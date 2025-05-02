@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Kristallkraft Angebotsgenerator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .produkt { margin-bottom: 12px; }
+    .produkt label { display: inline-block; width: 250px; }
+    input[type=number], select { width: 150px; }
+    button { margin-top: 20px; padding: 10px; font-size: 16px; }
+    textarea { width: 100%; height: 200px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h2>🛍️ Produkte & Mengen auswählen</h2>
+
+  <div style="margin-bottom: 20px;">
+    <label for="kontaktkanal"><strong>Kontaktkanal:</strong></label>
+    <select id="kontaktkanal">
+      <option value="">– Bitte wählen –</option>
+      <option value="chat">Chat</option>
+      <option value="telefon">Telefon</option>
+    </select>
+  </div>
+
+  <form id="angebotForm">
+    <div class="produkt"><label for="v1">Kristallkraft No1</label><input type="number" id="v1" name="42640144892146" min="0" value="0"></div>
+    <div class="produkt"><label for="v2">Kristallkraft No2</label><input type="number" id="v2" name="42640145514738" min="0" value="0"></div>
+    <div class="produkt"><label for="v3">Kristallkraft Coolly</label><input type="number" id="v3" name="43527031652617" min="0" value="0"></div>
+    <div class="produkt"><label for="v4">Kristallkraft Move</label><input type="number" id="v4" name="42640147874034" min="0" value="0"></div>
+    <div class="produkt"><label for="v5">Kristallkraft Bro</label><input type="number" id="v5" name="42640136569074" min="0" value="0"></div>
+    <div class="produkt"><label for="v6">Kristallkraft Femmina</label><input type="number" id="v6" name="42640142270706" min="0" value="0"></div>
+    <div class="produkt"><label for="v7">Kristallkraft Brave Horse</label><input type="number" id="v7" name="42640136044786" min="0" value="0"></div>
+    <div class="produkt"><label for="v8">Kristallkraft Core</label><input type="number" id="v8" name="42640139124978" min="0" value="0"></div>
+    <div class="produkt"><label for="v9">Kristallkraft Muscolo</label><input type="number" id="v9" name="44241608769801" min="0" value="0"></div>
+    <div class="produkt"><label for="v10">Kristallkraft Mental Balance</label><input type="number" id="v10" name="42640147185906" min="0" value="0"></div>
+    <div class="produkt"><label for="v11">Kristallkraft TheMineral</label><input type="number" id="v11" name="42712424906994" min="0" value="0"></div>
+  </form>
+
+  <button type="button" id="generateButton">🚀 Angebotstext generieren</button>
+
+  <h3>📋 Dein Angebotstext:</h3>
+  <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
+  <br>
+  <button type="button" id="copyButton">📋 Text kopieren</button>
+
+  <script>
+    const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
+
+    const produktNamen = {
+      "42640144892146": "Kristallkraft No1",
+      "42640145514738": "Kristallkraft No2",
+      "43527031652617": "Kristallkraft Coolly",
+      "42640147874034": "Kristallkraft Move",
+      "42640136569074": "Kristallkraft Bro",
+      "42640142270706": "Kristallkraft Femmina",
+      "42640136044786": "Kristallkraft Brave Horse",
+      "42640139124978": "Kristallkraft Core",
+      "44241608769801": "Kristallkraft Muscolo",
+      "42640147185906": "Kristallkraft Mental Balance",
+      "42712424906994": "Kristallkraft TheMineral"
+    };
+
+    document.getElementById("generateButton").addEventListener("click", function () {
+      const inputs = document.querySelectorAll('#angebotForm input[type=number]');
+      let items = [];
+      let textProdukte = [];
+
+      inputs.forEach(input => {
+        const qty = parseInt(input.value);
+        if (qty > 0) {
+          const variantId = input.name;
+          items.push(`${variantId}:${qty}`);
+          textProdukte.push(`- ${qty}x ${produktNamen[variantId]}`);
+        }
+      });
+
+      const kanal = document.getElementById("kontaktkanal").value.trim();
+      const refTag = kanal ? `?ref=${encodeURIComponent(kanal)}` : "";
+      const output = document.getElementById("angebotText");
+
+      if (items.length === 0) {
+        output.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
+        return;
+      }
+
+      const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
+      const angebotText = `Wie gerade besprochen sende ich dir unsere Produktempfehlung für dein Pferd zu.\n\n${textProdukte.join("\n")}\n\n👉 Klicke hier, um die Produkte in deinen Warenkorb zu legen:\n${cartUrl}\n\nLiebe Grüße\nDein Kristallkraft-Team`;
+
+      output.value = angebotText;
+    });
+
+    document.getElementById("copyButton").addEventListener("click", function () {
+      const textarea = document.getElementById("angebotText");
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        alert("Text wurde kopiert!");
+      });
+    });
+  </script>
+</body>
+</html>
