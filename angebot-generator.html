@@ -56,8 +56,7 @@
   <!-- TEXT-Ausgabe -->
   <h3>📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
-  <br>
-  <button type="button" id="copyButton">📋 Text kopieren</button>
+ 
 
   <!-- HTML-Ausgabe -->
   <div id="angebotHTML" style="display:none;"></div>
@@ -127,19 +126,7 @@
           <p>Liebe Grüße<br>Dein Kristallkraft-Team</p>
         `;
       }
-    });
-
-    document.getElementById("copyButton").addEventListener("click", function () {
-      const textarea = document.getElementById("angebotText");
-      if (textarea.style.display === "none") {
-        alert("Nur die Text-Version kann kopiert werden. Bitte Ausgabeformat 'Text' wählen.");
-        return;
-      }
-      textarea.select();
-      navigator.clipboard.writeText(textarea.value).then(() => {
-        alert("Text wurde kopiert!");
-      });
-    });
+   
   </script>
 </body>
 </html>
