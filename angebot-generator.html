@@ -9,6 +9,7 @@
     .produkt label { display: inline-block; width: 200px; }
     .inputgroup { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; align-items: center; }
     input[type=number], input[type=text] { width: 60px; }
+    input[type=text].wide { width: 200px; }
     select { width: 90px; }
     textarea {
       width: 100%;
@@ -31,6 +32,11 @@
 <body>
 
   <h2>🛍️ Produkte & Fütterung konfigurieren</h2>
+
+  <div style="margin-bottom: 10px;">
+    <label for="kundenname"><strong>Kundenname:</strong></label>
+    <input type="text" id="kundenname" class="wide" placeholder="z. B. Max Mustermann">
+  </div>
 
   <div style="margin-bottom: 10px;">
     <label for="beraterin"><strong>Beraterin:</strong></label>
@@ -99,21 +105,21 @@
             <input type="text" name="start-${prod.id}" placeholder="z. B. 2"> ➡️
             <select name="dauer-${prod.id}">
               <option value="">Dauer wählen</option>
-              <option value="eine Woche">1 Woche</option>
-              <option value="zwei Wochen">2 Wochen</option>
-              <option value="drei Wochen">3 Wochen</option>
-              <option value="vier Wochen">4 Wochen</option>
-              <option value="fünf Wochen">5 Wochen</option>
-              <option value="sechs Wochen">6 Wochen</option>
+              <option value="eine Woche">eine Woche</option>
+              <option value="zwei Wochen">zwei Wochen</option>
+              <option value="drei Wochen">drei Wochen</option>
+              <option value="vier Wochen">vier Wochen</option>
+              <option value="fünf Wochen">fünf Wochen</option>
+              <option value="sechs Wochen">sechs Wochen</option>
             </select> ➡️
             <select name="ab-${prod.id}">
               <option value="">Langfristig ab...</option>
-              <option value="ab der zweiten Woche">ab der 2. Woche</option>
-              <option value="ab der dritten Woche">ab der 3. Woche</option>
-              <option value="ab der vierten Woche">ab der 4. Woche</option>
-              <option value="ab der fünften Woche">ab der 5. Woche</option>
-              <option value="ab der sechsten Woche">ab der 6. Woche</option>
-              <option value="ab der siebten Woche">ab der 7. Woche</option>
+              <option value="ab der zweiten Woche">ab der zweiten Woche</option>
+              <option value="ab der dritten Woche">ab der dritten Woche</option>
+              <option value="ab der vierten Woche">ab der vierten Woche</option>
+              <option value="ab der fünften Woche">ab der fünften Woche</option>
+              <option value="ab der sechsten Woche">ab der sechsten Woche</option>
+              <option value="ab der siebten Woche">ab der siebten Woche</option>
             </select> ➡️
             <input type="text" name="nach-${prod.id}" placeholder="z. B. 1">
           </div>
@@ -129,6 +135,7 @@
       });
 
       document.getElementById("generateButton").addEventListener("click", () => {
+        const kunde = document.getElementById("kundenname").value.trim();
         const kanal = document.getElementById("kontaktkanal").value.trim();
         const berater = document.getElementById("beraterin").value.trim();
         const mode = document.getElementById("outputMode").value;
@@ -170,20 +177,24 @@
         }
 
         const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
+        const begruessung = kunde ? `Hallo ${kunde},\n\n` : "";
+
+        const bodyText = `${begruessung}Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}`;
 
         if (mode === "text") {
           outputText.style.display = "block";
           outputHTML.style.display = "none";
-          outputText.value = `Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}\n\nLiebe Grüße\nDein Kristallkraft-Team`;
+          outputText.value = bodyText;
         } else {
           outputText.style.display = "none";
           outputHTML.style.display = "block";
           outputHTML.innerHTML = `
-            <p>Wie gerade besprochen sende ich dir unsere Produktempfehlung für dein Pferd zu.</p>
+            <p>${kunde ? `Hallo ${kunde},` : ""}</p>
+            <p>Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:</p>
             <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
             <p>
               👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
-            
+            </p>
           `;
         }
       });
