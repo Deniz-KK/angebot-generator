@@ -102,7 +102,7 @@
           <label>${prod.name}</label>
           <div class="inputgroup">
             <input type="number" name="qty-${prod.id}" placeholder="Menge" min="0" value="0"> ➡️
-            <input type="text" name="start-${prod.id}" placeholder="Anzahl Messbecher"> ➡️
+            <input type="text" name="start-${prod.id}" placeholder="Messbecher"> ➡️
             <select name="dauer-${prod.id}">
               <option value="">Dauer wählen</option>
               <option value="eine Woche">eine Woche</option>
@@ -121,7 +121,7 @@
               <option value="ab der sechsten Woche">ab der sechsten Woche</option>
               <option value="ab der siebten Woche">ab der siebten Woche</option>
             </select> ➡️
-            <input type="text" name="nach-${prod.id}" placeholder="Anzahl Messbecher">
+            <input type="text" name="nach-${prod.id}" placeholder="Messbecher">
           </div>
         `;
         form.appendChild(block);
