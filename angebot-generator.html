@@ -6,8 +6,9 @@
   <style>
     body { font-family: sans-serif; padding: 20px; }
     .produkt { margin-bottom: 12px; }
-    .produkt label { display: inline-block; width: 250px; }
-    input[type=number], select { width: 150px; }
+    .produkt label { display: inline-block; width: 200px; }
+    .inputgroup { display: flex; gap: 10px; margin-top: 4px; }
+    input[type=number], input[type=text], select { width: 130px; }
     button { margin-top: 20px; padding: 10px; font-size: 16px; }
     textarea { width: 100%; height: 200px; margin-top: 20px; }
     #angebotHTML { border: 1px solid #ccc; padding: 15px; margin-top: 20px; background: #f9f9f9; }
@@ -16,6 +17,21 @@
 <body>
 
   <h2>🛍️ Produkte & Mengen auswählen</h2>
+
+  <!-- Beraterin -->
+  <div style="margin-bottom: 10px;">
+    <label for="beraterin"><strong>Beraterin:</strong></label>
+    <select id="beraterin">
+      <option value="">– Bitte wählen –</option>
+      <option value="Sofie">Sofie</option>
+      <option value="Merle">Merle</option>
+      <option value="Steffi">Steffi</option>
+      <option value="Katrin">Katrin</option>
+      <option value="Nadin">Nadin</option>
+      <option value="Bea">Bea</option>
+      <option value="Tatjana">Tatjana</option>
+    </select>
+  </div>
 
   <!-- Kontaktkanal -->
   <div style="margin-bottom: 10px;">
@@ -31,77 +47,96 @@
   <div style="margin-bottom: 20px;">
     <label for="outputMode"><strong>Ausgabeformat:</strong></label>
     <select id="outputMode">
-      <option value="text">Text</option>
-      <option value="html">HTML</option>
+      <option value="text">Text (kopierbar für Outlook etc.)</option>
+      <option value="html">HTML (mit Button)</option>
     </select>
   </div>
 
-  <!-- Produkte -->
-  <form id="angebotForm">
-    <div class="produkt"><label>Kristallkraft No1</label><input type="number" name="42640144892146" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft No2</label><input type="number" name="42640145514738" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Coolly</label><input type="number" name="43527031652617" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Move</label><input type="number" name="42640147874034" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Bro</label><input type="number" name="42640136569074" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Femmina</label><input type="number" name="42640142270706" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Brave Horse</label><input type="number" name="42640136044786" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Core</label><input type="number" name="42640139124978" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Muscolo</label><input type="number" name="44241608769801" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft Mental Balance</label><input type="number" name="42640147185906" min="0" value="0"></div>
-    <div class="produkt"><label>Kristallkraft TheMineral</label><input type="number" name="42712424906994" min="0" value="0"></div>
-  </form>
+  <form id="angebotForm"></form>
 
   <button type="button" id="generateButton">🚀 Angebotstext generieren</button>
 
-  <!-- TEXT-Ausgabe -->
   <h3>📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
-  <br>
-  <button type="button" id="copyButton">📋 Text kopieren</button>
-
-  <!-- HTML-Ausgabe -->
   <div id="angebotHTML" style="display:none;"></div>
 
   <script>
     const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
 
-    const produktNamen = {
-      "42640144892146": "Kristallkraft No1",
-      "42640145514738": "Kristallkraft No2",
-      "43527031652617": "Kristallkraft Coolly",
-      "42640147874034": "Kristallkraft Move",
-      "42640136569074": "Kristallkraft Bro",
-      "42640142270706": "Kristallkraft Femmina",
-      "42640136044786": "Kristallkraft Brave Horse",
-      "42640139124978": "Kristallkraft Core",
-      "44241608769801": "Kristallkraft Muscolo",
-      "42640147185906": "Kristallkraft Mental Balance",
-      "42712424906994": "Kristallkraft TheMineral"
-    };
+    const produkte = [
+      { id: "42640144892146", name: "Kristallkraft No1" },
+      { id: "42640145514738", name: "Kristallkraft No2" },
+      { id: "43527031652617", name: "Kristallkraft Coolly" },
+      { id: "42640147874034", name: "Kristallkraft Move" },
+      { id: "42640136569074", name: "Kristallkraft Bro" },
+      { id: "42640142270706", name: "Kristallkraft Femmina" },
+      { id: "42640136044786", name: "Kristallkraft Brave Horse" },
+      { id: "42640139124978", name: "Kristallkraft Core" },
+      { id: "44241608769801", name: "Kristallkraft Muscolo" },
+      { id: "42640147185906", name: "Kristallkraft Mental Balance" },
+      { id: "42712424906994", name: "Kristallkraft TheMineral" }
+    ];
+
+    const form = document.getElementById("angebotForm");
+    produkte.forEach((produkt, i) => {
+      const block = document.createElement("div");
+      block.className = "produkt";
+      block.innerHTML = `
+        <label>${produkt.name}</label>
+        <div class="inputgroup">
+          <input type="number" name="qty-${produkt.id}" placeholder="Menge" min="0" value="0">
+          <input type="text" name="fuetterung-${produkt.id}" placeholder="z. B. 1">
+          <select name="gabeart-${produkt.id}">
+            <option value="">Gabe</option>
+            <option value="Dauergabe">Dauergabe</option>
+            <option value="Kurgabe">Kurgabe</option>
+          </select>
+        </div>
+      `;
+      form.appendChild(block);
+    });
+
+    // Beraterin merken
+    const beraterSelect = document.getElementById("beraterin");
+    beraterSelect.value = localStorage.getItem("beraterin") || "";
+    beraterSelect.addEventListener("change", () => {
+      localStorage.setItem("beraterin", beraterSelect.value);
+    });
 
     document.getElementById("generateButton").addEventListener("click", function () {
-      const inputs = document.querySelectorAll('#angebotForm input[type=number]');
+      const kanal = document.getElementById("kontaktkanal").value.trim();
+      const beraterin = document.getElementById("beraterin").value.trim();
+      const refParts = [];
+      if (kanal) refParts.push(kanal);
+      if (beraterin) refParts.push(beraterin);
+      const refTag = refParts.length > 0 ? `?ref=${encodeURIComponent(refParts.join('-'))}` : "";
+
+      const mode = document.getElementById("outputMode").value;
+      const outputText = document.getElementById("angebotText");
+      const outputHTML = document.getElementById("angebotHTML");
+
       let items = [];
       let textProdukte = [];
 
-      inputs.forEach(input => {
-        const qty = parseInt(input.value);
+      produkte.forEach(prod => {
+        const qty = parseInt(document.querySelector(`[name="qty-${prod.id}"]`).value);
+        const futter = document.querySelector(`[name="fuetterung-${prod.id}"]`).value.trim();
+        const gabe = document.querySelector(`[name="gabeart-${prod.id}"]`).value;
+
         if (qty > 0) {
-          const variantId = input.name;
-          items.push(`${variantId}:${qty}`);
-          textProdukte.push(`- ${qty}x ${produktNamen[variantId]}`);
+          items.push(`${prod.id}:${qty}`);
+          let zusatz = [];
+          if (futter) zusatz.push(`${futter} Messbecher`);
+          if (gabe) zusatz.push(gabe);
+          const hinweis = zusatz.length ? ` (${zusatz.join(", ")})` : "";
+          textProdukte.push(`- ${qty}x ${prod.name}${hinweis}`);
         }
       });
-
-      const kanal = document.getElementById("kontaktkanal").value.trim();
-      const refTag = kanal ? `?ref=${encodeURIComponent(kanal)}` : "";
-      const outputText = document.getElementById("angebotText");
-      const outputHTML = document.getElementById("angebotHTML");
-      const mode = document.getElementById("outputMode").value;
 
       if (items.length === 0) {
         outputText.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
         outputHTML.style.display = "none";
+        outputText.style.display = "block";
         return;
       }
 
@@ -110,35 +145,26 @@
       if (mode === "text") {
         outputText.style.display = "block";
         outputHTML.style.display = "none";
+        outputText.value = `Wie gerade besprochen sende ich dir unsere Produktempfehlung für dein Pferd zu.
 
-        outputText.value = `Wie gerade besprochen sende ich dir unsere Produktempfehlung für dein Pferd zu.\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}\n\nLiebe Grüße\nDein Kristallkraft-Team`;
+${textProdukte.join("\n")}
+
+👉 Jetzt bestellen: ${cartUrl}
+
+Liebe Grüße
+Dein Kristallkraft-Team`;
       } else {
         outputText.style.display = "none";
         outputHTML.style.display = "block";
-
         outputHTML.innerHTML = `
           <p>Wie gerade besprochen sende ich dir unsere Produktempfehlung für dein Pferd zu.</p>
-          <ul>
-            ${textProdukte.map(p => `<li>${p}</li>`).join("")}
-          </ul>
+          <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
           <p>
             👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
           </p>
           <p>Liebe Grüße<br>Dein Kristallkraft-Team</p>
         `;
       }
-    });
-
-    document.getElementById("copyButton").addEventListener("click", function () {
-      const textarea = document.getElementById("angebotText");
-      if (textarea.style.display === "none") {
-        alert("Nur die Text-Version kann kopiert werden. Bitte Ausgabeformat 'Text' wählen.");
-        return;
-      }
-      textarea.select();
-      navigator.clipboard.writeText(textarea.value).then(() => {
-        alert("Text wurde kopiert!");
-      });
     });
   </script>
 </body>
