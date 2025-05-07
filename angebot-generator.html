@@ -8,7 +8,7 @@
     .produkt { margin-bottom: 12px; }
     .produkt label { display: inline-block; width: 200px; }
     .inputgroup { display: flex; gap: 10px; margin-top: 4px; }
-    input[type=number], input[type=text], select { width: 130px; }
+    input[type=number], input[type=text] { width: 60px; } select { width: 90px; }
     button { margin-top: 20px; padding: 10px; font-size: 16px; }
     textarea { width: 100%; height: 200px; margin-top: 20px; }
     #angebotHTML { border: 1px solid #ccc; padding: 15px; margin-top: 20px; background: #f9f9f9; }
@@ -83,15 +83,18 @@
       block.className = "produkt";
       block.innerHTML = `
         <label>${produkt.name}</label>
-        <div class="inputgroup">
-          <input type="number" name="qty-${produkt.id}" placeholder="Menge" min="0" value="0">
-          <<input type="text" name="fuetterung-${produkt.id}" placeholder="z. B. 1 Messbecher">
-          <select name="gabeart-${produkt.id}">
-            <option value="">Fütterung</option>
-            <option value="Dauergabe">Dauergabe</option>
-            <option value="Kurgabe">Kurgabe</option>
-          </select>
-        </div>
+        block.innerHTML = `
+  <label>${produkt.name}</label>
+  <div class="inputgroup">
+    <input type="number" name="qty-${produkt.id}" placeholder="Menge" min="0" value="0"> ➡️
+    <input type="text" name="fuetterung-${produkt.id}" placeholder="z. B. 1 MB"> ➡️
+    <select name="gabeart-${produkt.id}">
+      <option value="">Fütterung</option>
+      <option value="Dauergabe">Dauergabe</option>
+      <option value="Kurgabe">Kurgabe</option>
+    </select>
+  </div>
+`;
       `;
       form.appendChild(block);
     });
