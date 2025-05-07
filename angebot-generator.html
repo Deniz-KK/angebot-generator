@@ -6,11 +6,11 @@
   <style>
     body { font-family: sans-serif; padding: 20px; }
     .produkt { margin-bottom: 12px; }
-    .produkt label { display: inline-block; width: 200px; }
-    .inputgroup { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; align-items: center; }
-    input[type=number], input[type=text] { width: 60px; }
+    .produkt label { font-size: 13px; font-weight: bold; display: inline-block; width: 200px; margin-top: 10px;}
+    .inputgroup { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; margin-bottom: 15px; align-items: center; }
+    input[type=number], input[type=text] { width: 75px; }
     input[type=text].wide { width: 200px; }
-    select { width: 90px; }
+    select { width: 190px; }
     textarea {
       width: 100%;
       height: 200px;
@@ -27,6 +27,7 @@
       margin-top: 20px;
       background: #f9f9f9;
     }
+    #angebotForm > div{border-top: #e0e4ea dotted 1px;}
   </style>
 </head>
 <body>
@@ -35,7 +36,7 @@
 
   <div style="margin-bottom: 10px;">
     <label for="kundenname"><strong>Kundenname:</strong></label>
-    <input type="text" id="kundenname" class="wide" placeholder="z. B. Max Mustermann">
+    <input type="text" id="kundenname" class="wide" placeholder="z. B. Max Mustermann">
   </div>
 
   <div style="margin-bottom: 10px;">
@@ -101,19 +102,19 @@
         block.innerHTML = `
           <label>${prod.name}</label>
           <div class="inputgroup">
-            <input type="number" name="qty-${prod.id}" placeholder="Menge" min="0" value="0"> ➡️
+            <input style="margin-right: 75px;" type="number" name="qty-${prod.id}" placeholder="Menge" min="0" value="0">
             <input type="text" name="start-${prod.id}" placeholder="Messbecher"> ➡️
-            <select name="dauer-${prod.id}">
-              <option value="">Kurzzeitfütterung</option>
+            <select style="margin-right: 35px;" name="dauer-${prod.id}">
+              <option value="">Kurzzeitfütt. Wochen wählen...</option>
               <option value="eine Woche">eine Woche</option>
               <option value="zwei Wochen">zwei Wochen</option>
               <option value="drei Wochen">drei Wochen</option>
               <option value="vier Wochen">vier Wochen</option>
               <option value="fünf Wochen">fünf Wochen</option>
               <option value="sechs Wochen">sechs Wochen</option>
-            </select> ➡️
+            </select>
             <select name="ab-${prod.id}">
-              <option value="">Dauerfütterung</option>
+              <option value="">Dauerfütt. ab Woche...</option>
               <option value="ab der zweiten Woche">ab der zweiten Woche</option>
               <option value="ab der dritten Woche">ab der dritten Woche</option>
               <option value="ab der vierten Woche">ab der vierten Woche</option>
