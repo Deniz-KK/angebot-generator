@@ -20,7 +20,12 @@
       padding: 10px;
       font-size: 16px;
     }
-    #angebotHTML { border: 1px solid #ccc; padding: 15px; margin-top: 20px; background: #f9f9f9; }
+    #angebotHTML {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-top: 20px;
+      background: #f9f9f9;
+    }
   </style>
 </head>
 <body>
@@ -91,26 +96,26 @@
           <label>${prod.name}</label>
           <div class="inputgroup">
             <input type="number" name="qty-${prod.id}" placeholder="Menge" min="0" value="0"> ➡️
-            <input type="text" name="start-${prod.id}" placeholder="z. B. 2 MB"> ➡️
+            <input type="text" name="start-${prod.id}" placeholder="z. B. 2"> ➡️
             <select name="dauer-${prod.id}">
               <option value="">Dauer wählen</option>
-              <option value="eine Woche">eine Woche</option>
-              <option value="zwei Wochen">zwei Wochen</option>
-              <option value="drei Wochen">drei Wochen</option>
-              <option value="vier Wochen">vier Wochen</option>
-              <option value="fünf Wochen">fünf Wochen</option>
-              <option value="sechs Wochen">sechs Wochen</option>
+              <option value="eine Woche">1 Woche</option>
+              <option value="zwei Wochen">2 Wochen</option>
+              <option value="drei Wochen">3 Wochen</option>
+              <option value="vier Wochen">4 Wochen</option>
+              <option value="fünf Wochen">5 Wochen</option>
+              <option value="sechs Wochen">6 Wochen</option>
             </select> ➡️
             <select name="ab-${prod.id}">
               <option value="">Langfristig ab...</option>
-              <option value="ab der zweiten Woche">ab der zweiten Woche</option>
-              <option value="ab der dritten Woche">ab der dritten Woche</option>
-              <option value="ab der vierten Woche">ab der vierten Woche</option>
-              <option value="ab der fünften Woche">ab der fünften Woche</option>
-              <option value="ab der sechsten Woche">ab der sechsten Woche</option>
-              <option value="ab der siebten Woche">ab der siebten Woche</option>
+              <option value="ab der zweiten Woche">ab der 2. Woche</option>
+              <option value="ab der dritten Woche">ab der 3. Woche</option>
+              <option value="ab der vierten Woche">ab der 4. Woche</option>
+              <option value="ab der fünften Woche">ab der 5. Woche</option>
+              <option value="ab der sechsten Woche">ab der 6. Woche</option>
+              <option value="ab der siebten Woche">ab der 7. Woche</option>
             </select> ➡️
-            <input type="text" name="nach-${prod.id}" placeholder="z. B. 1 MB">
+            <input type="text" name="nach-${prod.id}" placeholder="z. B. 1">
           </div>
         `;
         form.appendChild(block);
@@ -148,9 +153,9 @@
           const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
 
           let details = [];
-          if (start && dauer) details.push(`${start} für ${dauer}`);
-          else if (start) details.push(start);
-          if (ab && nach) details.push(`${ab} ${nach}`);
+          if (start && dauer) details.push(`${start} Messbecher für ${dauer}`);
+          else if (start) details.push(`${start} Messbecher`);
+          if (ab && nach) details.push(`${ab} ${nach} Messbecher`);
 
           const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
           items.push(`${prod.id}:${qty}`);
@@ -169,7 +174,7 @@
         if (mode === "text") {
           outputText.style.display = "block";
           outputHTML.style.display = "none";
-          outputText.value = `Wie gerade besprochen sende ich dir unsere Produktempfehlung für dein Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}\n\nLiebe Grüße\nDein Kristallkraft-Team`;
+          outputText.value = `Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}\n\nLiebe Grüße\nDein Kristallkraft-Team`;
         } else {
           outputText.style.display = "none";
           outputHTML.style.display = "block";
@@ -178,8 +183,7 @@
             <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
             <p>
               👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
-            </p>
-            <p>Liebe Grüße<br>Dein Kristallkraft-Team</p>
+            
           `;
         }
       });
