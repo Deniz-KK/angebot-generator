@@ -4,158 +4,171 @@
   <meta charset="UTF-8" />
   <title>Kristallkraft Angebotsgenerator</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 40px;
-      background-color: #fafafa;
-      font-size: 16px;
-      line-height: 1.5;
-    }
+	body {
+	  font-family: sans-serif;
+	  padding: 40px;
+	  background-color: #fafafa;
+	  font-size: 15px;
+	  line-height: 1.5;
+	}
 
-    h2, h3 {
-      margin-top: 0;
-    }
+	h2, h3 {
+	  margin-top: 25px;
+	}
+	
+	#angebotForm > div > div > span{
+		font-size: 13px;
+	}
 
-    .form-section {
-      max-width: 800px;
-      margin-bottom: 40px;
-      background-color: #fff;
-      padding: 24px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
+	.form-section {
+	  max-width: 800px;
+	  margin-bottom: 40px;
+	  background-color: #fff;
+	  padding: 24px;
+	  border-radius: 8px;
+	  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+	}
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 16px 24px;
-      align-items: center;
-      margin-bottom: 16px;
-    }
+	.form-grid {
+	  display: grid;
+	  grid-template-columns: 180px 1fr;
+	  gap: 16px 24px;
+	  align-items: center;
+	  margin-bottom: 16px;
+	}
 
-    @media (max-width: 600px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+	@media (max-width: 600px) {
+	  .form-grid {
+		grid-template-columns: 1fr;
+	  }
+	}
 
-    label {
-      font-weight: 600;
-    }
+	label {
+	  font-weight: 600;
+	}
 
-    input, select, textarea {
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      width: 100%;
-      box-sizing: border-box;
-    }
+	input, select, textarea {
+	  padding: 12px;
+	  font-size: 16px;
+	  border: 1px solid #ccc;
+	  border-radius: 6px;
+	  width: 100%;
+	  box-sizing: border-box;
+	}
 
-    textarea {
-      height: 240px;
-      resize: vertical;
-      margin-top: 24px;
-    }
+	textarea {
+	  height: 240px;
+	  resize: vertical;
+	  margin-top: 24px;
+	}
 
-    button {
-      margin-top: 28px;
-      padding: 14px 24px;
-      font-size: 17px;
-      border: none;
-      background-color: #0077cc;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
+	button {
+	  margin-top: 28px;
+	  padding: 14px 24px;
+	  font-size: 17px;
+	  border: none;
+	  background-color: #0077cc;
+	  color: white;
+	  border-radius: 6px;
+	  cursor: pointer;
+	  transition: background-color 0.2s ease;
+	}
 
-    button:hover {
-      background-color: #005fa3;
-    }
+	button:hover {
+	  background-color: #005fa3;
+	}
 
-    .produkt {
-      display: flex;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 24px;
-      padding: 20px;
-      border-top: 1px dotted #e0e4ea;
-      background-color: #fdfdfd;
-      border-left: 4px solid #0077cc;
-      border-radius: 6px;
-    }
+	.produkt {
+	  display: flex;
+	  align-items: flex-start;
+	  flex-wrap: wrap;
+	  gap: 20px;
+	  margin-bottom: 24px;
+	  padding: 20px;
+	  border-top: 1px dotted #e0e4ea;
+	  background-color: #fdfdfd;
+	  border-left: 4px solid #0077cc;
+	  border-radius: 6px;
+	}
 
-    .produkt label {
-      flex: 1 1 100%;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
+	.produkt label {
+	  flex: 1 1 100%;
+	  font-weight: 600;
+	  margin-bottom: 8px;
+	}
 
-    .inputgroup {
-      flex: 1 1 100%;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
+	.inputgroup {
+	  flex: 1 1 100%;
+	  display: flex;
+	  flex-wrap: wrap;
+	  gap: 12px;
+	  align-items: center;
+	}
 
-    .inputgroup input[type="number"],
-    .inputgroup input[type="text"],
-    .inputgroup select {
-      flex: 1 1 140px;
-      min-width: 90px;
-    }
+	
+	.inputgroup select {
+	  flex: 1 1 140px;
+	  min-width: 90px;
+	  max-width: 208px;
+	}
+	
+	.inputgroup input[type="number"]{
+		width:63px;
+		font-size: 20px;
+	}
+	
+	.inputgroup input[type="text"]{
+	width:120px;
+	}
 
-    #angebotHTML {
-      border: 1px solid #ccc;
-      padding: 24px;
-      margin-top: 32px;
-      background: #f9f9f9;
-      border-radius: 6px;
-    }
+	#angebotHTML {
+	  border: 1px solid #ccc;
+	  padding: 24px;
+	  margin-top: 32px;
+	  background: #f9f9f9;
+	  border-radius: 6px;
+	}
   </style>
 </head>
 <body>
   <h2>🛍️ Produkte & Fütterung konfigurieren</h2>
 
   <section class="form-section">
-    <div class="form-grid">
-      <label for="kundenname">👤 Kundenname:</label>
-      <input type="text" id="kundenname" placeholder="z. B. Max Mustermann" />
-    </div>
+	<div class="form-grid">
+	  <label for="kundenname">👤 Kundenname:</label>
+	  <input type="text" id="kundenname" placeholder="z. B. Max Mustermann" />
+	</div>
 
-    <div class="form-grid">
-      <label for="beraterin">🧑‍💼 Beraterin:</label>
-      <select id="beraterin">
-        <option value="">– Bitte wählen –</option>
-        <option value="Sofie">Sofie</option>
-        <option value="Merle">Merle</option>
-        <option value="Steffi">Steffi</option>
-        <option value="Katrin">Katrin</option>
-        <option value="Nadin">Nadin</option>
-        <option value="Bea">Bea</option>
-        <option value="Tatjana">Tatjana</option>
-      </select>
-    </div>
+	<div class="form-grid">
+	  <label for="beraterin">🧑‍💼 Beraterin:</label>
+	  <select id="beraterin">
+		<option value="">– Bitte wählen –</option>
+		<option value="Sofie">Sofie</option>
+		<option value="Merle">Merle</option>
+		<option value="Steffi">Steffi</option>
+		<option value="Katrin">Katrin</option>
+		<option value="Nadin">Nadin</option>
+		<option value="Bea">Bea</option>
+		<option value="Tatjana">Tatjana</option>
+	  </select>
+	</div>
 
-    <div class="form-grid">
-      <label for="kontaktkanal">☎️ Kontaktkanal:</label>
-      <select id="kontaktkanal">
-        <option value="">– Bitte wählen –</option>
-        <option value="chat">Chat</option>
-        <option value="telefon">Telefon</option>
-      </select>
-    </div>
+	<div class="form-grid">
+	  <label for="kontaktkanal">☎️ Kontaktkanal:</label>
+	  <select id="kontaktkanal">
+		<option value="">– Bitte wählen –</option>
+		<option value="chat">Chat</option>
+		<option value="telefon">Telefon</option>
+	  </select>
+	</div>
 
-    <div class="form-grid">
-      <label for="outputMode">📝 Ausgabeformat:</label>
-      <select id="outputMode">
-        <option value="text">Text (für Chat / WhatsApp)</option>
-        <option value="html">HTML (für E-Mail)</option>
-      </select>
-    </div>
+	<div class="form-grid">
+	  <label for="outputMode">📝 Ausgabeformat:</label>
+	  <select id="outputMode">
+		<option value="text">Text (für Chat / WhatsApp)</option>
+		<option value="html">HTML (für E-Mail)</option>
+	  </select>
+	</div>
   </section>
 
   <form id="angebotForm"></form>
@@ -167,28 +180,28 @@
   <div id="angebotHTML" style="display:none;"></div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
-      const produkte = [
-        { id: "42640144892146", name: "Kristallkraft No1" },
-        { id: "42640145514738", name: "Kristallkraft No2" },
-        { id: "43527031652617", name: "Kristallkraft Coolly" },
-        { id: "42640147874034", name: "Kristallkraft Move" },
-        { id: "42640136569074", name: "Kristallkraft Bro" },
-        { id: "42640142270706", name: "Kristallkraft Femmina" },
-        { id: "42640136044786", name: "Kristallkraft Brave Horse" },
-        { id: "42640139124978", name: "Kristallkraft Core" },
-        { id: "44241608769801", name: "Kristallkraft Muscolo" },
-        { id: "42640147185906", name: "Kristallkraft Mental Balance" },
-        { id: "42712424906994", name: "Kristallkraft TheMineral" }
-      ];
+	document.addEventListener("DOMContentLoaded", function () {
+	  const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
+	  const produkte = [
+		{ id: "42640144892146", name: "Kristallkraft No1" },
+		{ id: "42640145514738", name: "Kristallkraft No2" },
+		{ id: "43527031652617", name: "Kristallkraft Coolly" },
+		{ id: "42640147874034", name: "Kristallkraft Move" },
+		{ id: "42640136569074", name: "Kristallkraft Bro" },
+		{ id: "42640142270706", name: "Kristallkraft Femmina" },
+		{ id: "42640136044786", name: "Kristallkraft Brave Horse" },
+		{ id: "42640139124978", name: "Kristallkraft Core" },
+		{ id: "44241608769801", name: "Kristallkraft Muscolo" },
+		{ id: "42640147185906", name: "Kristallkraft Mental Balance" },
+		{ id: "42712424906994", name: "Kristallkraft TheMineral" }
+	  ];
 
-      const form = document.getElementById("angebotForm");
+	  const form = document.getElementById("angebotForm");
 
-      produkte.forEach(prod => {
-        const block = document.createElement("div");
-        block.className = "produkt";
-        const icons = {
+	  produkte.forEach(prod => {
+		const block = document.createElement("div");
+		block.className = "produkt";
+		const icons = {
   "Kristallkraft Coolly": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/cl_gratissack.svg",
   "Kristallkraft No1": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no1_gratissack.svg",
   "Kristallkraft No2": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no2_gratissack.svg",
@@ -204,102 +217,102 @@
 
 block.innerHTML = `
   <div class="inputgroup" style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-    <span style="display: flex; align-items: center; min-width: 200px; font-weight: 600;">
-      <img src="${icons[prod.name] || ''}" alt="${prod.name}" style="height: 24px; width: auto; margin-right: 8px;">
-      ${prod.name}
-    </span>
-    <input type="number" name="qty-${prod.id}" id="qty-${prod.id}" placeholder="Menge" min="0" value="0">
-    <select name="dauer-${prod.id}">
-      <option value="">Kurzzeitfütt. Wochen wählen...</option>
-      <option value="eine Woche">eine Woche</option>
-      <option value="zwei Wochen">zwei Wochen</option>
-      <option value="drei Wochen">drei Wochen</option>
-      <option value="vier Wochen">vier Wochen</option>
-      <option value="fünf Wochen">fünf Wochen</option>
-      <option value="sechs Wochen">sechs Wochen</option>
-    </select>
-    ➡️
-    <input type="text" name="start-${prod.id}" placeholder="Messbecher">
-    <select name="ab-${prod.id}">
-      <option value="">Dauerfütt. ab Woche...</option>
-      <option value="ab der zweiten Woche">ab der zweiten Woche</option>
-      <option value="ab der dritten Woche">ab der dritten Woche</option>
-      <option value="ab der vierten Woche">ab der vierten Woche</option>
-      <option value="ab der fünften Woche">ab der fünften Woche</option>
-      <option value="ab der sechsten Woche">ab der sechsten Woche</option>
-      <option value="ab der siebten Woche">ab der siebten Woche</option>
-    </select>
-    ➡️
-    <input type="text" name="nach-${prod.id}" placeholder="Messbecher">
+	<span style="display: flex; align-items: center; min-width: 200px; font-weight: 600;">
+	  <img src="${icons[prod.name] || ''}" alt="${prod.name}" style="height: 24px; width: auto; margin-right: 8px;">
+	  ${prod.name}
+	</span>
+	<input type="number" name="qty-${prod.id}" id="qty-${prod.id}" placeholder="Menge" min="0" value="0">
+	<select name="dauer-${prod.id}">
+	  <option value="">Kurzzeitfütt. Wochen...</option>
+	  <option value="eine Woche">eine Woche</option>
+	  <option value="zwei Wochen">zwei Wochen</option>
+	  <option value="drei Wochen">drei Wochen</option>
+	  <option value="vier Wochen">vier Wochen</option>
+	  <option value="fünf Wochen">fünf Wochen</option>
+	  <option value="sechs Wochen">sechs Wochen</option>
+	</select>
+	➡️
+	<input type="text" name="start-${prod.id}" placeholder="Messbecher">
+	<select name="ab-${prod.id}">
+	  <option value="">Dauerfütt. ab Woche...</option>
+	  <option value="ab der zweiten Woche">ab der zweiten Woche</option>
+	  <option value="ab der dritten Woche">ab der dritten Woche</option>
+	  <option value="ab der vierten Woche">ab der vierten Woche</option>
+	  <option value="ab der fünften Woche">ab der fünften Woche</option>
+	  <option value="ab der sechsten Woche">ab der sechsten Woche</option>
+	  <option value="ab der siebten Woche">ab der siebten Woche</option>
+	</select>
+	➡️
+	<input type="text" name="nach-${prod.id}" placeholder="Messbecher">
   </div>`;
-        form.appendChild(block);
-      });
+		form.appendChild(block);
+	  });
 
-      document.getElementById("generateButton").addEventListener("click", () => {
-        const kunde = document.getElementById("kundenname").value.trim();
-        const kanal = document.getElementById("kontaktkanal").value.trim();
-        const berater = document.getElementById("beraterin").value.trim();
-        const mode = document.getElementById("outputMode").value;
-        const outputText = document.getElementById("angebotText");
-        const outputHTML = document.getElementById("angebotHTML");
+	  document.getElementById("generateButton").addEventListener("click", () => {
+		const kunde = document.getElementById("kundenname").value.trim();
+		const kanal = document.getElementById("kontaktkanal").value.trim();
+		const berater = document.getElementById("beraterin").value.trim();
+		const mode = document.getElementById("outputMode").value;
+		const outputText = document.getElementById("angebotText");
+		const outputHTML = document.getElementById("angebotHTML");
 
-        const refParts = [];
-        if (kanal) refParts.push(kanal);
-        if (berater) refParts.push(berater);
-        const refTag = refParts.length > 0 ? `?ref=${encodeURIComponent(refParts.join('-'))}` : "";
+		const refParts = [];
+		if (kanal) refParts.push(kanal);
+		if (berater) refParts.push(berater);
+		const refTag = refParts.length > 0 ? `?ref=${encodeURIComponent(refParts.join('-'))}` : "";
 
-        let items = [];
-        let textProdukte = [];
+		let items = [];
+		let textProdukte = [];
 
-        produkte.forEach(prod => {
-          const qty = parseInt(document.querySelector(`[name="qty-${prod.id}"]`).value);
-          if (!qty || qty <= 0) return;
+		produkte.forEach(prod => {
+		  const qty = parseInt(document.querySelector(`[name="qty-${prod.id}"]`).value);
+		  if (!qty || qty <= 0) return;
 
-          const start = document.querySelector(`[name="start-${prod.id}"]`).value.trim();
-          const dauer = document.querySelector(`[name="dauer-${prod.id}"]`).value.trim();
-          const ab = document.querySelector(`[name="ab-${prod.id}"]`).value.trim();
-          const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
+		  const start = document.querySelector(`[name="start-${prod.id}"]`).value.trim();
+		  const dauer = document.querySelector(`[name="dauer-${prod.id}"]`).value.trim();
+		  const ab = document.querySelector(`[name="ab-${prod.id}"]`).value.trim();
+		  const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
 
-          let details = [];
-          if (start && dauer) details.push(`${start} Messbecher für ${dauer}`);
-          else if (start) details.push(`${start} Messbecher`);
-          if (ab && nach) details.push(`${ab} ${nach} Messbecher`);
+		  let details = [];
+		  if (start && dauer) details.push(`${start} Messbecher für ${dauer}`);
+		  else if (start) details.push(`${start} Messbecher`);
+		  if (ab && nach) details.push(`${ab} ${nach} Messbecher`);
 
-          const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
-          items.push(`${prod.id}:${qty}`);
-          textProdukte.push(`${qty}x ${prod.name}${zusatz}`);
-        });
+		  const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
+		  items.push(`${prod.id}:${qty}`);
+		  textProdukte.push(`${qty}x ${prod.name}${zusatz}`);
+		});
 
-        if (items.length === 0) {
-          outputText.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
-          outputHTML.style.display = "none";
-          outputText.style.display = "block";
-          return;
-        }
+		if (items.length === 0) {
+		  outputText.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
+		  outputHTML.style.display = "none";
+		  outputText.style.display = "block";
+		  return;
+		}
 
-        const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
-        const begruessung = kunde ? `Hallo ${kunde},\n\n` : "";
+		const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
+		const begruessung = kunde ? `Hallo ${kunde},\n\n` : "";
 
-        const bodyText = `${begruessung}Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}`;
+		const bodyText = `${begruessung}Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}`;
 
-        if (mode === "text") {
-          outputText.style.display = "block";
-          outputHTML.style.display = "none";
-          outputText.value = bodyText;
-        } else {
-          outputText.style.display = "none";
-          outputHTML.style.display = "block";
-          outputHTML.innerHTML = `
-            <p>${kunde ? `Hallo ${kunde},` : ""}</p>
-            <p>Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:</p>
-            <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
-            <p>
-              👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
-            </p>
-          `;
-        }
-      });
-    });
+		if (mode === "text") {
+		  outputText.style.display = "block";
+		  outputHTML.style.display = "none";
+		  outputText.value = bodyText;
+		} else {
+		  outputText.style.display = "none";
+		  outputHTML.style.display = "block";
+		  outputHTML.innerHTML = `
+			<p>${kunde ? `Hallo ${kunde},` : ""}</p>
+			<p>Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:</p>
+			<ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
+			<p>
+			  👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
+			</p>
+		  `;
+		}
+	  });
+	});
   </script>
 </body>
 </html>
