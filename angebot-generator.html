@@ -100,31 +100,31 @@
         const block = document.createElement("div");
         block.className = "produkt";
         block.innerHTML = `
-          <label>${prod.name}</label>
-          <div class="inputgroup">
-            <input style="margin-right: 75px;" type="number" name="qty-${prod.id}" placeholder="Menge" min="0" value="0">
-            <input type="text" name="start-${prod.id}" placeholder="Messbecher"> ➡️
-            <select style="margin-right: 35px;" name="dauer-${prod.id}">
-              <option value="">Kurzzeitfütt. Wochen wählen...</option>
-              <option value="eine Woche">eine Woche</option>
-              <option value="zwei Wochen">zwei Wochen</option>
-              <option value="drei Wochen">drei Wochen</option>
-              <option value="vier Wochen">vier Wochen</option>
-              <option value="fünf Wochen">fünf Wochen</option>
-              <option value="sechs Wochen">sechs Wochen</option>
-            </select>
-            <select name="ab-${prod.id}">
-              <option value="">Dauerfütt. ab Woche...</option>
-              <option value="ab der zweiten Woche">ab der zweiten Woche</option>
-              <option value="ab der dritten Woche">ab der dritten Woche</option>
-              <option value="ab der vierten Woche">ab der vierten Woche</option>
-              <option value="ab der fünften Woche">ab der fünften Woche</option>
-              <option value="ab der sechsten Woche">ab der sechsten Woche</option>
-              <option value="ab der siebten Woche">ab der siebten Woche</option>
-            </select> ➡️
-            <input type="text" name="nach-${prod.id}" placeholder="Messbecher">
-          </div>
-        `;
+  <label>${prod.name}</label>
+  <div class="inputgroup">
+    <input style="margin-right: 75px;" type="number" name="qty-${prod.id}" placeholder="Menge" min="0" value="0">
+    <select style="margin-right: 35px;" name="dauer-${prod.id}">
+      <option value="">Kurzzeitfütt. Wochen wählen...</option>
+      <option value="eine Woche">eine Woche</option>
+      <option value="zwei Wochen">zwei Wochen</option>
+      <option value="drei Wochen">drei Wochen</option>
+      <option value="vier Wochen">vier Wochen</option>
+      <option value="fünf Wochen">fünf Wochen</option>
+      <option value="sechs Wochen">sechs Wochen</option>
+    </select> ➡️
+    <input type="text" name="start-${prod.id}" placeholder="Messbecher">
+    <select name="ab-${prod.id}">
+      <option value="">Dauerfütt. ab Woche...</option>
+      <option value="ab der zweiten Woche">ab der zweiten Woche</option>
+      <option value="ab der dritten Woche">ab der dritten Woche</option>
+      <option value="ab der vierten Woche">ab der vierten Woche</option>
+      <option value="ab der fünften Woche">ab der fünften Woche</option>
+      <option value="ab der sechsten Woche">ab der sechsten Woche</option>
+      <option value="ab der siebten Woche">ab der siebten Woche</option>
+    </select> ➡️
+    <input type="text" name="nach-${prod.id}" placeholder="Messbecher">
+  </div>
+`;
         form.appendChild(block);
       });
 
