@@ -280,7 +280,7 @@ block.innerHTML = `
 
 		  const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
 		  items.push(`${prod.id}:${qty}`);
-		  textProdukte.push(`${qty}x ${prod.name}${zusatz}`);
+		  textProdukte.push(`${prod.name}${zusatz}`);
 		});
 
 		if (items.length === 0) {
