@@ -195,6 +195,16 @@
 		{ id: "42640147185906", name: "Kristallkraft Mental Balance" },
 		{ id: "42712424906994", name: "Kristallkraft TheMineral" }
 	  ];
+		// Beim Laden gespeicherten Wert setzen
+const savedBeraterin = localStorage.getItem("beraterin");
+if (savedBeraterin) {
+  document.getElementById("beraterin").value = savedBeraterin;
+}
+
+// EventListener hinzufügen, um bei Änderung zu speichern
+document.getElementById("beraterin").addEventListener("change", (e) => {
+  localStorage.setItem("beraterin", e.target.value);
+});
 
 	  const form = document.getElementById("angebotForm");
 
