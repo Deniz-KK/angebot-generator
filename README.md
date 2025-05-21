@@ -1,1 +1,1 @@
-Dieses Formular generiert einen Link über den die ensprechenden Produkte dann direkt mit der angegebenen Anzahl zum Warenkorb hinzugefügt werden.
+Dieses Formular generiert eine Text Baustein mit einer Kaufempfehlung mit der entsprechenden Fütteungsempfehlung. Der Link fügt die ensprechenden Produkte dann direkt mit der angegebenen Anzahl zum Warenkorb hinzu.
