@@ -274,9 +274,9 @@ block.innerHTML = `
 		  const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
 
 		  let details = [];
-		  if (start && dauer) details.push(`${start} Messbecher für ${dauer}`);
-		  else if (start) details.push(`${start} Messbecher`);
-		  if (ab && nach) details.push(`${ab} ${nach} Messbecher`);
+		  if (start && dauer) details.push(`${start} Messbecher täglich für ${dauer}`);
+		  else if (start) details.push(`${start} Messbecher täglich`);
+		  if (ab && nach) details.push(`${ab} ${nach} Messbecher täglich`);
 
 		  const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
 		  items.push(`${prod.id}:${qty}`);
