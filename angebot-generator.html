@@ -138,7 +138,10 @@
 	  <label for="kundenname">👤 Kundenname:</label>
 	  <input type="text" id="kundenname" placeholder="z. B. Max Mustermann" />
 	</div>
-
+<div class="form-grid">
+  <label for="pferdename">🐴 Name des Pferdes:</label>
+  <input type="text" id="pferdename" placeholder="z. B. Bella" />
+</div>
 	<div class="form-grid">
 	  <label for="beraterin">🧑‍💼 Beraterin:</label>
 	  <select id="beraterin">
@@ -169,6 +172,13 @@
 		<option value="html">HTML (für E-Mail)</option>
 	  </select>
 	</div>
+	  <div class="form-grid">
+  <label for="anrede">🙋‍♂️ Anrede:</label>
+  <select id="anrede">
+    <option value="du">Du</option>
+    <option value="sie">Sie</option>
+  </select>
+</div>
   </section>
 
   <form id="angebotForm"></form>
@@ -180,38 +190,35 @@
   <div id="angebotHTML" style="display:none;"></div>
 
   <script>
-	document.addEventListener("DOMContentLoaded", function () {
-	  const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
-	  const produkte = [
-		{ id: "42640144892146", name: "Kristallkraft No1" },
-		{ id: "42640145514738", name: "Kristallkraft No2" },
-		{ id: "43527031652617", name: "Kristallkraft Coolly" },
-		{ id: "42640147874034", name: "Kristallkraft Move" },
-		{ id: "42640136569074", name: "Kristallkraft Bro" },
-		{ id: "42640142270706", name: "Kristallkraft Femmina" },
-		{ id: "42640136044786", name: "Kristallkraft Brave Horse" },
-		{ id: "42640139124978", name: "Kristallkraft Core" },
-		{ id: "44241608769801", name: "Kristallkraft Muscolo" },
-		{ id: "42640147185906", name: "Kristallkraft Mental Balance" },
-		{ id: "42712424906994", name: "Kristallkraft TheMineral" }
-	  ];
-		// Beim Laden gespeicherten Wert setzen
-const savedBeraterin = localStorage.getItem("beraterin");
-if (savedBeraterin) {
-  document.getElementById("beraterin").value = savedBeraterin;
-}
+document.addEventListener("DOMContentLoaded", function () {
+  const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
+  const produkte = [
+    { id: "42640144892146", name: "Kristallkraft No1" },
+    { id: "42640145514738", name: "Kristallkraft No2" },
+    { id: "43527031652617", name: "Kristallkraft Coolly" },
+    { id: "42640147874034", name: "Kristallkraft Move" },
+    { id: "42640136569074", name: "Kristallkraft Bro" },
+    { id: "42640142270706", name: "Kristallkraft Femmina" },
+    { id: "42640136044786", name: "Kristallkraft Brave Horse" },
+    { id: "42640139124978", name: "Kristallkraft Core" },
+    { id: "44241608769801", name: "Kristallkraft Muscolo" },
+    { id: "42640147185906", name: "Kristallkraft Mental Balance" },
+    { id: "42712424906994", name: "Kristallkraft TheMineral" }
+  ];
 
-// EventListener hinzufügen, um bei Änderung zu speichern
-document.getElementById("beraterin").addEventListener("change", (e) => {
-  localStorage.setItem("beraterin", e.target.value);
-});
+  // Berater speichern
+  const savedBeraterin = localStorage.getItem("beraterin");
+  if (savedBeraterin) {
+    document.getElementById("beraterin").value = savedBeraterin;
+  }
 
-	  const form = document.getElementById("angebotForm");
+  document.getElementById("beraterin").addEventListener("change", (e) => {
+    localStorage.setItem("beraterin", e.target.value);
+  });
 
-	  produkte.forEach(prod => {
-		const block = document.createElement("div");
-		block.className = "produkt";
-		const icons = {
+  // Produkte rendern
+  const form = document.getElementById("angebotForm");
+  const icons = {
   "Kristallkraft Coolly": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/cl_gratissack.svg",
   "Kristallkraft No1": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no1_gratissack.svg",
   "Kristallkraft No2": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no2_gratissack.svg",
@@ -225,105 +232,135 @@ document.getElementById("beraterin").addEventListener("change", (e) => {
   "Kristallkraft Core": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/core_gratissack.svg"
 };
 
-block.innerHTML = `
-  <div class="inputgroup" style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-	<span style="display: flex; align-items: center; min-width: 200px; font-weight: 600;">
-	  <img src="${icons[prod.name] || ''}" alt="${prod.name}" style="height: 24px; width: auto; margin-right: 8px;">
-	  ${prod.name}
-	</span>
-	<input type="number" name="qty-${prod.id}" id="qty-${prod.id}" placeholder="Menge" min="0" value="0">
-	<select name="dauer-${prod.id}">
-	  <option value="">Kurzzeitfütt. Wochen...</option>
-	  <option value="eine Woche">eine Woche</option>
-	  <option value="zwei Wochen">zwei Wochen</option>
-	  <option value="drei Wochen">drei Wochen</option>
-	  <option value="vier Wochen">vier Wochen</option>
-	  <option value="fünf Wochen">fünf Wochen</option>
-	  <option value="sechs Wochen">sechs Wochen</option>
-	</select>
-	➡️
-	<input type="text" name="start-${prod.id}" placeholder="Messbecher">
-	<select name="ab-${prod.id}">
-	  <option value="">Dauerfütt. ab Woche...</option>
-	  <option value="ab der zweiten Woche">ab der zweiten Woche</option>
-	  <option value="ab der dritten Woche">ab der dritten Woche</option>
-	  <option value="ab der vierten Woche">ab der vierten Woche</option>
-	  <option value="ab der fünften Woche">ab der fünften Woche</option>
-	  <option value="ab der sechsten Woche">ab der sechsten Woche</option>
-	  <option value="ab der siebten Woche">ab der siebten Woche</option>
-	</select>
-	➡️
-	<input type="text" name="nach-${prod.id}" placeholder="Messbecher">
-  </div>`;
-		form.appendChild(block);
-	  });
+  produkte.forEach(prod => {
+    const block = document.createElement("div");
+    block.className = "produkt";
+    block.innerHTML = `
+      <div class="inputgroup">
+        <span style="display: flex; align-items: center; min-width: 200px; font-weight: 600;">
+          <img src="${icons[prod.name] || ''}" alt="${prod.name}" style="height: 24px; width: auto; margin-right: 8px;">
+          ${prod.name}
+        </span>
+        <input type="number" name="qty-${prod.id}" id="qty-${prod.id}" placeholder="Menge" min="0" value="0">
+        <select name="dauer-${prod.id}">
+          <option value="">Kurzzeitfütt. Wochen...</option>
+          <option value="eine Woche">eine Woche</option>
+          <option value="zwei Wochen">zwei Wochen</option>
+          <option value="drei Wochen">drei Wochen</option>
+          <option value="vier Wochen">vier Wochen</option>
+          <option value="fünf Wochen">fünf Wochen</option>
+          <option value="sechs Wochen">sechs Wochen</option>
+        </select>
+        ➡️
+        <input type="text" name="start-${prod.id}" placeholder="Messbecher">
+        <select name="ab-${prod.id}">
+          <option value="">Dauerfütt. ab Woche...</option>
+          <option value="ab der zweiten Woche">ab der zweiten Woche</option>
+          <option value="ab der dritten Woche">ab der dritten Woche</option>
+          <option value="ab der vierten Woche">ab der vierten Woche</option>
+          <option value="ab der fünften Woche">ab der fünften Woche</option>
+          <option value="ab der sechsten Woche">ab der sechsten Woche</option>
+          <option value="ab der siebten Woche">ab der siebten Woche</option>
+        </select>
+        ➡️
+        <input type="text" name="nach-${prod.id}" placeholder="Messbecher">
+      </div>`;
+    form.appendChild(block);
+  });
 
-	  document.getElementById("generateButton").addEventListener("click", () => {
-		const kunde = document.getElementById("kundenname").value.trim();
-		const kanal = document.getElementById("kontaktkanal").value.trim();
-		const berater = document.getElementById("beraterin").value.trim();
-		const mode = document.getElementById("outputMode").value;
-		const outputText = document.getElementById("angebotText");
-		const outputHTML = document.getElementById("angebotHTML");
+  document.getElementById("generateButton").addEventListener("click", () => {
+    const kunde = document.getElementById("kundenname").value.trim();
+    const pferd = document.getElementById("pferdename")?.value.trim() || "";
+    const kanal = document.getElementById("kontaktkanal").value.trim();
+    const berater = document.getElementById("beraterin").value.trim();
+    const mode = document.getElementById("outputMode").value;
+    const anrede = document.getElementById("anrede")?.value || "du";
+    const outputText = document.getElementById("angebotText");
+    const outputHTML = document.getElementById("angebotHTML");
 
-		const refParts = [];
-		if (kanal) refParts.push(kanal);
-		if (berater) refParts.push(berater);
-		const refTag = refParts.length > 0 ? `?ref=${encodeURIComponent(refParts.join('-'))}` : "";
+    const refParts = [];
+    if (kanal) refParts.push(kanal);
+    if (berater) refParts.push(berater);
+    const refTag = refParts.length > 0 ? `?ref=${encodeURIComponent(refParts.join('-'))}` : "";
 
-		let items = [];
-		let textProdukte = [];
+    let items = [];
+    let textProdukte = [];
 
-		produkte.forEach(prod => {
-		  const qty = parseInt(document.querySelector(`[name="qty-${prod.id}"]`).value);
-		  if (!qty || qty <= 0) return;
+    produkte.forEach(prod => {
+      const qty = parseInt(document.querySelector(`[name="qty-${prod.id}"]`).value);
+      if (isNaN(qty) || qty <= 0) return;
 
-		  const start = document.querySelector(`[name="start-${prod.id}"]`).value.trim();
-		  const dauer = document.querySelector(`[name="dauer-${prod.id}"]`).value.trim();
-		  const ab = document.querySelector(`[name="ab-${prod.id}"]`).value.trim();
-		  const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
+      const start = document.querySelector(`[name="start-${prod.id}"]`).value.trim();
+      const dauer = document.querySelector(`[name="dauer-${prod.id}"]`).value.trim();
+      const ab = document.querySelector(`[name="ab-${prod.id}"]`).value.trim();
+      const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
 
-		  let details = [];
-		  if (start && dauer) details.push(`${start} Messbecher täglich für ${dauer}`);
-		  else if (start) details.push(`${start} Messbecher täglich`);
-		  if (ab && nach) details.push(`${ab} ${nach} Messbecher täglich`);
+      let details = [];
+      if (start && dauer) details.push(`${start} Messbecher täglich für ${dauer}`);
+      else if (start) details.push(`${start} Messbecher täglich`);
+      if (ab && nach) details.push(`${ab} ${nach} Messbecher täglich`);
 
-		  const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
-		  items.push(`${prod.id}:${qty}`);
-		  textProdukte.push(`${prod.name}${zusatz}`);
-		});
+      const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
+      items.push(`${prod.id}:${qty}`);
+      textProdukte.push(`${prod.name}${zusatz}`);
+    });
 
-		if (items.length === 0) {
-		  outputText.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
-		  outputHTML.style.display = "none";
-		  outputText.style.display = "block";
-		  return;
-		}
+    if (items.length === 0) {
+      outputText.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
+      outputHTML.style.display = "none";
+      outputText.style.display = "block";
+      return;
+    }
 
-		const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
-		const begruessung = kunde ? `Hallo ${kunde},\n\n` : "";
+    const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
 
-		const bodyText = `${begruessung}Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:\n\n${textProdukte.join("\n")}\n\n👉 Jetzt bestellen: ${cartUrl}`;
+    let begruessung = `Hallo ${kunde},\n\n`;
+    let einleitung = "";
+    let hinweis = "";
+    let abschluss = "";
 
-		if (mode === "text") {
-		  outputText.style.display = "block";
-		  outputHTML.style.display = "none";
-		  outputText.value = bodyText;
-		} else {
-		  outputText.style.display = "none";
-		  outputHTML.style.display = "block";
-		  outputHTML.innerHTML = `
-			<p>${kunde ? `Hallo ${kunde},` : ""}</p>
-			<p>Wie gerade besprochen sende ich Ihnen unsere Produktempfehlung für Ihr Pferd:</p>
-			<ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
-			<p>
-			  👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
-			</p>
-		  `;
-		}
-	  });
-	});
-  </script>
+    if (anrede === "du") {
+      einleitung = `danke für die ganzen Infos!\nAuf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` "${pferd}"` : ""}:\n\n`;
+      hinweis = `Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:\n`;
+      abschluss = `\nWenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`;
+    } else {
+      einleitung = `danke für die ganzen Informationen!\nAuf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` "${pferd}"` : ""}:\n\n`;
+      hinweis = `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:\n`;
+      abschluss = `\nSollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`;
+    }
+
+    const bodyText = `${begruessung}${einleitung}${textProdukte.join("\n")}\n\n${hinweis}👉 Jetzt bestellen: ${cartUrl}${abschluss}`;
+
+    if (mode === "text") {
+      outputText.style.display = "block";
+      outputHTML.style.display = "none";
+      outputText.value = bodyText;
+    } else {
+      outputText.style.display = "none";
+      outputHTML.style.display = "block";
+      outputHTML.innerHTML = `
+        <p>${kunde ? `Hallo ${kunde},` : ""}</p>
+        <p>${anrede === "du"
+          ? `danke für die ganzen Infos!<br>Auf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` „${pferd}“` : ""}:`
+          : `danke für die ganzen Informationen!<br>Auf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` „${pferd}“` : ""}:`
+        }</p>
+        <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
+        <p>${anrede === "du"
+          ? `Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:`
+          : `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:`
+        }</p>
+        <p>
+          👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
+        </p>
+        <p>${anrede === "du"
+          ? `Wenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`
+          : `Sollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`
+        }</p>
+      `;
+    }
+  });
+});
+</script>
   <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
   <script>
 	const canvas = document.getElementById("confettiCanvas");
