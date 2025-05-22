@@ -320,11 +320,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let abschluss = "";
 
     if (anrede === "du") {
-      einleitung = `danke für die ganzen Infos!\nAuf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` "${pferd}"` : ""}:\n\n`;
+      einleitung = `danke für die ganzen Infos!\nAuf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` ${pferd}` : ""}:\n\n`;
       hinweis = `Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:\n`;
       abschluss = `\nWenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`;
     } else {
-      einleitung = `danke für die ganzen Informationen!\nAuf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` "${pferd}"` : ""}:\n\n`;
+      einleitung = `danke für die ganzen Informationen!\nAuf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` ${pferd}` : ""}:\n\n`;
       hinweis = `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:\n`;
       abschluss = `\nSollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`;
     }
