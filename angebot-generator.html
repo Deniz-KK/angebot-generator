@@ -15,13 +15,9 @@
 	h2, h3 {
 	  margin-top: 25px;
 	}
-	
-	#angebotForm > div > div > span{
-		font-size: 13px;
-	}
 
 	.form-section {
-	  max-width: 800px;
+	  max-width: 1200px;
 	  margin-bottom: 40px;
 	  background-color: #fff;
 	  padding: 24px;
@@ -78,47 +74,120 @@
 	  background-color: #005fa3;
 	}
 
-	.produkt {
-	  display: flex;
-	  align-items: flex-start;
-	  flex-wrap: wrap;
-	  gap: 20px;
-	  margin-bottom: 24px;
-	  padding: 20px;
-	  border-top: 1px dotted #e0e4ea;
-	  background-color: #fdfdfd;
-	  border-left: 4px solid #0077cc;
-	  border-radius: 6px;
+	.add-product-button {
+	  background-color: #28a745;
+	  margin-top: 16px;
+	  padding: 12px 20px;
+	  font-size: 15px;
 	}
 
-	.produkt label {
-	  flex: 1 1 100%;
-	  font-weight: 600;
-	  margin-bottom: 8px;
+	.add-product-button:hover {
+	  background-color: #218838;
 	}
 
-	.inputgroup {
-	  flex: 1 1 100%;
-	  display: flex;
-	  flex-wrap: wrap;
-	  gap: 12px;
+	.remove-button {
+	  background-color: #dc3545;
+	  padding: 8px 12px;
+	  font-size: 14px;
+	  margin-left: 12px;
+	}
+
+	.remove-button:hover {
+	  background-color: #c82333;
+	}
+
+	.product-selection {
+	  background-color: #f8f9fa;
+	  border: 1px solid #dee2e6;
+	  border-radius: 8px;
+	  padding: 0;
+	  margin-bottom: 20px;
+	  overflow: hidden;
+	}
+
+	.product-header {
+	  background-color: #e9ecef;
+	  border-bottom: 2px solid #dee2e6;
+	  padding: 12px 20px;
+	  margin-bottom: 0;
+	  display: grid;
+	  grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
+	  gap: 10px;
 	  align-items: center;
 	}
 
-	
-	.inputgroup select {
-	  flex: 1 1 140px;
-	  min-width: 90px;
-	  max-width: 208px;
+	.product-header div {
+	  font-weight: 600;
+	  font-size: 12px;
+	  text-align: center;
+	  color: #495057;
+	  text-transform: uppercase;
+	  letter-spacing: 0.3px;
+	  line-height: 1.2;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	  white-space: nowrap;
 	}
-	
-	.inputgroup input[type="number"]{
-		width:63px;
-		font-size: 20px;
+
+	.product-header div:first-child {
+	  text-align: center;
 	}
-	
-	.inputgroup input[type="text"]{
-	width:120px;
+
+	.product-input-row {
+	  padding: 20px;
+	}
+
+	.product-row {
+	  display: grid;
+	  grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
+	  gap: 10px;
+	  align-items: center;
+	  margin-bottom: 16px;
+	}
+
+	@media (max-width: 800px) {
+	  .product-row {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	  }
+
+	  .product-header {
+		display: none;
+	  }
+
+	  .product-input-row {
+		padding: 16px;
+	  }
+	}
+
+	.added-product {
+	  background-color: #e8f4fd;
+	  border: 1px solid #0077cc;
+	  border-radius: 8px;
+	  padding: 16px;
+	  margin-bottom: 12px;
+	  display: flex;
+	  align-items: center;
+	  justify-content: space-between;
+	  flex-wrap: wrap;
+	  gap: 12px;
+	}
+
+	.product-info {
+	  display: flex;
+	  align-items: center;
+	  gap: 12px;
+	  flex: 1;
+	}
+
+	.product-icon {
+	  height: 32px;
+	  width: auto;
+	}
+
+	.product-details {
+	  font-size: 14px;
+	  color: #666;
 	}
 
 	#angebotHTML {
@@ -127,6 +196,34 @@
 	  margin-top: 32px;
 	  background: #f9f9f9;
 	  border-radius: 6px;
+	}
+
+	/* Basis Styles */
+	.success-notification {
+	  background-color: #d4edda;
+	  color: #155724;
+	  padding: 12px;
+	  border-radius: 6px;
+	  margin-top: 16px;
+	  display: none;
+	}
+
+	.copy-button {
+	  background-color: #28a745;
+	  margin-left: 10px;
+	  padding: 8px 16px;
+	  font-size: 14px;
+	}
+
+	.copy-button:hover {
+	  background-color: #218838;
+	}
+
+	.no-products {
+	  text-align: center;
+	  color: #666;
+	  font-style: italic;
+	  padding: 20px;
 	}
   </style>
 </head>
@@ -138,10 +235,10 @@
 	  <label for="kundenname">👤 Kundenname:</label>
 	  <input type="text" id="kundenname" placeholder="z. B. Max Mustermann" />
 	</div>
-<div class="form-grid">
-  <label for="pferdename">🐴 Name des Pferdes:</label>
-  <input type="text" id="pferdename" placeholder="z. B. Black Beauty" />
-</div>
+	<div class="form-grid">
+	  <label for="pferdename">🐴 Name des Pferdes:</label>
+	  <input type="text" id="pferdename" placeholder="z. B. Black Beauty" />
+	</div>
 	<div class="form-grid">
 	  <label for="beraterin">🧑‍💼 Beraterin:</label>
 	  <select id="beraterin">
@@ -161,9 +258,8 @@
 	  <select id="kontaktkanal">
 		<option value="">– Bitte wählen –</option>
 		<option value="telefon">Telefon</option>
-		  <option value="chat">Chat</option>
-		  <option value="e-mail">E-Mail</option>
-		
+		<option value="chat">Chat</option>
+		<option value="e-mail">E-Mail</option>
 	  </select>
 	</div>
 
@@ -174,18 +270,76 @@
 		<option value="html">HTML (für E-Mail)</option>
 	  </select>
 	</div>
-	  <div class="form-grid">
-  <label for="anrede">🙋‍♂️ Anrede:</label>
-  <select id="anrede">
-    <option value="du">Du</option>
-    <option value="sie">Sie</option>
-  </select>
-</div>
+	<div class="form-grid">
+	  <label for="anrede">🙋‍♂️ Anrede:</label>
+	  <select id="anrede">
+		<option value="du">Du</option>
+		<option value="sie">Sie</option>
+	  </select>
+	</div>
   </section>
 
-  <form id="angebotForm"></form>
+
+
+  <!-- Produkt-Auswahl Sektion -->
+  <section class="form-section">
+	<h3>🛒 Produkte hinzufügen</h3>
+
+	<div class="product-selection">
+	  <!-- Überschriften wie Tabelle -->
+	  <div class="product-header">
+		<div>Produkt</div>
+		<div>Bestell-<br>menge</div>
+		<div>Kurzzeitfütterung</div>
+		<div>Fütter-<br>menge</div>
+		<div>Dauerfütterung</div>
+		<div>Fütter-<br>menge</div>
+		<div></div>
+	  </div>
+
+	  <div class="product-input-row">
+		<div class="product-row">
+		  <select id="produktSelect">
+			<option value="">– Produkt wählen –</option>
+		  </select>
+		  <input type="number" id="mengeInput" placeholder="Menge" min="0" value="1">
+		  <select id="dauerSelect">
+			<option value="">Wochen...</option>
+			<option value="eine Woche">eine Woche</option>
+			<option value="zwei Wochen">zwei Wochen</option>
+			<option value="drei Wochen">drei Wochen</option>
+			<option value="vier Wochen">vier Wochen</option>
+			<option value="fünf Wochen">fünf Wochen</option>
+			<option value="sechs Wochen">sechs Wochen</option>
+		  </select>
+		  <input type="text" id="startInput" placeholder="Messbecher">
+		  <select id="abSelect">
+			<option value="">Woche...</option>
+			<option value="ab der zweiten Woche">ab der zweiten Woche</option>
+			<option value="ab der dritten Woche">ab der dritten Woche</option>
+			<option value="ab der vierten Woche">ab der vierten Woche</option>
+			<option value="ab der fünften Woche">ab der fünften Woche</option>
+			<option value="ab der sechsten Woche">ab der sechsten Woche</option>
+			<option value="ab der siebten Woche">ab der siebten Woche</option>
+		  </select>
+		  <input type="text" id="nachInput" placeholder="Messbecher">
+		  <button type="button" id="addProductButton" class="add-product-button">➕ Hinzufügen</button>
+		</div>
+	  </div>
+	</div>
+
+	<!-- Hinzugefügte Produkte -->
+	<div id="addedProductsList">
+	  <div class="no-products">Noch keine Produkte hinzugefügt</div>
+	</div>
+  </section>
 
   <button type="button" id="generateButton">🚀 Angebotstext generieren</button>
+  <button type="button" id="copyButton" class="copy-button" style="display:none;">📋 Text kopieren</button>
+
+  <div class="success-notification" id="successNotification">
+	✅ Angebot erfolgreich erstellt!
+  </div>
 
   <h3>📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
@@ -199,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
     { id: "42640145514738", name: "Kristallkraft No2" },
     { id: "43527031652617", name: "Kristallkraft Coolly" },
     { id: "42640147874034", name: "Kristallkraft Move" },
-    { id: "42640136569074", name: "Kristallkraft Bro" },
+    { id: "42640136569074", name: "Kristallkraft Bronchiale" },
     { id: "42640142270706", name: "Kristallkraft Femmina" },
     { id: "42640136044786", name: "Kristallkraft Brave Horse" },
     { id: "42640139124978", name: "Kristallkraft Core" },
@@ -208,68 +362,181 @@ document.addEventListener("DOMContentLoaded", function () {
     { id: "42712424906994", name: "Kristallkraft TheMineral" }
   ];
 
+  const icons = {
+    "Kristallkraft Coolly": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/cl_gratissack.svg",
+    "Kristallkraft No1": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no1_gratissack.svg",
+    "Kristallkraft No2": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no2_gratissack.svg",
+    "Kristallkraft Move": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/move_gratissack.svg",
+    "Kristallkraft Bronchiale": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/bro_gratissack.svg",
+    "Kristallkraft TheMineral": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/tm_gratissack.svg",
+    "Kristallkraft Mental Balance": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/mb_gratissack.svg",
+    "Kristallkraft Muscolo": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/muscolo_gratissack.svg",
+    "Kristallkraft Femmina": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/femmina_gratissack.svg",
+    "Kristallkraft Brave Horse": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/brave_horse_gratissack.svg",
+    "Kristallkraft Core": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/core_gratissack.svg"
+  };
+
+  let addedProducts = [];
+
+  // Dropdown mit Produkten füllen
+  const produktSelect = document.getElementById("produktSelect");
+  produkte.forEach(prod => {
+    const option = document.createElement("option");
+    option.value = prod.id;
+    option.textContent = prod.name;
+    produktSelect.appendChild(option);
+  });
+
+  // Erweiterte Tracking-Funktionen
+  function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  function saveTrackingData(data) {
+    const trackingData = JSON.parse(sessionStorage.getItem('kristallkraft_tracking') || '[]');
+    trackingData.push({
+      ...data,
+      timestamp: new Date().toISOString(),
+      linkId: generateUniqueId()
+    });
+    sessionStorage.setItem('kristallkraft_tracking', JSON.stringify(trackingData));
+  }
+
   // Berater speichern
-  const savedBeraterin = localStorage.getItem("beraterin");
+  const savedBeraterin = sessionStorage.getItem("beraterin");
   if (savedBeraterin) {
     document.getElementById("beraterin").value = savedBeraterin;
   }
 
   document.getElementById("beraterin").addEventListener("change", (e) => {
-    localStorage.setItem("beraterin", e.target.value);
+    sessionStorage.setItem("beraterin", e.target.value);
   });
 
-  // Produkte rendern
-  const form = document.getElementById("angebotForm");
-  const icons = {
-  "Kristallkraft Coolly": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/cl_gratissack.svg",
-  "Kristallkraft No1": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no1_gratissack.svg",
-  "Kristallkraft No2": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/no2_gratissack.svg",
-  "Kristallkraft Move": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/move_gratissack.svg",
-  "Kristallkraft Bro": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/bro_gratissack.svg",
-  "Kristallkraft TheMineral": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/tm_gratissack.svg",
-  "Kristallkraft Mental Balance": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/mb_gratissack.svg",
-  "Kristallkraft Muscolo": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/muscolo_gratissack.svg",
-  "Kristallkraft Femmina": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/femmina_gratissack.svg",
-  "Kristallkraft Brave Horse": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/brave_horse_gratissack.svg",
-  "Kristallkraft Core": "https://cdn.shopify.com/s/files/1/0632/5449/5474/files/core_gratissack.svg"
-};
+  // Copy Button Funktionalität
+  document.getElementById("copyButton").addEventListener("click", () => {
+    const textArea = document.getElementById("angebotText");
+    if (textArea.style.display !== "none") {
+      textArea.select();
+      document.execCommand('copy');
+    } else {
+      const htmlDiv = document.getElementById("angebotHTML");
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = htmlDiv.textContent || htmlDiv.innerText;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+    }
 
-  produkte.forEach(prod => {
-    const block = document.createElement("div");
-    block.className = "produkt";
-    block.innerHTML = `
-      <div class="inputgroup">
-        <span style="display: flex; align-items: center; min-width: 200px; font-weight: 600;">
-          <img src="${icons[prod.name] || ''}" alt="${prod.name}" style="height: 24px; width: auto; margin-right: 8px;">
-          ${prod.name}
-        </span>
-        <input type="number" name="qty-${prod.id}" id="qty-${prod.id}" placeholder="Menge" min="0" value="0">
-        <select name="dauer-${prod.id}">
-          <option value="">Kurzzeitfütt. Wochen...</option>
-          <option value="eine Woche">eine Woche</option>
-          <option value="zwei Wochen">zwei Wochen</option>
-          <option value="drei Wochen">drei Wochen</option>
-          <option value="vier Wochen">vier Wochen</option>
-          <option value="fünf Wochen">fünf Wochen</option>
-          <option value="sechs Wochen">sechs Wochen</option>
-        </select>
-        ➡️
-        <input type="text" name="start-${prod.id}" placeholder="Messbecher">
-        <select name="ab-${prod.id}">
-          <option value="">Dauerfütt. ab Woche...</option>
-          <option value="ab der zweiten Woche">ab der zweiten Woche</option>
-          <option value="ab der dritten Woche">ab der dritten Woche</option>
-          <option value="ab der vierten Woche">ab der vierten Woche</option>
-          <option value="ab der fünften Woche">ab der fünften Woche</option>
-          <option value="ab der sechsten Woche">ab der sechsten Woche</option>
-          <option value="ab der siebten Woche">ab der siebten Woche</option>
-        </select>
-        ➡️
-        <input type="text" name="nach-${prod.id}" placeholder="Messbecher">
-      </div>`;
-    form.appendChild(block);
+    const button = document.getElementById("copyButton");
+    const originalText = button.textContent;
+    button.textContent = "✅ Kopiert!";
+    button.style.backgroundColor = "#28a745";
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.backgroundColor = "#28a745";
+    }, 2000);
   });
 
+  // Produkt hinzufügen
+  document.getElementById("addProductButton").addEventListener("click", () => {
+    const produktId = document.getElementById("produktSelect").value;
+    const menge = parseInt(document.getElementById("mengeInput").value);
+    const dauer = document.getElementById("dauerSelect").value;
+    const start = document.getElementById("startInput").value.trim();
+    const ab = document.getElementById("abSelect").value;
+    const nach = document.getElementById("nachInput").value.trim();
+
+    if (!produktId) {
+      alert("Bitte wähle ein Produkt aus.");
+      return;
+    }
+
+    if (isNaN(menge) || menge <= 0) {
+      alert("Bitte gib eine gültige Menge ein.");
+      return;
+    }
+
+    const produkt = produkte.find(p => p.id === produktId);
+    if (!produkt) return;
+
+    // Prüfen ob Produkt bereits hinzugefügt wurde
+    const existingIndex = addedProducts.findIndex(p => p.id === produktId);
+    if (existingIndex !== -1) {
+      // Produkt aktualisieren
+      addedProducts[existingIndex] = {
+        id: produktId,
+        name: produkt.name,
+        menge,
+        dauer,
+        start,
+        ab,
+        nach
+      };
+    } else {
+      // Neues Produkt hinzufügen
+      addedProducts.push({
+        id: produktId,
+        name: produkt.name,
+        menge,
+        dauer,
+        start,
+        ab,
+        nach
+      });
+    }
+
+    updateAddedProductsList();
+    clearProductForm();
+  });
+
+  function clearProductForm() {
+    document.getElementById("produktSelect").value = "";
+    document.getElementById("mengeInput").value = "1";
+    document.getElementById("dauerSelect").value = "";
+    document.getElementById("startInput").value = "";
+    document.getElementById("abSelect").value = "";
+    document.getElementById("nachInput").value = "";
+  }
+
+  function updateAddedProductsList() {
+    const container = document.getElementById("addedProductsList");
+
+    if (addedProducts.length === 0) {
+      container.innerHTML = '<div class="no-products">Noch keine Produkte hinzugefügt</div>';
+      return;
+    }
+
+    container.innerHTML = addedProducts.map((prod, index) => {
+      let details = [];
+      if (prod.start && prod.dauer) details.push(`${prod.start} Messbecher täglich für ${prod.dauer}`);
+      else if (prod.start) details.push(`${prod.start} Messbecher täglich`);
+      if (prod.ab && prod.nach) details.push(`${prod.ab} ${prod.nach} Messbecher täglich`);
+
+      const detailsText = details.length > 0 ? `<div class="product-details">${details.join(", ")}</div>` : "";
+
+      return `
+        <div class="added-product">
+          <div class="product-info">
+            <img src="${icons[prod.name] || ''}" alt="${prod.name}" class="product-icon">
+            <div>
+              <strong>${prod.name}</strong> (${prod.menge}x)
+              ${detailsText}
+            </div>
+          </div>
+          <button type="button" class="remove-button" onclick="removeProduct(${index})">🗑️ Entfernen</button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Globale Funktion zum Entfernen von Produkten
+  window.removeProduct = function(index) {
+    addedProducts.splice(index, 1);
+    updateAddedProductsList();
+  };
+
+  // Hauptfunktion zum Generieren des Angebots
   document.getElementById("generateButton").addEventListener("click", () => {
     const kunde = document.getElementById("kundenname").value.trim();
     const pferd = document.getElementById("pferdename")?.value.trim() || "";
@@ -280,41 +547,50 @@ document.addEventListener("DOMContentLoaded", function () {
     const outputText = document.getElementById("angebotText");
     const outputHTML = document.getElementById("angebotHTML");
 
-    const refParts = [];
-    if (kanal) refParts.push(kanal);
-    if (berater) refParts.push(berater);
-    const refTag = refParts.length > 0 ? `?ref=${encodeURIComponent(refParts.join('-'))}` : "";
-
-    let items = [];
-    let textProdukte = [];
-
-    produkte.forEach(prod => {
-      const qty = parseInt(document.querySelector(`[name="qty-${prod.id}"]`).value);
-      if (isNaN(qty) || qty <= 0) return;
-
-      const start = document.querySelector(`[name="start-${prod.id}"]`).value.trim();
-      const dauer = document.querySelector(`[name="dauer-${prod.id}"]`).value.trim();
-      const ab = document.querySelector(`[name="ab-${prod.id}"]`).value.trim();
-      const nach = document.querySelector(`[name="nach-${prod.id}"]`).value.trim();
-
-      let details = [];
-      if (start && dauer) details.push(`${start} Messbecher täglich für ${dauer}`);
-      else if (start) details.push(`${start} Messbecher täglich`);
-      if (ab && nach) details.push(`${ab} ${nach} Messbecher täglich`);
-
-      const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
-      items.push(`${prod.id}:${qty}`);
-      textProdukte.push(`${prod.name}${zusatz}`);
-    });
-
-    if (items.length === 0) {
-      outputText.value = "❗ Bitte gib bei mindestens einem Produkt eine Menge größer 0 ein.";
+    if (addedProducts.length === 0) {
+      outputText.value = "❗ Bitte füge mindestens ein Produkt hinzu.";
       outputHTML.style.display = "none";
       outputText.style.display = "block";
       return;
     }
 
-    const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}${refTag}`;
+    // Tracking-Parameter erstellen
+    const trackingParams = new URLSearchParams();
+
+    trackingParams.set('utm_source', 'servicelink');
+    if (kanal) trackingParams.set('utm_medium', kanal);
+    if (berater) trackingParams.set('utm_content', berater);
+
+    const linkId = generateUniqueId();
+    trackingParams.set('link_id', linkId);
+    trackingParams.set('created', Date.now());
+
+    let items = [];
+    let textProdukte = [];
+
+    addedProducts.forEach(prod => {
+      let details = [];
+      if (prod.start && prod.dauer) details.push(`${prod.start} Messbecher täglich für ${prod.dauer}`);
+      else if (prod.start) details.push(`${prod.start} Messbecher täglich`);
+      if (prod.ab && prod.nach) details.push(`${prod.ab} ${prod.nach} Messbecher täglich`);
+
+      const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
+      items.push(`${prod.id}:${prod.menge}`);
+      textProdukte.push(`${prod.name}${zusatz}`);
+    });
+
+    const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${trackingParams.toString()}`;
+
+    // Tracking-Daten speichern
+    saveTrackingData({
+      kunde,
+      pferd,
+      beraterin: berater,
+      kontaktkanal: kanal,
+      linkId,
+      produkte: textProdukte,
+      cartUrl
+    });
 
     let begruessung = `Hallo ${kunde},\n\n`;
     let einleitung = "";
@@ -343,8 +619,8 @@ document.addEventListener("DOMContentLoaded", function () {
       outputHTML.innerHTML = `
         <p>${kunde ? `Hallo ${kunde},` : ""}</p>
         <p>${anrede === "du"
-          ? `danke für die ganzen Infos!<br>Auf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` „${pferd}“` : ""}:`
-          : `danke für die ganzen Informationen!<br>Auf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` „${pferd}“` : ""}:`
+          ? `danke für die ganzen Infos!<br>Auf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` „${pferd}"` : ""}:`
+          : `danke für die ganzen Informationen!<br>Auf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` „${pferd}"` : ""}:`
         }</p>
         <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
         <p>${anrede === "du"
@@ -360,6 +636,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }</p>
       `;
     }
+
+    document.getElementById("copyButton").style.display = "inline-block";
+    document.getElementById("successNotification").style.display = "block";
+    setTimeout(() => {
+      document.getElementById("successNotification").style.display = "none";
+    }, 5000);
   });
 });
 </script>
