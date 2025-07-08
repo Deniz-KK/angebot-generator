@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Kristallkraft Angebotsgenerator</title>
-
+  
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MSBJB2KWM"></script>
   <script>
@@ -20,7 +20,7 @@
       }
     });
   </script>
-
+  
   <style>
 	body {
 	  font-family: sans-serif;
@@ -242,20 +242,6 @@
 	  font-style: italic;
 	  padding: 20px;
 	}
-
-	.tracking-info {
-	  background-color: #e7f3ff;
-	  border: 1px solid #0077cc;
-	  border-radius: 6px;
-	  padding: 16px;
-	  margin-top: 20px;
-	  font-size: 14px;
-	}
-
-	.tracking-info h4 {
-	  margin: 0 0 10px 0;
-	  color: #0077cc;
-	}
   </style>
 </head>
 <body>
@@ -367,15 +353,6 @@
 
   <div class="success-notification" id="successNotification">
 	✅ Angebot erfolgreich erstellt!
-  </div>
-
-  <!-- Tracking Info Box -->
-  <div class="tracking-info" id="trackingInfo" style="display:none;">
-	<h4>📊 Tracking Information</h4>
-	<p><strong>Session ID:</strong> <span id="sessionIdDisplay"></span></p>
-	<p><strong>Link ID:</strong> <span id="linkIdDisplay"></span></p>
-	<p><strong>Generiert am:</strong> <span id="timestampDisplay"></span></p>
-	<p><strong>Anzahl Produkte:</strong> <span id="productCountDisplay"></span></p>
   </div>
 
   <h3>📋 Dein Angebotstext:</h3>
@@ -567,7 +544,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Output Mode Tracking + Copy Button Visibility
   document.getElementById("outputMode").addEventListener("change", (e) => {
     trackEvent('output_mode_selected', { outputMode: e.target.value });
-
+    
     // Copy Button Sichtbarkeit basierend auf Output Mode
     const copyButton = document.getElementById("copyButton");
     if (e.target.value === "text") {
@@ -585,7 +562,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("copyButton").addEventListener("click", () => {
     const mode = document.getElementById("outputMode").value;
     const textArea = document.getElementById("angebotText");
-
+    
     if (mode === "text") {
       textArea.select();
       document.execCommand('copy');
@@ -711,7 +688,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Globale Funktion zum Entfernen von Produkten mit Tracking
   window.removeProduct = function(index) {
     const removedProduct = addedProducts[index];
-
+    
     // Tracking für Produkt entfernen
     trackEvent('product_removed', {
       produktName: removedProduct.name,
@@ -738,7 +715,7 @@ document.addEventListener("DOMContentLoaded", function () {
       outputText.value = "❗ Bitte füge mindestens ein Produkt hinzu.";
       outputHTML.style.display = "none";
       outputText.style.display = "block";
-
+      
       // Tracking für Fehler
       trackEvent('generation_error', {
         error: 'no_products',
@@ -746,7 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
         berater: berater,
         kontaktkanal: kanal
       });
-
+      
       return;
     }
 
@@ -807,13 +784,6 @@ document.addEventListener("DOMContentLoaded", function () {
       outputMode: mode,
       anrede: anrede
     });
-
-    // Anzeige der Tracking-Informationen
-    document.getElementById("sessionIdDisplay").textContent = sessionId;
-    document.getElementById("linkIdDisplay").textContent = linkId;
-    document.getElementById("timestampDisplay").textContent = new Date().toLocaleString('de-DE');
-    document.getElementById("productCountDisplay").textContent = addedProducts.length;
-    document.getElementById("trackingInfo").style.display = "block";
 
     let begruessung = `Hallo ${kunde},\n\n`;
     let einleitung = "";
