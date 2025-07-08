@@ -3,6 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <title>Kristallkraft Angebotsgenerator</title>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MSBJB2KWM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8MSBJB2KWM', {
+      page_title: 'Kristallkraft Angebotsgenerator',
+      page_location: window.location.href,
+      custom_map: {
+        'custom_parameter_1': 'beraterin',
+        'custom_parameter_2': 'kontaktkanal',
+        'custom_parameter_3': 'session_id'
+      }
+    });
+  </script>
+
   <style>
 	body {
 	  font-family: sans-serif;
@@ -198,7 +216,6 @@
 	  border-radius: 6px;
 	}
 
-	/* Basis Styles */
 	.success-notification {
 	  background-color: #d4edda;
 	  color: #155724;
@@ -224,6 +241,20 @@
 	  color: #666;
 	  font-style: italic;
 	  padding: 20px;
+	}
+
+	.tracking-info {
+	  background-color: #e7f3ff;
+	  border: 1px solid #0077cc;
+	  border-radius: 6px;
+	  padding: 16px;
+	  margin-top: 20px;
+	  font-size: 14px;
+	}
+
+	.tracking-info h4 {
+	  margin: 0 0 10px 0;
+	  color: #0077cc;
 	}
   </style>
 </head>
@@ -279,14 +310,11 @@
 	</div>
   </section>
 
-
-
   <!-- Produkt-Auswahl Sektion -->
   <section class="form-section">
 	<h3>🛒 Produkte hinzufügen</h3>
 
 	<div class="product-selection">
-	  <!-- Überschriften wie Tabelle -->
 	  <div class="product-header">
 		<div>Produkt</div>
 		<div>Bestell-<br>menge</div>
@@ -341,6 +369,15 @@
 	✅ Angebot erfolgreich erstellt!
   </div>
 
+  <!-- Tracking Info Box -->
+  <div class="tracking-info" id="trackingInfo" style="display:none;">
+	<h4>📊 Tracking Information</h4>
+	<p><strong>Session ID:</strong> <span id="sessionIdDisplay"></span></p>
+	<p><strong>Link ID:</strong> <span id="linkIdDisplay"></span></p>
+	<p><strong>Generiert am:</strong> <span id="timestampDisplay"></span></p>
+	<p><strong>Anzahl Produkte:</strong> <span id="productCountDisplay"></span></p>
+  </div>
+
   <h3>📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
   <div id="angebotHTML" style="display:none;"></div>
@@ -377,6 +414,17 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   let addedProducts = [];
+  let sessionId = getOrCreateSessionId();
+
+  // Session ID Management
+  function getOrCreateSessionId() {
+    let sessionId = sessionStorage.getItem('kristallkraft_session_id');
+    if (!sessionId) {
+      sessionId = generateUniqueId();
+      sessionStorage.setItem('kristallkraft_session_id', sessionId);
+    }
+    return sessionId;
+  }
 
   // Dropdown mit Produkten füllen
   const produktSelect = document.getElementById("produktSelect");
@@ -397,9 +445,107 @@ document.addEventListener("DOMContentLoaded", function () {
     trackingData.push({
       ...data,
       timestamp: new Date().toISOString(),
-      linkId: generateUniqueId()
+      linkId: generateUniqueId(),
+      sessionId: sessionId
     });
     sessionStorage.setItem('kristallkraft_tracking', JSON.stringify(trackingData));
+  }
+
+  // Umfassendes Event-Tracking
+  function trackEvent(eventName, eventData = {}) {
+    const trackingEvent = {
+      event: eventName,
+      timestamp: new Date().toISOString(),
+      sessionId: sessionId,
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      ...eventData
+    };
+
+    // Console Log für Debugging
+    console.log('📊 Tracking Event:', trackingEvent);
+
+    // SessionStorage für lokale Speicherung
+    const events = JSON.parse(sessionStorage.getItem('kristallkraft_events') || '[]');
+    events.push(trackingEvent);
+    sessionStorage.setItem('kristallkraft_events', JSON.stringify(events));
+
+    // Google Analytics (GA4) - Enhanced Events
+    if (typeof gtag !== 'undefined') {
+      // Basis-Event für GA4
+      gtag('event', eventName, {
+        event_category: 'Angebotsgenerator',
+        event_label: eventData.label || eventName,
+        beraterin: eventData.beraterin || '',
+        kontaktkanal: eventData.kontaktkanal || '',
+        session_id: sessionId,
+        value: eventData.value || 0,
+        currency: 'EUR',
+        ...eventData
+      });
+
+      // Spezielle GA4 E-Commerce Events
+      if (eventName === 'angebot_generated') {
+        gtag('event', 'generate_lead', {
+          currency: 'EUR',
+          value: eventData.produktWert || 0,
+          beraterin: eventData.beraterin,
+          kontaktkanal: eventData.kontaktkanal,
+          items: eventData.produkte?.map((prod, index) => ({
+            item_id: prod.id || `item_${index}`,
+            item_name: prod.name,
+            category: 'Kristallkraft',
+            quantity: prod.menge || 1,
+            price: 50 // Durchschnittspreis - kann angepasst werden
+          })) || []
+        });
+      }
+
+      if (eventName === 'product_added') {
+        gtag('event', 'add_to_cart', {
+          currency: 'EUR',
+          value: 50, // Durchschnittspreis
+          items: [{
+            item_id: eventData.produktId,
+            item_name: eventData.produktName,
+            category: 'Kristallkraft',
+            quantity: eventData.menge || 1,
+            price: 50
+          }]
+        });
+      }
+    }
+
+    // Facebook Pixel - falls vorhanden
+    if (typeof fbq !== 'undefined') {
+      fbq('track', 'CustomEvent', {
+        event_name: eventName,
+        session_id: sessionId,
+        ...eventData
+      });
+    }
+
+    // Matomo/Piwik - falls vorhanden
+    if (typeof _paq !== 'undefined') {
+      _paq.push(['trackEvent', 'Angebotsgenerator', eventName, eventData.label || '', eventData.value || 0]);
+    }
+
+    // Server-seitiges Tracking (optional)
+    // sendToServer(trackingEvent);
+  }
+
+  // Optional: Server-seitiges Tracking
+  function sendToServer(trackingEvent) {
+    // Nur aktivieren wenn Server-Endpoint vorhanden
+    // fetch('/api/tracking', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(trackingEvent)
+    // }).catch(error => {
+    //   console.error('Tracking error:', error);
+    // });
   }
 
   // Berater speichern
@@ -410,23 +556,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.getElementById("beraterin").addEventListener("change", (e) => {
     sessionStorage.setItem("beraterin", e.target.value);
+    trackEvent('berater_selected', { beraterin: e.target.value });
+  });
+
+  // Kontaktkanal Tracking
+  document.getElementById("kontaktkanal").addEventListener("change", (e) => {
+    trackEvent('kontaktkanal_selected', { kontaktkanal: e.target.value });
+  });
+
+  // Output Mode Tracking + Copy Button Visibility
+  document.getElementById("outputMode").addEventListener("change", (e) => {
+    trackEvent('output_mode_selected', { outputMode: e.target.value });
+
+    // Copy Button Sichtbarkeit basierend auf Output Mode
+    const copyButton = document.getElementById("copyButton");
+    if (e.target.value === "text") {
+      // Bei Text-Modus: Button anzeigen falls bereits ein Angebot generiert wurde
+      if (document.getElementById("angebotText").value !== "Noch kein Angebot erstellt.") {
+        copyButton.style.display = "inline-block";
+      }
+    } else {
+      // Bei HTML-Modus: Button verstecken
+      copyButton.style.display = "none";
+    }
   });
 
   // Copy Button Funktionalität
   document.getElementById("copyButton").addEventListener("click", () => {
+    const mode = document.getElementById("outputMode").value;
     const textArea = document.getElementById("angebotText");
-    if (textArea.style.display !== "none") {
+
+    if (mode === "text") {
       textArea.select();
       document.execCommand('copy');
-    } else {
-      const htmlDiv = document.getElementById("angebotHTML");
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = htmlDiv.textContent || htmlDiv.innerText;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempTextArea);
     }
+
+    // Tracking für Copy-Aktion
+    trackEvent('angebot_copied', {
+      outputMode: mode,
+      produktAnzahl: addedProducts.length
+    });
 
     const button = document.getElementById("copyButton");
     const originalText = button.textContent;
@@ -438,7 +607,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 2000);
   });
 
-  // Produkt hinzufügen
+  // Produkt hinzufügen mit Tracking
   document.getElementById("addProductButton").addEventListener("click", () => {
     const produktId = document.getElementById("produktSelect").value;
     const menge = parseInt(document.getElementById("mengeInput").value);
@@ -459,6 +628,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const produkt = produkte.find(p => p.id === produktId);
     if (!produkt) return;
+
+    // Tracking für Produkt hinzufügen
+    trackEvent('product_added', {
+      produktName: produkt.name,
+      produktId: produktId,
+      menge: menge,
+      dauer: dauer,
+      totalProdukte: addedProducts.length + 1
+    });
 
     // Prüfen ob Produkt bereits hinzugefügt wurde
     const existingIndex = addedProducts.findIndex(p => p.id === produktId);
@@ -530,13 +708,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }).join("");
   }
 
-  // Globale Funktion zum Entfernen von Produkten
+  // Globale Funktion zum Entfernen von Produkten mit Tracking
   window.removeProduct = function(index) {
+    const removedProduct = addedProducts[index];
+
+    // Tracking für Produkt entfernen
+    trackEvent('product_removed', {
+      produktName: removedProduct.name,
+      produktId: removedProduct.id,
+      totalProdukte: addedProducts.length - 1
+    });
+
     addedProducts.splice(index, 1);
     updateAddedProductsList();
   };
 
-  // Hauptfunktion zum Generieren des Angebots
+  // Hauptfunktion zum Generieren des Angebots mit erweitertem Tracking
   document.getElementById("generateButton").addEventListener("click", () => {
     const kunde = document.getElementById("kundenname").value.trim();
     const pferd = document.getElementById("pferdename")?.value.trim() || "";
@@ -551,22 +738,32 @@ document.addEventListener("DOMContentLoaded", function () {
       outputText.value = "❗ Bitte füge mindestens ein Produkt hinzu.";
       outputHTML.style.display = "none";
       outputText.style.display = "block";
+
+      // Tracking für Fehler
+      trackEvent('generation_error', {
+        error: 'no_products',
+        kunde: kunde,
+        berater: berater,
+        kontaktkanal: kanal
+      });
+
       return;
     }
 
     // Tracking-Parameter erstellen
     const trackingParams = new URLSearchParams();
-
     trackingParams.set('utm_source', 'servicelink');
     if (kanal) trackingParams.set('utm_medium', kanal);
     if (berater) trackingParams.set('utm_content', berater);
 
     const linkId = generateUniqueId();
     trackingParams.set('link_id', linkId);
+    trackingParams.set('session_id', sessionId);
     trackingParams.set('created', Date.now());
 
     let items = [];
     let textProdukte = [];
+    let produktWert = 0;
 
     addedProducts.forEach(prod => {
       let details = [];
@@ -577,20 +774,46 @@ document.addEventListener("DOMContentLoaded", function () {
       const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
       items.push(`${prod.id}:${prod.menge}`);
       textProdukte.push(`${prod.name}${zusatz}`);
+      produktWert += prod.menge; // Vereinfachte Wertberechnung
     });
 
     const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${trackingParams.toString()}`;
 
-    // Tracking-Daten speichern
+    // Haupttracking-Event für Angebotsgenerierung
+    trackEvent('angebot_generated', {
+      kunde: kunde,
+      pferd: pferd,
+      beraterin: berater,
+      kontaktkanal: kanal,
+      outputMode: mode,
+      anrede: anrede,
+      linkId: linkId,
+      produktAnzahl: addedProducts.length,
+      produktWert: produktWert,
+      produkte: addedProducts.map(p => ({ name: p.name, menge: p.menge })),
+      cartUrl: cartUrl
+    });
+
+    // Speichern der Tracking-Daten
     saveTrackingData({
       kunde,
       pferd,
       beraterin: berater,
       kontaktkanal: kanal,
       linkId,
+      sessionId,
       produkte: textProdukte,
-      cartUrl
+      cartUrl,
+      outputMode: mode,
+      anrede: anrede
     });
+
+    // Anzeige der Tracking-Informationen
+    document.getElementById("sessionIdDisplay").textContent = sessionId;
+    document.getElementById("linkIdDisplay").textContent = linkId;
+    document.getElementById("timestampDisplay").textContent = new Date().toLocaleString('de-DE');
+    document.getElementById("productCountDisplay").textContent = addedProducts.length;
+    document.getElementById("trackingInfo").style.display = "block";
 
     let begruessung = `Hallo ${kunde},\n\n`;
     let einleitung = "";
@@ -613,6 +836,8 @@ document.addEventListener("DOMContentLoaded", function () {
       outputText.style.display = "block";
       outputHTML.style.display = "none";
       outputText.value = bodyText;
+      // Copy Button nur bei Text-Modus anzeigen
+      document.getElementById("copyButton").style.display = "inline-block";
     } else {
       outputText.style.display = "none";
       outputHTML.style.display = "block";
@@ -628,20 +853,35 @@ document.addEventListener("DOMContentLoaded", function () {
           : `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:`
         }</p>
         <p>
-          👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
+          👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;" onclick="trackEvent('cart_link_clicked', {linkId: '${linkId}', produktAnzahl: ${addedProducts.length}, beraterin: '${berater}', kontaktkanal: '${kanal}'});">🛒 Jetzt bestellen</a>
         </p>
         <p>${anrede === "du"
           ? `Wenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`
           : `Sollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`
         }</p>
       `;
+      // Copy Button bei HTML-Modus verstecken
+      document.getElementById("copyButton").style.display = "none";
     }
-
-    document.getElementById("copyButton").style.display = "inline-block";
     document.getElementById("successNotification").style.display = "block";
     setTimeout(() => {
       document.getElementById("successNotification").style.display = "none";
     }, 5000);
+  });
+
+  // Seiten-Load Tracking
+  trackEvent('page_loaded', {
+    userAgent: navigator.userAgent,
+    referrer: document.referrer,
+    timestamp: new Date().toISOString()
+  });
+
+  // Seiten-Verlassen Tracking
+  window.addEventListener('beforeunload', () => {
+    trackEvent('page_unload', {
+      timeOnPage: Date.now() - performance.timing.navigationStart,
+      produkteHinzugefuegt: addedProducts.length
+    });
   });
 });
 </script>
