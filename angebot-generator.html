@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Kristallkraft Angebotsgenerator</title>
+  <title>Kristallkraft Angebotsgenerator - Robust Tracking</title>
   
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MSBJB2KWM"></script>
@@ -22,342 +22,405 @@
   </script>
   
   <style>
-	body {
-	  font-family: sans-serif;
-	  padding: 40px;
-	  background-color: #fafafa;
-	  font-size: 15px;
-	  line-height: 1.5;
-	}
+    body {
+      font-family: sans-serif;
+      padding: 40px;
+      background-color: #fafafa;
+      font-size: 15px;
+      line-height: 1.5;
+    }
 
-	h2, h3 {
-	  margin-top: 25px;
-	}
+    .tracking-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      z-index: 1000;
+      max-width: 300px;
+    }
 
-	.form-section {
-	  max-width: 1200px;
-	  margin-bottom: 40px;
-	  background-color: #fff;
-	  padding: 24px;
-	  border-radius: 8px;
-	  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-	}
+    .tracking-status.working {
+      background: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
 
-	.form-grid {
-	  display: grid;
-	  grid-template-columns: 180px 1fr;
-	  gap: 16px 24px;
-	  align-items: center;
-	  margin-bottom: 16px;
-	}
+    .tracking-status.blocked {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
 
-	@media (max-width: 600px) {
-	  .form-grid {
-		grid-template-columns: 1fr;
-	  }
-	}
+    h2, h3 {
+      margin-top: 25px;
+    }
 
-	label {
-	  font-weight: 600;
-	}
+    .form-section {
+      max-width: 1200px;
+      margin-bottom: 40px;
+      background-color: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
 
-	input, select, textarea {
-	  padding: 12px;
-	  font-size: 16px;
-	  border: 1px solid #ccc;
-	  border-radius: 6px;
-	  width: 100%;
-	  box-sizing: border-box;
-	}
+    .form-grid {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 16px 24px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
 
-	textarea {
-	  height: 240px;
-	  resize: vertical;
-	  margin-top: 24px;
-	}
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-	button {
-	  margin-top: 28px;
-	  padding: 14px 24px;
-	  font-size: 17px;
-	  border: none;
-	  background-color: #0077cc;
-	  color: white;
-	  border-radius: 6px;
-	  cursor: pointer;
-	  transition: background-color 0.2s ease;
-	}
+    label {
+      font-weight: 600;
+    }
 
-	button:hover {
-	  background-color: #005fa3;
-	}
+    input, select, textarea {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-	.add-product-button {
-	  background-color: #28a745;
-	  margin-top: 16px;
-	  padding: 12px 20px;
-	  font-size: 15px;
-	}
+    textarea {
+      height: 240px;
+      resize: vertical;
+      margin-top: 24px;
+    }
 
-	.add-product-button:hover {
-	  background-color: #218838;
-	}
+    button {
+      margin-top: 28px;
+      padding: 14px 24px;
+      font-size: 17px;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
 
-	.remove-button {
-	  background-color: #dc3545;
-	  padding: 8px 12px;
-	  font-size: 14px;
-	  margin-left: 12px;
-	}
+    button:hover {
+      background-color: #005fa3;
+    }
 
-	.remove-button:hover {
-	  background-color: #c82333;
-	}
+    .add-product-button {
+      background-color: #28a745;
+      margin-top: 16px;
+      padding: 12px 20px;
+      font-size: 15px;
+    }
 
-	.product-selection {
-	  background-color: #f8f9fa;
-	  border: 1px solid #dee2e6;
-	  border-radius: 8px;
-	  padding: 0;
-	  margin-bottom: 20px;
-	  overflow: hidden;
-	}
+    .add-product-button:hover {
+      background-color: #218838;
+    }
 
-	.product-header {
-	  background-color: #e9ecef;
-	  border-bottom: 2px solid #dee2e6;
-	  padding: 12px 20px;
-	  margin-bottom: 0;
-	  display: grid;
-	  grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
-	  gap: 10px;
-	  align-items: center;
-	}
+    .remove-button {
+      background-color: #dc3545;
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-left: 12px;
+    }
 
-	.product-header div {
-	  font-weight: 600;
-	  font-size: 12px;
-	  text-align: center;
-	  color: #495057;
-	  text-transform: uppercase;
-	  letter-spacing: 0.3px;
-	  line-height: 1.2;
-	  overflow: hidden;
-	  text-overflow: ellipsis;
-	  white-space: nowrap;
-	}
+    .remove-button:hover {
+      background-color: #c82333;
+    }
 
-	.product-header div:first-child {
-	  text-align: center;
-	}
+    .product-selection {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 0;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
 
-	.product-input-row {
-	  padding: 20px;
-	}
+    .product-header {
+      background-color: #e9ecef;
+      border-bottom: 2px solid #dee2e6;
+      padding: 12px 20px;
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
+      gap: 10px;
+      align-items: center;
+    }
 
-	.product-row {
-	  display: grid;
-	  grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
-	  gap: 10px;
-	  align-items: center;
-	  margin-bottom: 16px;
-	}
+    .product-header div {
+      font-weight: 600;
+      font-size: 12px;
+      text-align: center;
+      color: #495057;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-	@media (max-width: 800px) {
-	  .product-row {
-		grid-template-columns: 1fr;
-		gap: 8px;
-	  }
+    .product-header div:first-child {
+      text-align: center;
+    }
 
-	  .product-header {
-		display: none;
-	  }
+    .product-input-row {
+      padding: 20px;
+    }
 
-	  .product-input-row {
-		padding: 16px;
-	  }
-	}
+    .product-row {
+      display: grid;
+      grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
 
-	.added-product {
-	  background-color: #e8f4fd;
-	  border: 1px solid #0077cc;
-	  border-radius: 8px;
-	  padding: 16px;
-	  margin-bottom: 12px;
-	  display: flex;
-	  align-items: center;
-	  justify-content: space-between;
-	  flex-wrap: wrap;
-	  gap: 12px;
-	}
+    @media (max-width: 800px) {
+      .product-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
 
-	.product-info {
-	  display: flex;
-	  align-items: center;
-	  gap: 12px;
-	  flex: 1;
-	}
+      .product-header {
+        display: none;
+      }
 
-	.product-icon {
-	  height: 32px;
-	  width: auto;
-	}
+      .product-input-row {
+        padding: 16px;
+      }
+    }
 
-	.product-details {
-	  font-size: 14px;
-	  color: #666;
-	}
+    .added-product {
+      background-color: #e8f4fd;
+      border: 1px solid #0077cc;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-	#angebotHTML {
-	  border: 1px solid #ccc;
-	  padding: 24px;
-	  margin-top: 32px;
-	  background: #f9f9f9;
-	  border-radius: 6px;
-	}
+    .product-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
 
-	.success-notification {
-	  background-color: #d4edda;
-	  color: #155724;
-	  padding: 12px;
-	  border-radius: 6px;
-	  margin-top: 16px;
-	  display: none;
-	}
+    .product-icon {
+      height: 32px;
+      width: auto;
+    }
 
-	.copy-button {
-	  background-color: #28a745;
-	  margin-left: 10px;
-	  padding: 8px 16px;
-	  font-size: 14px;
-	}
+    .product-details {
+      font-size: 14px;
+      color: #666;
+    }
 
-	.copy-button:hover {
-	  background-color: #218838;
-	}
+    #angebotHTML {
+      border: 1px solid #ccc;
+      padding: 24px;
+      margin-top: 32px;
+      background: #f9f9f9;
+      border-radius: 6px;
+    }
 
-	.no-products {
-	  text-align: center;
-	  color: #666;
-	  font-style: italic;
-	  padding: 20px;
-	}
+    .success-notification {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .copy-button {
+      background-color: #28a745;
+      margin-left: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .copy-button:hover {
+      background-color: #218838;
+    }
+
+    .no-products {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    .debug-info {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .debug-info h4 {
+      margin-top: 0;
+      color: #495057;
+    }
+
+    .debug-info pre {
+      background: #ffffff;
+      padding: 8px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
   </style>
 </head>
 <body>
+  <!-- Tracking Status Anzeige -->
+  <div id="trackingStatus" class="tracking-status">
+    <strong>Tracking Status:</strong> <span id="trackingStatusText">Wird geprüft...</span>
+  </div>
+
   <h2 style="margin-bottom: 25px;">🛍️ Produkte & Fütterung konfigurieren</h2>
 
   <section class="form-section">
-	<div class="form-grid">
-	  <label for="kundenname">👤 Kundenname:</label>
-	  <input type="text" id="kundenname" placeholder="z. B. Max Mustermann" />
-	</div>
-	<div class="form-grid">
-	  <label for="pferdename">🐴 Name des Pferdes:</label>
-	  <input type="text" id="pferdename" placeholder="z. B. Black Beauty" />
-	</div>
-	<div class="form-grid">
-	  <label for="beraterin">🧑‍💼 Beraterin:</label>
-	  <select id="beraterin">
-		<option value="">– Bitte wählen –</option>
-		<option value="Sofie">Sofie</option>
-		<option value="Merle">Merle</option>
-		<option value="Steffi">Steffi</option>
-		<option value="Katrin">Katrin</option>
-		<option value="Nadin">Nadin</option>
-		<option value="Bea">Bea</option>
-		<option value="Tatjana">Tatjana</option>
-	  </select>
-	</div>
+    <div class="form-grid">
+      <label for="kundenname">👤 Kundenname:</label>
+      <input type="text" id="kundenname" placeholder="z. B. Max Mustermann" />
+    </div>
+    <div class="form-grid">
+      <label for="pferdename">🐴 Name des Pferdes:</label>
+      <input type="text" id="pferdename" placeholder="z. B. Black Beauty" />
+    </div>
+    <div class="form-grid">
+      <label for="beraterin">🧑‍💼 Beraterin:</label>
+      <select id="beraterin">
+        <option value="">– Bitte wählen –</option>
+        <option value="Sofie">Sofie</option>
+        <option value="Merle">Merle</option>
+        <option value="Steffi">Steffi</option>
+        <option value="Katrin">Katrin</option>
+        <option value="Nadin">Nadin</option>
+        <option value="Bea">Bea</option>
+        <option value="Tatjana">Tatjana</option>
+      </select>
+    </div>
 
-	<div class="form-grid">
-	  <label for="kontaktkanal">☎️ Kontaktkanal:</label>
-	  <select id="kontaktkanal">
-		<option value="">– Bitte wählen –</option>
-		<option value="telefon">Telefon</option>
-		<option value="chat">Chat</option>
-		<option value="e-mail">E-Mail</option>
-	  </select>
-	</div>
+    <div class="form-grid">
+      <label for="kontaktkanal">☎️ Kontaktkanal:</label>
+      <select id="kontaktkanal">
+        <option value="">– Bitte wählen –</option>
+        <option value="telefon">Telefon</option>
+        <option value="chat">Chat</option>
+        <option value="e-mail">E-Mail</option>
+      </select>
+    </div>
 
-	<div class="form-grid">
-	  <label for="outputMode">📝 Ausgabeformat:</label>
-	  <select id="outputMode">
-		<option value="text">Text (für Chat / WhatsApp)</option>
-		<option value="html">HTML (für E-Mail)</option>
-	  </select>
-	</div>
-	<div class="form-grid">
-	  <label for="anrede">🙋‍♂️ Anrede:</label>
-	  <select id="anrede">
-		<option value="du">Du</option>
-		<option value="sie">Sie</option>
-	  </select>
-	</div>
+    <div class="form-grid">
+      <label for="outputMode">📝 Ausgabeformat:</label>
+      <select id="outputMode">
+        <option value="text">Text (für Chat / WhatsApp)</option>
+        <option value="html">HTML (für E-Mail)</option>
+      </select>
+    </div>
+    <div class="form-grid">
+      <label for="anrede">🙋‍♂️ Anrede:</label>
+      <select id="anrede">
+        <option value="du">Du</option>
+        <option value="sie">Sie</option>
+      </select>
+    </div>
   </section>
 
   <!-- Produkt-Auswahl Sektion -->
   <section class="form-section">
-	<h3 style="margin-bottom: 25px;">🛒 Produkte hinzufügen</h3>
+    <h3 style="margin-bottom: 25px;">🛒 Produkte hinzufügen</h3>
 
-	<div class="product-selection">
-	  <div class="product-header">
-		<div>Produkt</div>
-		<div>Bestell-<br>menge</div>
-		<div>Kurzzeitfütterung</div>
-		<div>Fütter-<br>menge</div>
-		<div>Dauerfütterung</div>
-		<div>Fütter-<br>menge</div>
-		<div></div>
-	  </div>
+    <div class="product-selection">
+      <div class="product-header">
+        <div>Produkt</div>
+        <div>Bestell-<br>menge</div>
+        <div>Kurzzeitfütterung</div>
+        <div>Fütter-<br>menge</div>
+        <div>Dauerfütterung</div>
+        <div>Fütter-<br>menge</div>
+        <div></div>
+      </div>
 
-	  <div class="product-input-row">
-		<div class="product-row">
-		  <select id="produktSelect">
-			<option value="">– Produkt wählen –</option>
-		  </select>
-		  <input type="number" id="mengeInput" placeholder="Menge" min="0" value="1">
-		  <select id="dauerSelect">
-			<option value="">Wochen...</option>
-			<option value="eine Woche">eine Woche</option>
-			<option value="zwei Wochen">zwei Wochen</option>
-			<option value="drei Wochen">drei Wochen</option>
-			<option value="vier Wochen">vier Wochen</option>
-			<option value="fünf Wochen">fünf Wochen</option>
-			<option value="sechs Wochen">sechs Wochen</option>
-		  </select>
-		  <input type="text" id="startInput" placeholder="Messbecher">
-		  <select id="abSelect">
-			<option value="">Woche...</option>
-			<option value="ab der zweiten Woche">ab der zweiten Woche</option>
-			<option value="ab der dritten Woche">ab der dritten Woche</option>
-			<option value="ab der vierten Woche">ab der vierten Woche</option>
-			<option value="ab der fünften Woche">ab der fünften Woche</option>
-			<option value="ab der sechsten Woche">ab der sechsten Woche</option>
-			<option value="ab der siebten Woche">ab der siebten Woche</option>
-		  </select>
-		  <input type="text" id="nachInput" placeholder="Messbecher">
-		  <button type="button" id="addProductButton" class="add-product-button">➕ Hinzufügen</button>
-		</div>
-	  </div>
-	</div>
+      <div class="product-input-row">
+        <div class="product-row">
+          <select id="produktSelect">
+            <option value="">– Produkt wählen –</option>
+          </select>
+          <input type="number" id="mengeInput" placeholder="Menge" min="0" value="1">
+          <select id="dauerSelect">
+            <option value="">Wochen...</option>
+            <option value="eine Woche">eine Woche</option>
+            <option value="zwei Wochen">zwei Wochen</option>
+            <option value="drei Wochen">drei Wochen</option>
+            <option value="vier Wochen">vier Wochen</option>
+            <option value="fünf Wochen">fünf Wochen</option>
+            <option value="sechs Wochen">sechs Wochen</option>
+          </select>
+          <input type="text" id="startInput" placeholder="Messbecher">
+          <select id="abSelect">
+            <option value="">Woche...</option>
+            <option value="ab der zweiten Woche">ab der zweiten Woche</option>
+            <option value="ab der dritten Woche">ab der dritten Woche</option>
+            <option value="ab der vierten Woche">ab der vierten Woche</option>
+            <option value="ab der fünften Woche">ab der fünften Woche</option>
+            <option value="ab der sechsten Woche">ab der sechsten Woche</option>
+            <option value="ab der siebten Woche">ab der siebten Woche</option>
+          </select>
+          <input type="text" id="nachInput" placeholder="Messbecher">
+          <button type="button" id="addProductButton" class="add-product-button">➕ Hinzufügen</button>
+        </div>
+      </div>
+    </div>
 
-	<!-- Hinzugefügte Produkte -->
-	<div id="addedProductsList">
-	  <div class="no-products">Noch keine Produkte hinzugefügt</div>
-	</div>
+    <!-- Hinzugefügte Produkte -->
+    <div id="addedProductsList">
+      <div class="no-products">Noch keine Produkte hinzugefügt</div>
+    </div>
   </section>
 
   <button type="button" id="generateButton">🚀 Angebotstext generieren</button>
   <button type="button" id="copyButton" class="copy-button" style="display:none;">📋 Text kopieren</button>
 
   <div class="success-notification" id="successNotification">
-	✅ Angebot erfolgreich erstellt!
+    ✅ Angebot erfolgreich erstellt!
   </div>
 
   <h3 style="margin-top: 25px;">📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
   <div id="angebotHTML" style="display:none;"></div>
+
+  <!-- Debug-Informationen -->
+  <div class="debug-info">
+    <h4>📊 Tracking Debug Info</h4>
+    <div><strong>Session ID:</strong> <span id="debugSessionId">-</span></div>
+    <div><strong>Tracking Status:</strong> <span id="debugTrackingStatus">-</span></div>
+    <div><strong>Events heute:</strong> <span id="debugEventCount">0</span></div>
+    <div><strong>Letzte Events:</strong></div>
+    <pre id="debugEvents">Noch keine Events</pre>
+  </div>
 
   <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -392,6 +455,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let addedProducts = [];
   let sessionId = getOrCreateSessionId();
+  let trackingWorking = false;
+  let trackingMethods = {
+    googleAnalytics: false,
+    localStorage: false,
+    serverside: false
+  };
 
   // Session ID Management
   function getOrCreateSessionId() {
@@ -403,6 +472,257 @@ document.addEventListener("DOMContentLoaded", function () {
     return sessionId;
   }
 
+  function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  // **ROBUSTES TRACKING SYSTEM**
+  // Mehrere Tracking-Methoden als Fallback
+  
+  // 1. Google Analytics Tracking (Original)
+  function trackGoogleAnalytics(eventName, eventData) {
+    try {
+      if (typeof gtag !== 'undefined') {
+        gtag('event', eventName, {
+          event_category: 'Angebotsgenerator',
+          event_label: eventData.label || eventName,
+          beraterin: eventData.beraterin || '',
+          kontaktkanal: eventData.kontaktkanal || '',
+          session_id: sessionId,
+          value: eventData.value || 0,
+          currency: 'EUR',
+          ...eventData
+        });
+        trackingMethods.googleAnalytics = true;
+        return true;
+      }
+    } catch (error) {
+      console.warn('Google Analytics tracking failed:', error);
+    }
+    return false;
+  }
+
+  // 2. Lokales Tracking (SessionStorage + IndexedDB)
+  function trackLocal(eventName, eventData) {
+    try {
+      const event = {
+        event: eventName,
+        timestamp: new Date().toISOString(),
+        sessionId: sessionId,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        beraterin: eventData.beraterin || '',
+        kontaktkanal: eventData.kontaktkanal || '',
+        ...eventData
+      };
+
+      // SessionStorage
+      const events = JSON.parse(sessionStorage.getItem('kristallkraft_events') || '[]');
+      events.push(event);
+      sessionStorage.setItem('kristallkraft_events', JSON.stringify(events));
+
+      // LocalStorage (persistenter)
+      const localEvents = JSON.parse(localStorage.getItem('kristallkraft_events') || '[]');
+      localEvents.push(event);
+      // Nur die letzten 1000 Events behalten
+      if (localEvents.length > 1000) {
+        localEvents.splice(0, localEvents.length - 1000);
+      }
+      localStorage.setItem('kristallkraft_events', JSON.stringify(localEvents));
+
+      trackingMethods.localStorage = true;
+      return true;
+    } catch (error) {
+      console.warn('Local tracking failed:', error);
+    }
+    return false;
+  }
+
+  // 3. Server-seitiges Tracking (GET-Request basiert)
+  function trackServer(eventName, eventData) {
+    try {
+      // Verwende einen GET-Request als Pixel-Tracking
+      // Das ist weniger blockierbar als POST-Requests
+      const trackingUrl = new URL(`https://${SHOP_DOMAIN}/api/track`);
+      
+      const params = {
+        event: eventName,
+        timestamp: new Date().toISOString(),
+        sessionId: sessionId,
+        beraterin: eventData.beraterin || '',
+        kontaktkanal: eventData.kontaktkanal || '',
+        produktAnzahl: eventData.produktAnzahl || 0,
+        ...eventData
+      };
+
+      Object.keys(params).forEach(key => {
+        if (params[key] !== '' && params[key] !== null && params[key] !== undefined) {
+          trackingUrl.searchParams.append(key, params[key]);
+        }
+      });
+
+      // Pixel-Tracking (sehr schwer blockierbar)
+      const img = new Image();
+      img.onload = () => {
+        trackingMethods.serverside = true;
+        console.log('Server tracking successful');
+      };
+      img.onerror = () => {
+        console.warn('Server tracking failed');
+      };
+      img.src = trackingUrl.toString();
+
+      return true;
+    } catch (error) {
+      console.warn('Server tracking failed:', error);
+    }
+    return false;
+  }
+
+  // 4. Beacon API (für wichtige Events)
+  function trackBeacon(eventName, eventData) {
+    try {
+      if (navigator.sendBeacon) {
+        const data = JSON.stringify({
+          event: eventName,
+          timestamp: new Date().toISOString(),
+          sessionId: sessionId,
+          ...eventData
+        });
+        
+        const success = navigator.sendBeacon(
+          `https://${SHOP_DOMAIN}/api/beacon-track`,
+          data
+        );
+        
+        if (success) {
+          console.log('Beacon tracking successful');
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn('Beacon tracking failed:', error);
+    }
+    return false;
+  }
+
+  // **HAUPTTRACKING-FUNKTION**
+  function trackEvent(eventName, eventData = {}) {
+    const results = {
+      googleAnalytics: false,
+      local: false,
+      server: false,
+      beacon: false
+    };
+
+    // Alle Tracking-Methoden versuchen
+    results.googleAnalytics = trackGoogleAnalytics(eventName, eventData);
+    results.local = trackLocal(eventName, eventData);
+    results.server = trackServer(eventName, eventData);
+    
+    // Beacon nur für wichtige Events
+    if (['angebot_generated', 'page_loaded'].includes(eventName)) {
+      results.beacon = trackBeacon(eventName, eventData);
+    }
+
+    // Mindestens eine Methode muss funktionieren
+    trackingWorking = results.googleAnalytics || results.local || results.server || results.beacon;
+
+    console.log(`📊 Event "${eventName}" tracked:`, results);
+    updateTrackingStatus();
+    updateDebugInfo();
+
+    return results;
+  }
+
+  // **TRACKING STATUS ÜBERWACHUNG**
+  function updateTrackingStatus() {
+    const statusElement = document.getElementById('trackingStatus');
+    const statusText = document.getElementById('trackingStatusText');
+    
+    if (trackingMethods.googleAnalytics) {
+      statusElement.className = 'tracking-status working';
+      statusText.textContent = 'Google Analytics funktioniert';
+    } else if (trackingMethods.localStorage) {
+      statusElement.className = 'tracking-status working';
+      statusText.textContent = 'Lokales Tracking aktiv (GA blockiert)';
+    } else {
+      statusElement.className = 'tracking-status blocked';
+      statusText.textContent = 'Tracking blockiert - Lokale Speicherung aktiv';
+    }
+  }
+
+  // **DEBUG-INFORMATIONEN**
+  function updateDebugInfo() {
+    document.getElementById('debugSessionId').textContent = sessionId;
+    
+    const trackingStatus = Object.keys(trackingMethods)
+      .filter(key => trackingMethods[key])
+      .join(', ') || 'Nur lokal';
+    document.getElementById('debugTrackingStatus').textContent = trackingStatus;
+
+    const events = JSON.parse(sessionStorage.getItem('kristallkraft_events') || '[]');
+    document.getElementById('debugEventCount').textContent = events.length;
+    
+    // Die letzten 3 Events anzeigen
+    const recentEvents = events.slice(-3).map(e => ({
+      event: e.event,
+      timestamp: e.timestamp.split('T')[1]?.split('.')[0],
+      beraterin: e.beraterin,
+      kontaktkanal: e.kontaktkanal
+    }));
+    
+    document.getElementById('debugEvents').textContent = JSON.stringify(recentEvents, null, 2);
+  }
+
+  // **BACKUP-SYSTEM FÜR MITARBEITER-STATISTIKEN**
+  function getDailyStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const events = JSON.parse(localStorage.getItem('kristallkraft_events') || '[]');
+    
+    const todaysEvents = events.filter(e => e.timestamp.startsWith(today));
+    const stats = {};
+    
+    todaysEvents.forEach(event => {
+      const berater = event.beraterin || 'Unbekannt';
+      if (!stats[berater]) {
+        stats[berater] = {
+          angebote: 0,
+          produkte: 0,
+          kontakte: []
+        };
+      }
+      
+      if (event.event === 'angebot_generated') {
+        stats[berater].angebote++;
+        stats[berater].produkte += event.produktAnzahl || 0;
+        if (event.kontaktkanal && !stats[berater].kontakte.includes(event.kontaktkanal)) {
+          stats[berater].kontakte.push(event.kontaktkanal);
+        }
+      }
+    });
+    
+    return stats;
+  }
+
+  // **EXPORTFUNKTION FÜR STATISTIKEN**
+  function exportStats() {
+    const stats = getDailyStats();
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      "Berater,Angebote,Produkte,Kontaktkanäle\n" +
+      Object.entries(stats).map(([berater, data]) => 
+        `${berater},${data.angebote},${data.produkte},"${data.kontakte.join(';')}"`
+      ).join('\n');
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `kristallkraft-stats-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   // Dropdown mit Produkten füllen
   const produktSelect = document.getElementById("produktSelect");
   produkte.forEach(prod => {
@@ -412,119 +732,8 @@ document.addEventListener("DOMContentLoaded", function () {
     produktSelect.appendChild(option);
   });
 
-  // Erweiterte Tracking-Funktionen
-  function generateUniqueId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-
-  function saveTrackingData(data) {
-    const trackingData = JSON.parse(sessionStorage.getItem('kristallkraft_tracking') || '[]');
-    trackingData.push({
-      ...data,
-      timestamp: new Date().toISOString(),
-      linkId: generateUniqueId(),
-      sessionId: sessionId
-    });
-    sessionStorage.setItem('kristallkraft_tracking', JSON.stringify(trackingData));
-  }
-
-  // Umfassendes Event-Tracking
-  function trackEvent(eventName, eventData = {}) {
-    const trackingEvent = {
-      event: eventName,
-      timestamp: new Date().toISOString(),
-      sessionId: sessionId,
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      ...eventData
-    };
-
-    // Console Log für Debugging
-    console.log('📊 Tracking Event:', trackingEvent);
-
-    // SessionStorage für lokale Speicherung
-    const events = JSON.parse(sessionStorage.getItem('kristallkraft_events') || '[]');
-    events.push(trackingEvent);
-    sessionStorage.setItem('kristallkraft_events', JSON.stringify(events));
-
-    // Google Analytics (GA4) - Enhanced Events
-    if (typeof gtag !== 'undefined') {
-      // Basis-Event für GA4
-      gtag('event', eventName, {
-        event_category: 'Angebotsgenerator',
-        event_label: eventData.label || eventName,
-        beraterin: eventData.beraterin || '',
-        kontaktkanal: eventData.kontaktkanal || '',
-        session_id: sessionId,
-        value: eventData.value || 0,
-        currency: 'EUR',
-        ...eventData
-      });
-
-      // Spezielle GA4 E-Commerce Events
-      if (eventName === 'angebot_generated') {
-        gtag('event', 'generate_lead', {
-          currency: 'EUR',
-          value: eventData.produktWert || 0,
-          beraterin: eventData.beraterin,
-          kontaktkanal: eventData.kontaktkanal,
-          items: eventData.produkte?.map((prod, index) => ({
-            item_id: prod.id || `item_${index}`,
-            item_name: prod.name,
-            category: 'Kristallkraft',
-            quantity: prod.menge || 1,
-            price: 50 // Durchschnittspreis - kann angepasst werden
-          })) || []
-        });
-      }
-
-      if (eventName === 'product_added') {
-        gtag('event', 'add_to_cart', {
-          currency: 'EUR',
-          value: 50, // Durchschnittspreis
-          items: [{
-            item_id: eventData.produktId,
-            item_name: eventData.produktName,
-            category: 'Kristallkraft',
-            quantity: eventData.menge || 1,
-            price: 50
-          }]
-        });
-      }
-    }
-
-    // Facebook Pixel - falls vorhanden
-    if (typeof fbq !== 'undefined') {
-      fbq('track', 'CustomEvent', {
-        event_name: eventName,
-        session_id: sessionId,
-        ...eventData
-      });
-    }
-
-    // Matomo/Piwik - falls vorhanden
-    if (typeof _paq !== 'undefined') {
-      _paq.push(['trackEvent', 'Angebotsgenerator', eventName, eventData.label || '', eventData.value || 0]);
-    }
-
-    // Server-seitiges Tracking (optional)
-    // sendToServer(trackingEvent);
-  }
-
-  // Optional: Server-seitiges Tracking
-  function sendToServer(trackingEvent) {
-    // Nur aktivieren wenn Server-Endpoint vorhanden
-    // fetch('/api/tracking', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(trackingEvent)
-    // }).catch(error => {
-    //   console.error('Tracking error:', error);
-    // });
-  }
-
+  // **EVENT HANDLERS MIT ROBUSTEM TRACKING**
+  
   // Berater speichern
   const savedBeraterin = sessionStorage.getItem("beraterin");
   if (savedBeraterin) {
@@ -536,29 +745,23 @@ document.addEventListener("DOMContentLoaded", function () {
     trackEvent('berater_selected', { beraterin: e.target.value });
   });
 
-  // Kontaktkanal Tracking
   document.getElementById("kontaktkanal").addEventListener("change", (e) => {
     trackEvent('kontaktkanal_selected', { kontaktkanal: e.target.value });
   });
 
-  // Output Mode Tracking + Copy Button Visibility
   document.getElementById("outputMode").addEventListener("change", (e) => {
     trackEvent('output_mode_selected', { outputMode: e.target.value });
     
-    // Copy Button Sichtbarkeit basierend auf Output Mode
     const copyButton = document.getElementById("copyButton");
     if (e.target.value === "text") {
-      // Bei Text-Modus: Button anzeigen falls bereits ein Angebot generiert wurde
       if (document.getElementById("angebotText").value !== "Noch kein Angebot erstellt.") {
         copyButton.style.display = "inline-block";
       }
     } else {
-      // Bei HTML-Modus: Button verstecken
       copyButton.style.display = "none";
     }
   });
 
-  // Copy Button Funktionalität
   document.getElementById("copyButton").addEventListener("click", () => {
     const mode = document.getElementById("outputMode").value;
     const textArea = document.getElementById("angebotText");
@@ -568,7 +771,6 @@ document.addEventListener("DOMContentLoaded", function () {
       document.execCommand('copy');
     }
 
-    // Tracking für Copy-Aktion
     trackEvent('angebot_copied', {
       outputMode: mode,
       produktAnzahl: addedProducts.length
@@ -584,7 +786,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 2000);
   });
 
-  // Produkt hinzufügen mit Tracking
   document.getElementById("addProductButton").addEventListener("click", () => {
     const produktId = document.getElementById("produktSelect").value;
     const menge = parseInt(document.getElementById("mengeInput").value);
@@ -606,19 +807,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const produkt = produkte.find(p => p.id === produktId);
     if (!produkt) return;
 
-    // Tracking für Produkt hinzufügen
     trackEvent('product_added', {
       produktName: produkt.name,
       produktId: produktId,
       menge: menge,
       dauer: dauer,
-      totalProdukte: addedProducts.length + 1
+      totalProdukte: addedProducts.length + 1,
+      beraterin: document.getElementById("beraterin").value,
+      kontaktkanal: document.getElementById("kontaktkanal").value
     });
 
-    // Prüfen ob Produkt bereits hinzugefügt wurde
     const existingIndex = addedProducts.findIndex(p => p.id === produktId);
     if (existingIndex !== -1) {
-      // Produkt aktualisieren
       addedProducts[existingIndex] = {
         id: produktId,
         name: produkt.name,
@@ -629,7 +829,6 @@ document.addEventListener("DOMContentLoaded", function () {
         nach
       };
     } else {
-      // Neues Produkt hinzufügen
       addedProducts.push({
         id: produktId,
         name: produkt.name,
@@ -685,22 +884,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }).join("");
   }
 
-  // Globale Funktion zum Entfernen von Produkten mit Tracking
   window.removeProduct = function(index) {
     const removedProduct = addedProducts[index];
     
-    // Tracking für Produkt entfernen
     trackEvent('product_removed', {
       produktName: removedProduct.name,
       produktId: removedProduct.id,
-      totalProdukte: addedProducts.length - 1
+      totalProdukte: addedProducts.length - 1,
+      beraterin: document.getElementById("beraterin").value,
+      kontaktkanal: document.getElementById("kontaktkanal").value
     });
 
     addedProducts.splice(index, 1);
     updateAddedProductsList();
   };
 
-  // Hauptfunktion zum Generieren des Angebots mit erweitertem Tracking
+  // **HAUPTFUNKTION - ANGEBOT GENERIEREN**
   document.getElementById("generateButton").addEventListener("click", () => {
     const kunde = document.getElementById("kundenname").value.trim();
     const pferd = document.getElementById("pferdename")?.value.trim() || "";
@@ -716,18 +915,16 @@ document.addEventListener("DOMContentLoaded", function () {
       outputHTML.style.display = "none";
       outputText.style.display = "block";
       
-      // Tracking für Fehler
       trackEvent('generation_error', {
         error: 'no_products',
         kunde: kunde,
-        berater: berater,
+        beraterin: berater,
         kontaktkanal: kanal
       });
       
       return;
     }
 
-    // Tracking-Parameter erstellen
     const trackingParams = new URLSearchParams();
     trackingParams.set('utm_source', 'servicelink');
     if (kanal) trackingParams.set('utm_medium', kanal);
@@ -751,12 +948,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
       items.push(`${prod.id}:${prod.menge}`);
       textProdukte.push(`${prod.name}${zusatz}`);
-      produktWert += prod.menge; // Vereinfachte Wertberechnung
+      produktWert += prod.menge;
     });
 
     const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${trackingParams.toString()}`;
 
-    // Haupttracking-Event für Angebotsgenerierung
+    // **KRITISCHES TRACKING - ANGEBOT GENERIERT**
     trackEvent('angebot_generated', {
       kunde: kunde,
       pferd: pferd,
@@ -769,20 +966,6 @@ document.addEventListener("DOMContentLoaded", function () {
       produktWert: produktWert,
       produkte: addedProducts.map(p => ({ name: p.name, menge: p.menge })),
       cartUrl: cartUrl
-    });
-
-    // Speichern der Tracking-Daten
-    saveTrackingData({
-      kunde,
-      pferd,
-      beraterin: berater,
-      kontaktkanal: kanal,
-      linkId,
-      sessionId,
-      produkte: textProdukte,
-      cartUrl,
-      outputMode: mode,
-      anrede: anrede
     });
 
     let begruessung = `Hallo ${kunde},\n\n`;
@@ -806,7 +989,6 @@ document.addEventListener("DOMContentLoaded", function () {
       outputText.style.display = "block";
       outputHTML.style.display = "none";
       outputText.value = bodyText;
-      // Copy Button nur bei Text-Modus anzeigen
       document.getElementById("copyButton").style.display = "inline-block";
     } else {
       outputText.style.display = "none";
@@ -830,21 +1012,32 @@ document.addEventListener("DOMContentLoaded", function () {
           : `Sollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`
         }</p>
       `;
-      // Copy Button bei HTML-Modus verstecken
       document.getElementById("copyButton").style.display = "none";
     }
+    
     document.getElementById("successNotification").style.display = "block";
     setTimeout(() => {
       document.getElementById("successNotification").style.display = "none";
     }, 5000);
   });
 
-  // Seiten-Load Tracking
+  // **INITIAL SETUP**
   trackEvent('page_loaded', {
     userAgent: navigator.userAgent,
     referrer: document.referrer,
     timestamp: new Date().toISOString()
   });
+
+  // Test Google Analytics Verfügbarkeit
+  setTimeout(() => {
+    if (typeof gtag === 'undefined') {
+      console.warn('Google Analytics nicht verfügbar - verwende Fallback-Tracking');
+      trackingMethods.googleAnalytics = false;
+    } else {
+      trackingMethods.googleAnalytics = true;
+    }
+    updateTrackingStatus();
+  }, 1000);
 
   // Seiten-Verlassen Tracking
   window.addEventListener('beforeunload', () => {
@@ -853,76 +1046,105 @@ document.addEventListener("DOMContentLoaded", function () {
       produkteHinzugefuegt: addedProducts.length
     });
   });
+
+  // **ZUSÄTZLICHE UTILITIES**
+  
+  // Keyboard Shortcut für Export (Strg+E)
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'e') {
+      e.preventDefault();
+      exportStats();
+    }
+  });
+
+  // Periodische Debug-Updates
+  setInterval(updateDebugInfo, 5000);
+
+  // **GLOBALE FUNKTIONEN FÜR DEBUGGING**
+  window.kristallkraftDebug = {
+    getStats: getDailyStats,
+    exportStats: exportStats,
+    getEvents: () => JSON.parse(localStorage.getItem('kristallkraft_events') || '[]'),
+    clearEvents: () => {
+      localStorage.removeItem('kristallkraft_events');
+      sessionStorage.removeItem('kristallkraft_events');
+      console.log('Events cleared');
+    },
+    forceTrack: (eventName, data) => trackEvent(eventName, data)
+  };
+
+  console.log('🎯 Kristallkraft Tracking aktiv. Debug-Funktionen verfügbar über window.kristallkraftDebug');
 });
 </script>
+
+  <!-- Confetti Animation -->
   <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
   <script>
-	const canvas = document.getElementById("confettiCanvas");
-	const ctx = canvas.getContext("2d");
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
   
-	function resizeCanvas() {
-	  canvas.width = window.innerWidth;
-	  canvas.height = window.innerHeight;
-	}
-	resizeCanvas();
-	window.addEventListener('resize', resizeCanvas);
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
   
-	function launchConfettiFromButton(button) {
-	  const rect = button.getBoundingClientRect();
-	  const originX = rect.left + rect.width / 2;
-	  const originY = rect.top + rect.height / 2;
+    function launchConfettiFromButton(button) {
+      const rect = button.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
   
-	  const particles = [];
-	  const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+      const particles = [];
+      const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
   
-	  for (let i = 0; i < 80; i++) {
-		const angle = Math.random() * 2 * Math.PI;
-		const speed = Math.random() * 5 + 2;
-		particles.push({
-		  x: originX,
-		  y: originY,
-		  dx: Math.cos(angle) * speed,
-		  dy: Math.sin(angle) * speed,
-		  radius: Math.random() * 4 + 2,
-		  color: colors[Math.floor(Math.random() * colors.length)],
-		  life: 60 // frames
-		});
-	  }
+      for (let i = 0; i < 80; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 5 + 2;
+        particles.push({
+          x: originX,
+          y: originY,
+          dx: Math.cos(angle) * speed,
+          dy: Math.sin(angle) * speed,
+          radius: Math.random() * 4 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 60
+        });
+      }
   
-	  function animate() {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		particles.forEach(p => {
-		  ctx.beginPath();
-		  ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
-		  ctx.fillStyle = p.color;
-		  ctx.fill();
-		  p.x += p.dx;
-		  p.y += p.dy;
-		  p.dy += 0.2; // gravity
-		  p.life--;
-		});
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          p.x += p.dx;
+          p.y += p.dy;
+          p.dy += 0.2;
+          p.life--;
+        });
   
-		// Remove dead particles
-		for (let i = particles.length - 1; i >= 0; i--) {
-		  if (particles[i].life <= 0) {
-			particles.splice(i, 1);
-		  }
-		}
+        for (let i = particles.length - 1; i >= 0; i--) {
+          if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+          }
+        }
   
-		if (particles.length > 0) {
-		  requestAnimationFrame(animate);
-		} else {
-		  ctx.clearRect(0, 0, canvas.width, canvas.height);
-		}
-	  }
+        if (particles.length > 0) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
   
-	  animate();
-	}
+      animate();
+    }
   
-	document.getElementById("generateButton").addEventListener("click", (e) => {
-	  const button = e.currentTarget;
-	  launchConfettiFromButton(button);
-	});
+    document.getElementById("generateButton").addEventListener("click", (e) => {
+      const button = e.currentTarget;
+      launchConfettiFromButton(button);
+    });
   </script>
 </body>
 </html>
