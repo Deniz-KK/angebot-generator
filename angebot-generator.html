@@ -290,6 +290,87 @@
       overflow-x: auto;
       margin: 8px 0;
     }
+
+    .stats-panel {
+      max-width: 1200px;
+      margin-top: 24px;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .stats-table th {
+      background: #e9ecef;
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid #dee2e6;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #495057;
+    }
+
+    .stats-table th.num {
+      text-align: center;
+    }
+
+    .stats-table td {
+      padding: 10px 14px;
+      border: 1px solid #dee2e6;
+    }
+
+    .stats-table td.num {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .stats-table tbody tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .stats-table tfoot tr {
+      background: #e9ecef;
+      font-weight: 700;
+    }
+
+    .stats-empty {
+      color: #666;
+      font-style: italic;
+      padding: 20px 0;
+    }
+
+    .stats-meta {
+      color: #999;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .stats-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stats-buttons button {
+      margin-top: 0;
+      font-size: 14px;
+      padding: 10px 18px;
+    }
+
+    #toggleStatsButton {
+      background-color: #6c757d;
+      margin-top: 16px;
+      padding: 10px 18px;
+      font-size: 14px;
+    }
+
+    #toggleStatsButton:hover {
+      background-color: #5a6268;
+    }
   </style>
 </head>
 <body>
@@ -411,6 +492,19 @@
   <h3 style="margin-top: 25px;">📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
   <div id="angebotHTML" style="display:none;"></div>
+
+  <!-- Statistiken Button -->
+  <button type="button" id="toggleStatsButton">📊 Tagesstatistik anzeigen</button>
+
+  <!-- Statistiken Panel -->
+  <div class="form-section stats-panel" id="statisticsPanel" style="display:none;">
+    <h3 style="margin-top:0;">📊 Tagesstatistik</h3>
+    <div id="statsContent"></div>
+    <div class="stats-buttons">
+      <button type="button" id="refreshStatsButton">🔄 Aktualisieren</button>
+      <button type="button" id="exportStatsButton" style="background-color:#28a745;">📥 CSV exportieren</button>
+    </div>
+  </div>
 
   <!-- Debug-Informationen -->
   <div class="debug-info">
@@ -722,6 +816,78 @@ document.addEventListener("DOMContentLoaded", function () {
     link.click();
     document.body.removeChild(link);
   }
+
+  // **STATISTIKEN ANZEIGEN**
+  function renderStats() {
+    const stats = getDailyStats();
+    const today = new Date().toLocaleDateString('de-DE');
+    const content = document.getElementById('statsContent');
+
+    const entries = Object.entries(stats);
+
+    if (entries.length === 0) {
+      content.innerHTML = `<p class="stats-empty">Noch keine Daten für heute (${today}) vorhanden.</p>`;
+      return;
+    }
+
+    let totalAngebote = 0;
+    let totalProdukte = 0;
+
+    const rows = entries.map(([berater, data]) => {
+      totalAngebote += data.angebote;
+      totalProdukte += data.produkte;
+      const kanaele = data.kontakte.length > 0 ? data.kontakte.join(', ') : '–';
+      return `
+        <tr>
+          <td>${berater}</td>
+          <td class="num">${data.angebote}</td>
+          <td class="num">${data.produkte}</td>
+          <td>${kanaele}</td>
+        </tr>
+      `;
+    }).join('');
+
+    content.innerHTML = `
+      <p style="color:#666;font-size:14px;margin-bottom:12px;">Datum: <strong>${today}</strong></p>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Beraterin</th>
+            <th class="num">Angebote</th>
+            <th class="num">Produkte</th>
+            <th>Kontaktkanäle</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr>
+            <td>Gesamt</td>
+            <td class="num">${totalAngebote}</td>
+            <td class="num">${totalProdukte}</td>
+            <td>–</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p class="stats-meta">Letzte Aktualisierung: ${new Date().toLocaleTimeString('de-DE')}</p>
+    `;
+  }
+
+  // Toggle Statistiken Panel
+  document.getElementById('toggleStatsButton').addEventListener('click', () => {
+    const panel = document.getElementById('statisticsPanel');
+    const btn = document.getElementById('toggleStatsButton');
+    if (panel.style.display === 'none') {
+      panel.style.display = 'block';
+      btn.textContent = '📊 Tagesstatistik ausblenden';
+      renderStats();
+    } else {
+      panel.style.display = 'none';
+      btn.textContent = '📊 Tagesstatistik anzeigen';
+    }
+  });
+
+  document.getElementById('refreshStatsButton').addEventListener('click', renderStats);
+  document.getElementById('exportStatsButton').addEventListener('click', exportStats);
 
   // Dropdown mit Produkten füllen
   const produktSelect = document.getElementById("produktSelect");
