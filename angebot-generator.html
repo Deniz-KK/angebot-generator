@@ -925,15 +925,14 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const trackingParams = new URLSearchParams();
-    trackingParams.set('utm_source', 'servicelink');
-    if (kanal) trackingParams.set('utm_medium', kanal);
-    if (berater) trackingParams.set('utm_content', berater);
-
     const linkId = generateUniqueId();
-    trackingParams.set('link_id', linkId);
-    trackingParams.set('session_id', sessionId);
-    trackingParams.set('created', Date.now());
+
+    // Direkter Warenkorb-Link (Ziel nach der Tracking-Weiche)
+    const direktCartParams = new URLSearchParams();
+    direktCartParams.set('utm_source', 'servicelink');
+    if (kanal) direktCartParams.set('utm_medium', kanal);
+    if (berater) direktCartParams.set('utm_content', berater);
+    direktCartParams.set('link_id', linkId);
 
     let items = [];
     let textProdukte = [];
@@ -951,7 +950,17 @@ document.addEventListener("DOMContentLoaded", function () {
       produktWert += prod.menge;
     });
 
-    const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${trackingParams.toString()}`;
+    const direktCartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${direktCartParams.toString()}`;
+
+    // Redirect-Link: führt durch Shopify-Tracking-Weiche, dann zum Warenkorb
+    const redirectParams = new URLSearchParams();
+    redirectParams.set('beraterin', berater);
+    redirectParams.set('kanal', kanal);
+    redirectParams.set('link_id', linkId);
+    redirectParams.set('session_id', sessionId);
+    redirectParams.set('produkte', addedProducts.map(p => p.name).join(','));
+    redirectParams.set('ziel', direktCartUrl);
+    const cartUrl = `https://${SHOP_DOMAIN}/pages/angebot-redirect?${redirectParams.toString()}`;
 
     // **KRITISCHES TRACKING - ANGEBOT GENERIERT**
     trackEvent('angebot_generated', {
@@ -964,8 +973,8 @@ document.addEventListener("DOMContentLoaded", function () {
       linkId: linkId,
       produktAnzahl: addedProducts.length,
       produktWert: produktWert,
-      produkte: addedProducts.map(p => ({ name: p.name, menge: p.menge })),
-      cartUrl: cartUrl
+      produkt_namen: addedProducts.map(p => p.name).join(', '),
+      cartUrl: direktCartUrl
     });
 
     let begruessung = `Hallo ${kunde},\n\n`;

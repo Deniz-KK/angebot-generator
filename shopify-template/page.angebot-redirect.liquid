@@ -1,0 +1,82 @@
+{% comment %}
+  Kristallkraft Angebot-Tracking-Weiche
+  ======================================
+  Diese Seite fängt Kunden-Klicks auf Angebotslinks ab,
+  sendet ein GA4-Event ("angebot_link_geklickt") und
+  leitet den Kunden dann sofort zum Warenkorb weiter.
+
+  Einbau in Shopify:
+  1. Im Shopify-Adminbereich → Online Shop → Themes → Aktuelles Theme → Code bearbeiten
+  2. Unter "Templates" → "Neue Vorlage hinzufügen" → Page → Name: "angebot-redirect"
+  3. Diesen Code einfügen und speichern
+  4. Unter "Seiten" eine neue Seite erstellen:
+     - Titel: "Angebot Weiterleitung" (oder beliebig)
+     - URL/Handle: "angebot-redirect" (GENAU so, damit der Link stimmt)
+     - Template: "page.angebot-redirect" auswählen
+     - Speichern
+{% endcomment %}
+
+{% layout none %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weiterleitung – Kristallkraft</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #fafafa;
+      color: #444;
+    }
+    .hinweis {
+      text-align: center;
+      padding: 2rem;
+    }
+    .hinweis p {
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="hinweis">
+    <p>Einen Moment bitte, du wirst weitergeleitet&nbsp;…</p>
+  </div>
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MSBJB2KWM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8MSBJB2KWM');
+
+    var params = new URLSearchParams(window.location.search);
+    var ziel   = params.get('ziel');
+
+    // GA4 Event feuern: Kunde hat Angebotslink geklickt
+    gtag('event', 'angebot_link_geklickt', {
+      beraterin:    params.get('beraterin') || '',
+      kontaktkanal: params.get('kanal')     || '',
+      produkt_namen: params.get('produkte') || '',
+      link_id:      params.get('link_id')   || '',
+      session_id:   params.get('session_id')|| ''
+    });
+
+    // Weiterleitung nach kurzem Delay (damit GA4 den Event absenden kann)
+    setTimeout(function() {
+      if (ziel) {
+        window.location.href = decodeURIComponent(ziel);
+      } else {
+        window.location.href = '/';
+      }
+    }, 400);
+  </script>
+</body>
+</html>
