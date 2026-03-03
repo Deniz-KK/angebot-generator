@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kristallkraft Influencer Gutschrift Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--gold:#C8952E;--gold-light:#E8C36A;--gold-dark:#A07520;--bg:#FAF8F4;--card:#FFFFFF;--text:#1A1A1A;--text-muted:#6B6B6B;--border:#E5E0D8;--accent-bg:#FDF6E8;--danger:#C0392B;--success:#27AE60}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  header{background:linear-gradient(135deg,#1A1A1A,#2D2D2D);padding:24px 40px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+  header .logo-icon{width:40px;height:40px;background:radial-gradient(circle at 50% 30%,var(--gold-light),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:700}
+  header h1{color:#fff;font-size:20px;font-weight:600;letter-spacing:.5px}
+  header h1 span{color:var(--gold-light)}
+  .container{max-width:960px;margin:0 auto;padding:32px 24px}
+  .step-indicator{display:flex;gap:8px;margin-bottom:32px;align-items:center}
+  .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;background:var(--border);color:var(--text-muted);transition:all .3s}
+  .step-dot.active{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(200,149,46,.4)}
+  .step-dot.done{background:var(--success);color:#fff}
+  .step-line{flex:1;height:2px;background:var(--border)}
+  .step-line.active{background:var(--gold)}
+  .card{background:var(--card);border-radius:16px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);margin-bottom:24px;border:1px solid var(--border)}
+  .card h2{font-size:18px;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+  .card h2 .icon{width:28px;height:28px;background:var(--accent-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg)}
+  .upload-zone:hover,.upload-zone.dragover{border-color:var(--gold);background:var(--accent-bg)}
+  .upload-zone .upload-icon{font-size:40px;margin-bottom:12px;display:block}
+  .upload-zone p{color:var(--text-muted);font-size:14px;margin-top:8px}
+  .upload-zone .upload-label{font-size:16px;font-weight:600;color:var(--text)}
+  .file-loaded{display:flex;align-items:center;gap:12px;padding:16px;background:#F0FAF0;border-radius:10px;border:1px solid #C3E6C3}
+  .file-loaded .check{color:var(--success);font-size:20px}
+  .file-loaded .fname{font-weight:500;flex:1}
+  .file-loaded .remove{background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:6px}
+  .file-loaded .remove:hover{background:#FDEDED}
+  .form-group{margin-bottom:18px}
+  .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .form-group input,.form-group select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:15px;color:var(--text);background:#fff;transition:border-color .2s}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,149,46,.1)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .toggle-row{display:flex;align-items:center;gap:12px;padding:16px;background:var(--accent-bg);border-radius:10px;margin-bottom:18px;cursor:pointer;user-select:none;border:1px solid transparent;transition:border-color .2s}
+  .toggle-row:hover{border-color:var(--gold)}
+  .toggle-row.checked{background:#FDF0D0;border-color:var(--gold)}
+  .toggle-switch{width:44px;height:24px;background:#C5C5C5;border-radius:12px;position:relative;transition:background .3s;flex-shrink:0}
+  .toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle-row.checked .toggle-switch{background:var(--gold)}
+  .toggle-row.checked .toggle-switch::after{transform:translateX(20px)}
+  .toggle-label{font-weight:500;font-size:15px}
+  .toggle-desc{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .data-table{width:100%;border-collapse:collapse;font-size:14px}
+  .data-table th{text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);padding:8px 12px;border-bottom:2px solid var(--border)}
+  .data-table td{padding:10px 12px;border-bottom:1px solid #F0EDE8}
+  .data-table tr:last-child td{border-bottom:none}
+  .data-table .amount{text-align:right;font-variant-numeric:tabular-nums}
+  .summary-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px}
+  .summary-row.total{font-weight:700;font-size:16px;border-top:2px solid var(--text);padding-top:12px;margin-top:4px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+  .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;box-shadow:0 2px 8px rgba(200,149,46,.3)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(200,149,46,.4)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)}
+  .btn-outline:hover{background:var(--bg)}
+  .btn-row{display:flex;gap:12px;margin-top:24px;justify-content:flex-end}
+  .error-msg{color:var(--danger);font-size:13px;margin-top:8px;display:flex;align-items:center;gap:6px}
+  .info-box{background:#EBF5FF;border:1px solid #B8D9F5;border-radius:8px;padding:12px 16px;font-size:13px;color:#2471A3;margin-bottom:18px;line-height:1.5}
+  .hint-box{background:var(--accent-bg);border:1px solid #E8D5A8;border-radius:8px;padding:12px 16px;font-size:13px;color:#8B6914;margin-bottom:18px;line-height:1.5}
+  .hidden{display:none !important}
+  .fade-in{animation:fadeIn .4s ease-out}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:640px){.form-row{grid-template-columns:1fr}.container{padding:20px 16px}.card{padding:20px}header{padding:16px 20px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-icon">K</div>
+  <h1><span>Kristallkraft</span> Influencer Gutschrift Generator</h1>
+</header>
+<div class="container">
+  <div class="step-indicator">
+    <div class="step-dot active" id="step1dot">1</div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-dot" id="step2dot">2</div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-dot" id="step3dot">3</div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="step1" class="fade-in">
+    <div class="card">
+      <h2><span class="icon">&#x1F4C4;</span> Rechnung hochladen</h2>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:18px">Laden Sie die Kristallkraft-Rechnung als PDF hoch. Die Daten werden automatisch ausgelesen.</p>
+      <div class="upload-zone" id="uploadZone">
+        <span class="upload-icon">&#x1F4E4;</span>
+        <div class="upload-label">PDF hier ablegen oder klicken</div>
+        <p>Unterst&uuml;tzt: .pdf Dateien</p>
+      </div>
+      <div class="file-loaded hidden" id="fileLoaded">
+        <span class="check">&#x2713;</span>
+        <span class="fname" id="fileName"></span>
+        <button class="remove" id="removeFile" title="Entfernen">&#x2715;</button>
+      </div>
+      <div class="error-msg hidden" id="uploadError"></div>
+      <input type="file" id="fileInput" accept=".pdf" style="display:none">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnParse" disabled>Weiter &#x2192;</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="step2" class="hidden">
+    <div class="card fade-in">
+      <h2><span class="icon">&#x1F4CB;</span> Ausgelesene Rechnungsdaten</h2>
+      <div class="info-box">Die Daten wurden aus der Rechnung ausgelesen. Bitte pr&uuml;fen und bei Bedarf korrigieren.</div>
+      <div style="margin-bottom:18px">
+        <div class="form-group">
+          <label>Rechnungsnr. (Original)</label>
+          <input type="text" id="invNumber" readonly style="background:#F5F5F5">
+        </div>
+      </div>
+      <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text-muted)">POSITIONEN</h3>
+      <table class="data-table">
+        <thead><tr><th>Menge</th><th>Beschreibung</th><th style="text-align:right">Einzelpreis</th><th style="text-align:right">Gesamt</th></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <div class="summary-row"><span>Nettobetrag (Rechnung)</span><span id="netAmount"></span></div>
+        <div class="summary-row"><span id="vatLabel">MwSt.</span><span id="vatAmount"></span></div>
+        <div class="summary-row total"><span>Gesamtbetrag (Rechnung)</span><span id="totalAmount"></span></div>
+      </div>
+      <div class="hint-box" style="margin-top:16px">
+        <strong>Hinweis:</strong> Der Gesamtbetrag der Gutschrift entspricht immer dem Rechnungs-Gesamtbetrag.
+        Bei regul&auml;rer Gutschrift wird mit 19% USt. r&uuml;ckgerechnet, bei Kleinunternehmern ohne USt.
+      </div>
+    </div>
+    <div class="card fade-in">
+      <h2><span class="icon">&#x1F464;</span> Influencer-Daten (Aussteller)</h2>
+      <div class="form-group"><label>Name</label><input type="text" id="infName" placeholder="Vor- und Nachname des Influencers"></div>
+      <div class="form-group"><label>Stra&szlig;e &amp; Hausnummer</label><input type="text" id="infStreet" placeholder="z.B. Musterstra&szlig;e 12"></div>
+      <div class="form-row">
+        <div class="form-group"><label>PLZ</label><input type="text" id="infZip" placeholder="z.B. 12345"></div>
+        <div class="form-group"><label>Ort</label><input type="text" id="infCity" placeholder="z.B. Berlin"></div>
+      </div>
+      <div class="toggle-row" id="toggleKlein" onclick="toggleKleinunternehmer()">
+        <div class="toggle-switch"></div>
+        <div>
+          <div class="toggle-label">Kleinunternehmer nach &sect;19 UStG</div>
+          <div class="toggle-desc">Aktivieren, wenn der Influencer Kleinunternehmer ist (keine MwSt. auf der Gutschrift)</div>
+        </div>
+      </div>
+      <div class="form-group" id="steuernummerGroup">
+        <label>Steuernummer</label>
+        <input type="text" id="infSteuer" placeholder="z.B. 12/345/67890">
+      </div>
+    </div>
+    <div class="card fade-in">
+      <h2><span class="icon">&#x1F522;</span> Gutschrift-Details</h2>
+      <div class="form-row">
+        <div class="form-group"><label>Gutschrift-Nummer</label><input type="text" id="gsNumber" placeholder="z.B. 10"></div>
+        <div class="form-group"><label>Gutschrift-Datum</label><input type="date" id="gsDate"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(1)">&#x2190; Zur&uuml;ck</button>
+      <button class="btn btn-primary" onclick="goToStep(3)">Vorschau &#x2192;</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="step3" class="hidden">
+    <div class="card fade-in">
+      <h2><span class="icon">&#x1F441;</span> Vorschau der Gutschrift</h2>
+      <div id="previewContent" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:32px;font-family:Arial,sans-serif;font-size:14px;line-height:1.6"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(2)">&#x2190; Bearbeiten</button>
+      <button class="btn btn-primary" onclick="generatePDF()">&#x1F4E5; Gutschrift als PDF herunterladen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let pdfFile=null,invoiceData={},isKleinunternehmer=false;
+
+const uploadZone=document.getElementById('uploadZone'),fileInput=document.getElementById('fileInput'),
+  fileLoaded=document.getElementById('fileLoaded'),fileNameEl=document.getElementById('fileName'),
+  removeFileBtn=document.getElementById('removeFile'),btnParse=document.getElementById('btnParse'),
+  uploadError=document.getElementById('uploadError');
+
+uploadZone.addEventListener('click',()=>fileInput.click());
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('dragover')});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('dragover');if(e.dataTransfer.files.length&&e.dataTransfer.files[0].type==='application/pdf')handleFile(e.dataTransfer.files[0])});
+fileInput.addEventListener('change',e=>{if(e.target.files.length)handleFile(e.target.files[0])});
+removeFileBtn.addEventListener('click',()=>{pdfFile=null;fileInput.value='';uploadZone.classList.remove('hidden');fileLoaded.classList.add('hidden');btnParse.disabled=true});
+
+function handleFile(f){pdfFile=f;fileNameEl.textContent=f.name;uploadZone.classList.add('hidden');fileLoaded.classList.remove('hidden');uploadError.classList.add('hidden');btnParse.disabled=false}
+
+btnParse.addEventListener('click',async()=>{
+  btnParse.disabled=true;btnParse.textContent='Wird ausgelesen...';
+  try{await parsePDF();goToStep(2)}catch(err){uploadError.textContent='\u26A0 Fehler beim Auslesen: '+err.message;uploadError.classList.remove('hidden')}
+  btnParse.disabled=false;btnParse.textContent='Weiter \u2192';
+});
+
+async function parsePDF(){
+  const ab=await pdfFile.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let fullText='';
+  for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const tc=await p.getTextContent();fullText+=tc.items.map(it=>it.str).join(' ')+'\n'}
+
+  const invNumMatch=fullText.match(/Rechnung\s*Nr\.?\s*(\d+)/i);
+  invoiceData.invoiceNumber=invNumMatch?invNumMatch[1]:'';
+
+  const dateMatch=fullText.match(/Datum:\s*([\d]+\.\s*\w+\s*\d{4})/i);
+  invoiceData.invoiceDate=dateMatch?dateMatch[1].trim():'';
+
+  // Parse address
+  const ap=/([A-Z\u00C4\u00D6\u00DC\u00E4\u00F6\u00FCa-z\u00DF]+\s+[A-Z\u00C4\u00D6\u00DC\u00E4\u00F6\u00FCa-z\u00DF]+)\s+([A-Z\u00C4\u00D6\u00DC\u00E4\u00F6\u00FCa-z\u00DF]+(?:weg|stra\u00DFe|str|allee|platz|gasse|ring|damm|ufer|feld|berg|hof|burg|dorf|land|wald|see|bach|bruch|br\u00FCcke|eck|garten|graben|grund|haus|heim|heide|horst|kamp|moor|ried|tal|turm|winkel)[a-z\u00E4\u00F6\u00FC\u00DF]*\.?\s*\d+[a-z]?)\s+(\d{5})\s+([A-Z\u00C4\u00D6\u00DC\u00E4\u00F6\u00FCa-z\u00DF]+(?:\s[A-Z\u00C4\u00D6\u00DC\u00E4\u00F6\u00FCa-z\u00DF]+)?)/i;
+  const am=fullText.match(ap);
+  let cN='',cS='',cZ='',cC='';
+  if(am){cN=am[1].trim();cS=am[2].trim();cZ=am[3].trim();cC=am[4].trim()}
+
+  // Parse items
+  invoiceData.items=[];
+  const ir=/(\d+)\s+(?:Sack|Stk|St\u00FCck|Dose|Dosen|Flasche|Flaschen|Pkg|Paket|Beutel|Tube|Eimer|Kanister|Set|Box|Karton)\s+([\w-]+)\s+([\w\u00C4\u00D6\u00DC\u00E4\u00F6\u00FC\u00DF\s,.\-]+?)\s+(\d+[.,]\d{2})\s+(\d+[.,]\d{2})/g;
+  let m;
+  while((m=ir.exec(fullText))!==null){invoiceData.items.push({quantity:parseInt(m[1]),number:m[2].trim(),description:m[3].trim(),unitPrice:parseFloat(m[4].replace(',','.')),totalPrice:parseFloat(m[5].replace(',','.'))})}
+  if(!invoiceData.items.length){
+    const sr=/(\d+)\s+\w+\s+([\w-]+)\s+(.+?)\s+(\d+[.,]\d{2})\s+(\d+[.,]\d{2})/g;
+    while((m=sr.exec(fullText))!==null){if(m[3].length>3&&!/Rechnung|Kunden|Datum|Seite/i.test(m[3]))invoiceData.items.push({quantity:parseInt(m[1]),number:m[2].trim(),description:m[3].trim(),unitPrice:parseFloat(m[4].replace(',','.')),totalPrice:parseFloat(m[5].replace(',','.'))})}
+  }
+
+  const tm=fullText.match(/Gesamtbetrag.*?(\d+[.,]\d{2})/i);
+  invoiceData.total=tm?parseFloat(tm[1].replace(',','.')):0;
+  const nm=fullText.match(/Netto\s+(\d+[.,]\d{2})/i);
+  invoiceData.netto=nm?parseFloat(nm[1].replace(',','.')):0;
+  const vm=fullText.match(/(\d+)%\s*MwSt\.?\s*=?\s*(\d+[.,]\d{2})/i);
+  invoiceData.vatRate=vm?parseInt(vm[1]):7;
+  invoiceData.vatAmount=vm?parseFloat(vm[2].replace(',','.')):0;
+  if(!invoiceData.netto&&invoiceData.total&&invoiceData.vatAmount)invoiceData.netto=invoiceData.total-invoiceData.vatAmount;
+
+  document.getElementById('invNumber').value=invoiceData.invoiceNumber;
+  document.getElementById('infName').value=cN;
+  document.getElementById('infStreet').value=cS;
+  document.getElementById('infZip').value=cZ;
+  document.getElementById('infCity').value=cC;
+  document.getElementById('gsDate').value=new Date().toISOString().split('T')[0];
+
+  const tbody=document.getElementById('itemsBody');tbody.innerHTML='';
+  invoiceData.items.forEach(it=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${it.quantity}</td><td>${it.description}</td><td class="amount">${fDE(it.unitPrice)} \u20ac</td><td class="amount">${fDE(it.totalPrice)} \u20ac</td>`;tbody.appendChild(tr)});
+  document.getElementById('netAmount').textContent=fDE(invoiceData.netto)+' \u20ac';
+  document.getElementById('vatLabel').textContent='MwSt. ('+invoiceData.vatRate+'%)';
+  document.getElementById('vatAmount').textContent=fDE(invoiceData.vatAmount)+' \u20ac';
+  document.getElementById('totalAmount').textContent=fDE(invoiceData.total)+' \u20ac';
+}
+
+function toggleKleinunternehmer(){isKleinunternehmer=!isKleinunternehmer;document.getElementById('toggleKlein').classList.toggle('checked',isKleinunternehmer)}
+
+function goToStep(s){
+  document.getElementById('step1').classList.toggle('hidden',s!==1);
+  document.getElementById('step2').classList.toggle('hidden',s!==2);
+  document.getElementById('step3').classList.toggle('hidden',s!==3);
+  ['step1dot','step2dot','step3dot'].forEach((id,i)=>{const d=document.getElementById(id);d.classList.remove('active','done');if(i+1<s)d.classList.add('done');else if(i+1===s)d.classList.add('active')});
+  document.getElementById('line1').classList.toggle('active',s>=2);
+  document.getElementById('line2').classList.toggle('active',s>=3);
+  if(s===3)renderPreview();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function fDE(n){return n.toFixed(2).replace('.',',')}
+function fDateDE(ds){if(!ds)return'';const d=new Date(ds);return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}
+
+function getAmounts(){
+  const g=invoiceData.total;
+  if(isKleinunternehmer)return{netto:g,ust:0,gesamt:g};
+  const netto=Math.round((g/1.19)*100)/100;
+  const ust=Math.round((g-netto)*100)/100;
+  return{netto,ust,gesamt:g};
+}
+
+function renderPreview(){
+  const n=document.getElementById('infName').value,st=document.getElementById('infStreet').value,
+    z=document.getElementById('infZip').value,c=document.getElementById('infCity').value,
+    sx=document.getElementById('infSteuer').value,gn=document.getElementById('gsNumber').value,
+    gd=fDateDE(document.getElementById('gsDate').value),a=getAmounts();
+
+  let h=`<div style="text-align:center;margin-bottom:24px"><strong style="font-size:16px">Gutschrift Nr.${gn} v. ${gd}</strong></div>
+    <div style="margin-bottom:4px"><strong>Aussteller:</strong></div><div>${n}</div><div>${st}</div><div>${z} ${c}</div>`;
+  if(sx)h+=`<div>Steuernummer: ${sx}</div>`;
+  h+=`<br><br><br><div style="margin-bottom:4px"><strong>Empf\u00e4nger:</strong></div>
+    <div>Kristallkraft Naturprodukte GmbH &amp; Co. KG</div><div>Hauptstra\u00dfe 3</div><div>29499 G\u00fclden</div><div>USt-IdNr.: DE296319042</div><br>
+    <div style="margin-bottom:16px">Gem\u00e4\u00df Kooperationsvertrag erfolgt die Rechnungsausstellung im Gutschriftverfahren gem\u00e4\u00df \u00a7 14 UStG</div>
+    <table style="width:100%;border-collapse:collapse;margin-top:16px">
+    <tr style="border-bottom:2px solid #333"><td style="padding:8px 0;font-weight:bold">Bezeichnung</td><td style="padding:8px 0;font-weight:bold;text-align:right">Anzahl</td></tr>
+    <tr><td style="padding:8px 0">Werbeleistung</td><td style="padding:8px 0;text-align:right">1</td></tr>
+    <tr><td style="padding:4px 0;font-size:12px;color:#666" colspan="2">Leistungsdatum entspricht Rechnungsdatum</td></tr>`;
+
+  if(isKleinunternehmer){
+    h+=`<tr style="border-top:1px solid #ddd"><td style="padding:8px 0">Zwischensumme</td><td style="padding:8px 0;text-align:right">${fDE(a.gesamt)} \u20ac</td></tr>
+      <tr><td style="padding:4px 0;color:#666">keine USt, da Kleinunternehmen nach \u00a719 UStG</td><td></td></tr>
+      <tr style="border-top:2px solid #333"><td style="padding:8px 0;font-weight:bold">Gesamtbetrag</td><td style="padding:8px 0;text-align:right;font-weight:bold">${fDE(a.gesamt)} \u20ac</td></tr>`;
+  }else{
+    h+=`<tr style="border-top:1px solid #ddd"><td style="padding:8px 0">Zwischensumme Entgelt</td><td style="padding:8px 0;text-align:right">${fDE(a.netto)} \u20ac</td></tr>
+      <tr><td style="padding:4px 0">19% USt.</td><td style="padding:4px 0;text-align:right">${fDE(a.ust)} \u20ac</td></tr>
+      <tr style="border-top:2px solid #333"><td style="padding:8px 0;font-weight:bold">Gesamtbetrag</td><td style="padding:8px 0;text-align:right;font-weight:bold">${fDE(a.gesamt)} \u20ac</td></tr>`;
+  }
+  h+='</table>';
+  document.getElementById('previewContent').innerHTML=h;
+}
+
+function generatePDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const n=document.getElementById('infName').value,st=document.getElementById('infStreet').value,
+    z=document.getElementById('infZip').value,c=document.getElementById('infCity').value,
+    sx=document.getElementById('infSteuer').value,gn=document.getElementById('gsNumber').value,
+    gd=fDateDE(document.getElementById('gsDate').value),a=getAmounts();
+
+  const L=25,R=185;
+  let y=30;
+  const lh=6;
+
+  doc.setFont('helvetica','bold');doc.setFontSize(13);
+  doc.text('Gutschrift Nr.'+gn+' v. '+gd,105,y,{align:'center'});
+  y+=14;
+
+  doc.setFont('helvetica','normal');doc.setFontSize(10.5);
+  doc.text('Aussteller:',L,y);y+=lh;
+  doc.text(n,L,y);y+=lh;
+  doc.text(st,L,y);y+=lh;
+  doc.text(z+' '+c,L,y);y+=lh;
+  if(sx){doc.text('Steuernummer: '+sx,L,y);y+=lh}
+
+  y+=30;
+
+  doc.text('Empf\u00e4nger:',L,y);y+=lh;
+  doc.text('Kristallkraft Naturprodukte GmbH & Co. KG',L,y);y+=lh;
+  doc.text('Hauptstra\u00dfe 3',L,y);y+=lh;
+  doc.text('29499 G\u00fclden',L,y);y+=lh;
+  doc.text('USt-IdNr.: DE296319042',L,y);y+=lh;
+  y+=12;
+
+  doc.setFontSize(10.5);
+  doc.text('Gem\u00e4\u00df Kooperationsvertrag erfolgt die Rechnungsausstellung im',L,y);y+=lh;
+  doc.text('Gutschriftverfahren gem\u00e4\u00df \u00a7 14 UStG',L,y);
+  y+=14;
+
+  doc.setFont('helvetica','bold');doc.setFontSize(10.5);
+  doc.text('Bezeichnung',L,y);doc.text('Anzahl',R,y,{align:'right'});
+  y+=1;doc.setLineWidth(0.5);doc.line(L,y,R,y);y+=8;
+
+  doc.setFont('helvetica','normal');
+  doc.text('Werbeleistung',L,y);doc.text('1',R,y,{align:'right'});y+=lh;
+  doc.setFontSize(9);doc.setTextColor(100);
+  doc.text('Leistungsdatum entspricht Rechnungsdatum',L,y);y+=10;
+  doc.setTextColor(0);doc.setFontSize(10.5);
+
+  if(isKleinunternehmer){
+    doc.text('Zwischensumme',L,y);doc.text(fDE(a.gesamt)+' \u20ac',R,y,{align:'right'});y+=lh;
+    doc.setFontSize(9);doc.setTextColor(100);
+    doc.text('keine USt, da Kleinunternehmen nach \u00a719 UStG',L,y);y+=8;
+    doc.setTextColor(0);doc.setFontSize(10.5);
+    doc.setLineWidth(0.5);doc.line(L,y,R,y);y+=6;
+    doc.setFont('helvetica','bold');
+    doc.text('Gesamtbetrag',L,y);doc.text(fDE(a.gesamt)+' \u20ac',R,y,{align:'right'});y+=1;doc.line(L,y,R,y);
+  }else{
+    doc.text('Zwischensumme Entgelt',L,y);doc.text(fDE(a.netto)+' \u20ac',R,y,{align:'right'});y+=lh;
+    doc.text('19% USt.',L,y);doc.text(fDE(a.ust)+' \u20ac',R,y,{align:'right'});y+=8;
+    doc.setLineWidth(0.5);doc.line(L,y,R,y);y+=6;
+    doc.setFont('helvetica','bold');
+    doc.text('Gesamtbetrag',L,y);doc.text(fDE(a.gesamt)+' \u20ac',R,y,{align:'right'});y+=1;doc.line(L,y,R,y);
+  }
+
+  const namePart=n.replace(/\s+/g,'');
+  const datePart=gd.replace(/\./g,'');
+  const fn=namePart+'_'+datePart+'_InfluencerMarketing_gutschrift'+gn+'_gepr.so.pdf';
+  doc.save(fn);
+}
+</script>
+</body>
+</html>
