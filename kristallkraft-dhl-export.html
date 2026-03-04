@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kristallkraft DHL Export</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #e8e8e8;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useCallback } = React;
+
+    const App = () => {
+      const [entries, setEntries] = useState([]);
+      const [selectedIds, setSelectedIds] = useState(new Set());
+      const [fileName, setFileName] = useState('');
+      const [isLoading, setIsLoading] = useState(false);
+
+      const parseExcel = useCallback((file) => {
+        setIsLoading(true);
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            
+            const processedEntries = jsonData.map((row, index) => {
+              const versendet = row['Versendet'];
+              const hasVersendetDate = versendet && 
+                versendet.toString().trim() !== '' && 
+                versendet.toString().trim() !== '--------' &&
+                versendet.toString().trim().toLowerCase() !== 'nan';
+              
+              return {
+                id: index,
+                vorname: row['Vorname'] || '',
+                nachname: row['Nachname'] || '',
+                vereinsname: row['Name des Vereins'] || '',
+                strasse: row['Strasse/ Lief.'] || '',
+                nummer: row['Nummer'] || '',
+                plz: row['Postleitzahl/ Lief.'] || '',
+                ort: row['Lieferort'] || '',
+                email: row['Email'] || '',
+                veranstaltung: row['Art der Veranstaltung:'] || '',
+                datum: row['Datum der Veranstaltung'] || '',
+                versendet: versendet || '',
+                isAlreadySent: hasVersendetDate,
+              };
+            }).filter(entry => entry.vorname || entry.nachname || entry.vereinsname);
+
+            setEntries(processedEntries);
+            const selectableIds = processedEntries
+              .filter(e => !e.isAlreadySent)
+              .map(e => e.id);
+            setSelectedIds(new Set(selectableIds));
+            setFileName(file.name);
+          } catch (error) {
+            alert('Fehler beim Lesen der Datei: ' + error.message);
+          }
+          setIsLoading(false);
+        };
+        
+        reader.readAsArrayBuffer(file);
+      }, []);
+
+      const handleFileDrop = useCallback((e) => {
+        e.preventDefault();
+        const file = e.dataTransfer?.files[0] || e.target.files?.[0];
+        if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+          parseExcel(file);
+        } else {
+          alert('Bitte eine Excel-Datei (.xlsx oder .xls) hochladen.');
+        }
+      }, [parseExcel]);
+
+      const toggleSelection = (id) => {
+        setSelectedIds(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(id)) {
+            newSet.delete(id);
+          } else {
+            newSet.add(id);
+          }
+          return newSet;
+        });
+      };
+
+      const selectAll = () => {
+        const selectableIds = entries.filter(e => !e.isAlreadySent).map(e => e.id);
+        setSelectedIds(new Set(selectableIds));
+      };
+
+      const deselectAll = () => {
+        setSelectedIds(new Set());
+      };
+
+      const formatDate = (date) => {
+        if (!date) return '';
+        if (date instanceof Date) {
+          const d = date.getDate().toString().padStart(2, '0');
+          const m = (date.getMonth() + 1).toString().padStart(2, '0');
+          const y = date.getFullYear().toString().slice(-2);
+          return `${d}.${m}.${y}`;
+        }
+        return date.toString();
+      };
+
+      const generateDHLCSV = () => {
+        const selectedEntries = entries.filter(e => selectedIds.has(e.id) && !e.isAlreadySent);
+        
+        if (selectedEntries.length === 0) {
+          alert('Keine Einträge ausgewählt.');
+          return;
+        }
+
+        const today = new Date();
+        const deliveryDate = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear().toString().slice(-2)}`;
+        
+        const header = `"OrderNo|""s_name1""|""s_name2""|""s_street""|""s_zipcodeno""|""s_town""|""s_country""|""s_phone""|""s_mail""|""quantity""|""products""|""delivery_date""|""CustomerNo""|""Total_weight""|""Abrechnungsnummer""|""AbsName""|""AbsStrasse""|""AbsPLZOrt""|""AbsLand""|""Zuordnung""|""AbsTel"""`;
+        
+        const rows = selectedEntries.map((entry, idx) => {
+          const orderNo = `SP${Date.now()}${idx}`;
+          const name1 = `${entry.vorname} ${entry.nachname}`.trim();
+          const name2 = entry.vereinsname;
+          const street = `${entry.strasse} ${entry.nummer}`.trim();
+          const plz = entry.plz.toString().replace('.0', '').split('.')[0];
+          const town = entry.ort;
+          const email = entry.email;
+          
+          return `"${orderNo}|""${name1}""|""${name2}""|""${street}""|""${plz}""|""${town}""|""DE""|\"\"|""${email}""|""1""|""CL-7, KK-8""|""${deliveryDate}""|\"\"|""\"\"|""60796335170102""|""Kristallkraft Naturprodukte""|""Hauptstraße 3""|""29499 Zernien""|""DE""|""V01PAK""|""4958639836090"""`;
+        });
+
+        const csvContent = '\uFEFF' + header + '\r\n' + rows.join('\r\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const dateStr = `${today.getDate().toString().padStart(2, '0')}_${(today.getMonth() + 1).toString().padStart(2, '0')}_${today.getFullYear().toString().slice(-2)}`;
+        const timeStr = `${today.getHours().toString().padStart(2, '0')}_${today.getMinutes().toString().padStart(2, '0')}_${today.getSeconds().toString().padStart(2, '0')}`;
+        link.download = `DHL_ZL_DE_-_${dateStr}_-_${timeStr}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      };
+
+      const selectedCount = [...selectedIds].filter(id => !entries.find(e => e.id === id)?.isAlreadySent).length;
+      const sentCount = entries.filter(e => e.isAlreadySent).length;
+      const availableCount = entries.filter(e => !e.isAlreadySent).length;
+
+      return (
+        <div style={{ minHeight: '100vh', padding: '24px' }}>
+          {/* Header */}
+          <div style={{
+            maxWidth: '1400px',
+            margin: '0 auto 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div>
+              <h1 style={{
+                margin: 0,
+                fontSize: '28px',
+                fontWeight: 700,
+                background: 'linear-gradient(90deg, #ffd700, #ffaa00)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.5px'
+              }}>
+                🐴 Kristallkraft Sponsoring
+              </h1>
+              <p style={{ margin: '4px 0 0', opacity: 0.7, fontSize: '14px' }}>
+                DHL Versand-Export Tool
+              </p>
+            </div>
+            
+            {entries.length > 0 && (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontSize: '13px'
+                }}>
+                  <span style={{ opacity: 0.7 }}>Verfügbar:</span>{' '}
+                  <strong style={{ color: '#4ade80' }}>{availableCount}</strong>
+                  <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
+                  <span style={{ opacity: 0.7 }}>Bereits versendet:</span>{' '}
+                  <strong style={{ color: '#f87171' }}>{sentCount}</strong>
+                  <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
+                  <span style={{ opacity: 0.7 }}>Ausgewählt:</span>{' '}
+                  <strong style={{ color: '#fbbf24' }}>{selectedCount}</strong>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Upload Area */}
+          {entries.length === 0 && (
+            <div 
+              onDrop={handleFileDrop}
+              onDragOver={(e) => e.preventDefault()}
+              style={{
+                maxWidth: '600px',
+                margin: '80px auto',
+                border: '2px dashed rgba(255,215,0,0.4)',
+                borderRadius: '16px',
+                padding: '60px 40px',
+                textAlign: 'center',
+                background: 'rgba(255,255,255,0.03)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <div style={{ fontSize: '64px', marginBottom: '16px' }}>📁</div>
+              <h2 style={{ margin: '0 0 8px', fontWeight: 600 }}>Excel-Datei hochladen</h2>
+              <p style={{ opacity: 0.6, margin: 0 }}>
+                Ziehen Sie die Sponsoring-Anfragen Excel-Datei hierher<br />
+                oder klicken Sie zum Auswählen
+              </p>
+              <input
+                id="fileInput"
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileDrop}
+                style={{ display: 'none' }}
+              />
+            </div>
+          )}
+
+          {isLoading && (
+            <div style={{ textAlign: 'center', padding: '60px' }}>
+              <div style={{ fontSize: '48px' }}>⏳</div>
+              <p>Datei wird verarbeitet...</p>
+            </div>
+          )}
+
+          {/* Entries Table */}
+          {entries.length > 0 && !isLoading && (
+            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+              {/* Actions Bar */}
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                marginBottom: '16px',
+                flexWrap: 'wrap',
+                alignItems: 'center'
+              }}>
+                <button
+                  onClick={() => {
+                    setEntries([]);
+                    setSelectedIds(new Set());
+                    setFileName('');
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  📂 Neue Datei laden
+                </button>
+                
+                <button
+                  onClick={selectAll}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'rgba(74, 222, 128, 0.2)',
+                    border: '1px solid rgba(74, 222, 128, 0.4)',
+                    borderRadius: '8px',
+                    color: '#4ade80',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  ✓ Alle auswählen
+                </button>
+                
+                <button
+                  onClick={deselectAll}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'rgba(248, 113, 113, 0.2)',
+                    border: '1px solid rgba(248, 113, 113, 0.4)',
+                    borderRadius: '8px',
+                    color: '#f87171',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  ✗ Alle abwählen
+                </button>
+                
+                <div style={{ flex: 1 }} />
+                
+                <button
+                  onClick={generateDHLCSV}
+                  disabled={selectedCount === 0}
+                  style={{
+                    padding: '12px 28px',
+                    background: selectedCount > 0 
+                      ? 'linear-gradient(135deg, #ffd700, #ffaa00)' 
+                      : 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: selectedCount > 0 ? '#1a1a2e' : '#666',
+                    cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: selectedCount > 0 ? '0 4px 20px rgba(255,215,0,0.3)' : 'none'
+                  }}
+                >
+                  📦 DHL CSV exportieren ({selectedCount})
+                </button>
+              </div>
+
+              {/* File Name */}
+              <div style={{
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginBottom: '16px',
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ opacity: 0.6 }}>📄 Geladene Datei:</span>
+                <strong>{fileName}</strong>
+                <span style={{ opacity: 0.4, marginLeft: 'auto' }}>
+                  Produkte: CL-7, KK-8
+                </span>
+              </div>
+
+              {/* Table */}
+              <div style={{
+                background: 'rgba(0,0,0,0.3)',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    fontSize: '13px'
+                  }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <th style={{ padding: '14px 12px', textAlign: 'center', width: '50px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                          ✓
+                        </th>
+                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Name</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Verein</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Lieferadresse</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>PLZ / Ort</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Veranstaltung</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Versendet</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {entries.map((entry) => (
+                        <tr 
+                          key={entry.id}
+                          onClick={() => !entry.isAlreadySent && toggleSelection(entry.id)}
+                          style={{
+                            background: entry.isAlreadySent 
+                              ? 'rgba(100,100,100,0.15)' 
+                              : selectedIds.has(entry.id) 
+                                ? 'rgba(255,215,0,0.1)' 
+                                : 'transparent',
+                            opacity: entry.isAlreadySent ? 0.4 : 1,
+                            cursor: entry.isAlreadySent ? 'not-allowed' : 'pointer',
+                            transition: 'background 0.2s ease'
+                          }}
+                        >
+                          <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            {entry.isAlreadySent ? (
+                              <span style={{ color: '#666' }}>—</span>
+                            ) : (
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.has(entry.id)}
+                                onChange={() => toggleSelection(entry.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ 
+                                  width: '18px', 
+                                  height: '18px', 
+                                  cursor: 'pointer',
+                                  accentColor: '#ffd700'
+                                }}
+                              />
+                            )}
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>
+                            {entry.vorname} {entry.nachname}
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', maxWidth: '250px' }}>
+                            <div style={{ 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis', 
+                              whiteSpace: 'nowrap',
+                              fontSize: '12px'
+                            }}>
+                              {entry.vereinsname}
+                            </div>
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            {entry.strasse} {entry.nummer}
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <span style={{ 
+                              background: 'rgba(255,255,255,0.1)', 
+                              padding: '2px 8px', 
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              fontFamily: 'monospace'
+                            }}>
+                              {entry.plz.toString().replace('.0', '').split('.')[0]}
+                            </span>
+                            {' '}{entry.ort}
+                          </td>
+                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '12px' }}>
+                            {entry.veranstaltung}
+                            {entry.datum && (
+                              <span style={{ opacity: 0.6, marginLeft: '8px' }}>
+                                ({formatDate(entry.datum)})
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            {entry.isAlreadySent ? (
+                              <span style={{
+                                background: 'rgba(248, 113, 113, 0.2)',
+                                color: '#f87171',
+                                padding: '4px 10px',
+                                borderRadius: '12px',
+                                fontSize: '11px',
+                                fontWeight: 500
+                              }}>
+                                {entry.versendet}
+                              </span>
+                            ) : (
+                              <span style={{
+                                background: 'rgba(74, 222, 128, 0.2)',
+                                color: '#4ade80',
+                                padding: '4px 10px',
+                                borderRadius: '12px',
+                                fontSize: '11px',
+                                fontWeight: 500
+                              }}>
+                                Offen
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Footer Info */}
+              <div style={{
+                marginTop: '16px',
+                padding: '16px',
+                background: 'rgba(255,215,0,0.1)',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,215,0,0.2)',
+                fontSize: '13px'
+              }}>
+                <strong style={{ color: '#ffd700' }}>💡 Hinweis:</strong>{' '}
+                Grau markierte Einträge wurden bereits versendet und werden beim Export ignoriert.
+                Alle ausgewählten Einträge erhalten standardmäßig die Produkte <strong>CL-7</strong> und <strong>KK-8</strong>.
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
