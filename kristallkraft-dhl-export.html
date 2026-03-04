@@ -55,6 +55,7 @@
               
               return {
                 id: index,
+                oderId: row['Id'] || index,
                 vorname: row['Vorname'] || '',
                 nachname: row['Nachname'] || '',
                 vereinsname: row['Name des Vereins'] || '',
@@ -141,7 +142,7 @@
         const header = `"OrderNo|""s_name1""|""s_name2""|""s_street""|""s_zipcodeno""|""s_town""|""s_country""|""s_phone""|""s_mail""|""quantity""|""products""|""delivery_date""|""CustomerNo""|""Total_weight""|""Abrechnungsnummer""|""AbsName""|""AbsStrasse""|""AbsPLZOrt""|""AbsLand""|""Zuordnung""|""AbsTel"""`;
         
         const rows = selectedEntries.map((entry, idx) => {
-          const orderNo = `SP${Date.now()}${idx}`;
+          const orderNo = `Sponsoring-${entry.oderId}`;
           const name1 = `${entry.vorname} ${entry.nachname}`.trim();
           const name2 = entry.vereinsname;
           const street = `${entry.strasse} ${entry.nummer}`.trim();
@@ -242,8 +243,8 @@
               <div style={{ fontSize: '64px', marginBottom: '16px' }}>📁</div>
               <h2 style={{ margin: '0 0 8px', fontWeight: 600 }}>Excel-Datei hochladen</h2>
               <p style={{ opacity: 0.6, margin: 0 }}>
-                Ziehen die Sponsoring-Anfragen Excel-Datei hierher<br />
-                oder klicken Sie zum Auswählen
+                Zieh die Sponsoring-Anfragen Excel-Datei hierher<br />
+                oder klick zum Auswählen
               </p>
               <input
                 id="fileInput"
