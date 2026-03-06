@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link-Generator – Spendenbescheinigung</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
+        :root {
+            --accent: #2c5530;
+            --accent-hover: #1e3d22;
+            --bg: #f5f0e8;
+            --card: #fafaf7;
+            --ink: #1a1a2e;
+            --muted: #6b6b6b;
+            --border: #c8c5bb;
+            --success: #27ae60;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin-bottom: 1.5rem; animation: fadeDown 0.5s ease-out; }
+        .header h1 { font-family: 'Crimson Pro', serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+        .header p { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+        .card { background: var(--card); max-width: 960px; width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 1.8rem 2rem; box-shadow: 0 2px 16px rgba(0,0,0,0.05); animation: fadeUp 0.4s ease-out 0.1s both; }
+        .upload-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.25s; position: relative; background: #fff; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: #f0f7f1; }
+        .upload-zone .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .upload-zone .label { font-weight: 600; font-size: 0.95rem; color: var(--ink); }
+        .upload-zone .sublabel { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+        .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .upload-zone.loaded { border-color: var(--success); border-style: solid; }
+        .table-wrapper { margin-top: 1.5rem; overflow-x: auto; display: none; border: 1px solid var(--border); border-radius: 6px; }
+        .table-wrapper.show { display: block; animation: fadeUp 0.3s ease-out; }
+        .table-info { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 1rem; background: #e8f0e9; border-bottom: 1px solid var(--border); font-size: 0.82rem; flex-wrap: wrap; gap: 0.5rem; }
+        .table-info .count { font-weight: 600; color: var(--accent); }
+        .table-info input[type="search"] { padding: 0.3rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; font-size: 0.8rem; font-family: 'DM Sans', sans-serif; width: 200px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        thead { background: var(--accent); color: #fff; position: sticky; top: 0; }
+        thead th { padding: 0.55rem 0.7rem; text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid #eee; transition: background 0.15s; cursor: pointer; }
+        tbody tr:hover { background: #f0f7f1; }
+        tbody tr.selected { background: #d4edda; }
+        tbody td { padding: 0.5rem 0.7rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        tbody td:first-child { text-align: center; }
+        .radio-dot { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 50%; display: inline-block; vertical-align: middle; transition: all 0.2s; }
+        tr.selected .radio-dot { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px #fff; }
+        .detail-panel { margin-top: 1.5rem; display: none; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        .detail-panel.show { display: block; animation: fadeUp 0.3s ease-out; }
+        .detail-header { background: var(--accent); color: #fff; padding: 0.7rem 1rem; font-weight: 600; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.3rem; }
+        .detail-body { padding: 1.2rem; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7rem 1.2rem; }
+        @media (max-width: 700px) { .field-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 480px) { .field-grid { grid-template-columns: 1fr; } }
+        .field label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); display: block; margin-bottom: 0.1rem; }
+        .field input { width: 100%; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 3px; font-size: 0.88rem; font-family: 'DM Sans', sans-serif; }
+        .field input:focus { outline: none; border-color: var(--accent); }
+        .section-label { font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin: 1rem 0 0.5rem; grid-column: 1 / -1; }
+        .section-label:first-child { margin-top: 0; }
+        .actions { display: flex; justify-content: center; gap: 0.6rem; margin-top: 1.2rem; flex-wrap: wrap; }
+        .btn { font-family: 'DM Sans', sans-serif; font-weight: 600; padding: 0.65rem 1.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(44,85,48,0.2); }
+        .btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+        .btn-secondary:hover { background: var(--accent); color: #fff; }
+        .output-section { margin-top: 1rem; display: none; animation: fadeUp 0.3s ease-out; }
+        .output-section.show { display: block; }
+        .output-box { background: #1a1a2e; color: #a8e6a3; padding: 0.8rem 1rem; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.78rem; word-break: break-all; line-height: 1.5; position: relative; }
+        .copy-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 0.3rem 0.6rem; border-radius: 3px; font-size: 0.72rem; cursor: pointer; transition: background 0.2s; }
+        .copy-btn:hover { background: rgba(255,255,255,0.3); }
+        .copy-btn.copied { background: var(--success); }
+        .email-template { margin-top: 0.8rem; background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 1rem; font-size: 0.82rem; line-height: 1.6; color: #333; }
+        .email-template strong { color: var(--ink); }
+        .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #fff; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: transform 0.3s ease-out; z-index: 100; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Kristallkraft – Link-Generator Spendenbescheinigung</h1>
+    <p>Microsoft Forms Excel-Export hochladen → Veranstalter auswählen → Link generieren</p>
+</div>
+
+<div class="card">
+    <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+        <div class="icon">📊</div>
+        <div class="label">Microsoft Forms Export (.xlsx) hier ablegen oder klicken</div>
+        <div class="sublabel">Die Datei wird nur lokal im Browser verarbeitet – keine Daten werden hochgeladen.</div>
+    </div>
+
+    <div class="table-wrapper" id="tableWrapper">
+        <div class="table-info">
+            <span class="count" id="rowCount"></span>
+            <input type="search" id="searchInput" placeholder="Suchen…">
+        </div>
+        <div style="max-height: 350px; overflow-y: auto;">
+            <table>
+                <thead id="thead"></thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="detail-panel" id="detailPanel">
+        <div class="detail-header">
+            <span id="detailTitle">Ausgewählter Veranstalter</span>
+            <span style="font-size:0.75rem; opacity:0.8;">Felder bei Bedarf anpassen</span>
+        </div>
+        <div class="detail-body">
+            <div class="field-grid" id="fieldGrid">
+                <div class="section-label">Vereinsdaten</div>
+                <div class="field"><label>Vereinsname</label><input id="f-verein"></div>
+                <div class="field"><label>Vorname</label><input id="f-vorname"></div>
+                <div class="field"><label>Nachname</label><input id="f-nachname"></div>
+                <div class="field"><label>E-Mail</label><input id="f-email"></div>
+                <div class="field"><label>Eingetragener Verein</label><input id="f-ev"></div>
+                <div class="field"><label>Straße Verein</label><input id="f-strasse"></div>
+                <div class="field"><label>Hausnummer</label><input id="f-hausnr"></div>
+                <div class="field"><label>PLZ</label><input id="f-plz"></div>
+                <div class="field"><label>Ort</label><input id="f-ort"></div>
+
+                <div class="section-label">Steuerliche Angaben</div>
+                <div class="field"><label>Zuständiges Finanzamt</label><input id="f-finanzamt"></div>
+                <div class="field"><label>Steuernummer</label><input id="f-steuernr"></div>
+                <div class="field"><label>Veranlagungszeitraum</label><input id="f-veranlagung"></div>
+                <div class="field"><label>Datum Freistellungsbescheid</label><input id="f-freistellung"></div>
+
+                <div class="section-label">Veranstaltung</div>
+                <div class="field"><label>Art der Veranstaltung</label><input id="f-art"></div>
+                <div class="field"><label>Datum der Veranstaltung</label><input id="f-veranstaltungsdatum"></div>
+                <div class="field"><label>Teilnehmeranzahl</label><input id="f-teilnehmer"></div>
+
+                <div class="section-label">Sachzuwendung</div>
+                <div class="field"><label>Bezeichnung</label><input id="f-sachzuwendung" value="Sponsoring-Paket Pferdefutter"></div>
+                <div class="field"><label>Wert in EUR</label><input id="f-wert" type="number" step="0.01"></div>
+                <div class="field"><label>Datum der Zuwendung</label><input id="f-zuwendungsdatum" type="date"></div>
+
+                <div class="section-label">Lieferadresse</div>
+                <div class="field"><label>Straße (Lieferung)</label><input id="f-lief_strasse"></div>
+                <div class="field"><label>Hausnummer</label><input id="f-lief_nr"></div>
+                <div class="field"><label>PLZ</label><input id="f-lief_plz"></div>
+                <div class="field"><label>Ort</label><input id="f-lief_ort"></div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="generateLink()">🔗 Link generieren</button>
+                <button class="btn btn-secondary" onclick="copyLink()">📋 Link kopieren</button>
+                <button class="btn btn-secondary" onclick="copyEmail()">✉️ E-Mail-Text kopieren</button>
+            </div>
+
+            <div class="output-section" id="outputSection">
+                <div class="output-box" id="linkBox">
+                    <button class="copy-btn" onclick="copyLink()">Kopieren</button>
+                    <span id="linkText"></span>
+                </div>
+                <div class="email-template" id="emailTemplate"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE_URL = 'https://deniz-kk.github.io/angebot-generator/spendenbescheinigung.html';
+
+let allRows = [];
+let selectedIndex = -1;
+let generatedLink = '';
+
+const COLUMN_MAP = {
+    'Name des Vereins': 'verein',
+    'Eingetragener Verein (e.V.)': 'ev',
+    'Vorname': 'vorname',
+    'Nachname': 'nachname',
+    'Email': 'email',
+    'Strasse Verein': 'strasse',
+    'Hausnummer': 'hausnr',
+    'PLZ/Verein': 'plz',
+    'Ort/Verein': 'ort',
+    'Zuständiges Finanzamt:': 'finanzamt',
+    'Steuernummer:': 'steuernr',
+    'Veranlagungszeitraum:': 'veranlagung',
+    'Datum des Freistellungsbescheides:': 'freistellung',
+    'Art der Veranstaltung:': 'art',
+    'Datum der Veranstaltung': 'veranstaltungsdatum',
+    'Teilnehmeranzahl': 'teilnehmer',
+    'Strasse/ Lief.': 'lief_strasse',
+    'Nummer': 'lief_nr',
+    'Postleitzahl/ Lief.': 'lief_plz',
+    'Lieferort': 'lief_ort',
+    'geantwortet': 'geantwortet',
+    'Versendet': 'versendet',
+    'Spendenbescheinigung erhalten': 'bescheinigung'
+};
+
+const TABLE_COLS = [
+    { key: 'verein', label: 'Verein' },
+    { key: 'vorname', label: 'Vorname' },
+    { key: 'nachname', label: 'Nachname' },
+    { key: 'art', label: 'Veranstaltung' },
+    { key: 'veranstaltungsdatum', label: 'Datum' },
+    { key: 'ev', label: 'e.V.?' },
+    { key: 'geantwortet', label: 'Beantw.' },
+    { key: 'versendet', label: 'Versandt' },
+];
+
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, { type: 'array', cellDates: true });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+            if (!json.length) { showToast('Die Datei enthält keine Daten.'); return; }
+
+            const headers = Object.keys(json[0]);
+            allRows = json.map((row, idx) => {
+                const mapped = { _index: idx };
+                headers.forEach(h => {
+                    const clean = h.trim();
+                    const fieldId = COLUMN_MAP[h] || COLUMN_MAP[clean];
+                    if (fieldId) {
+                        let val = row[h];
+                        if (val instanceof Date) val = val.toLocaleDateString('de-DE');
+                        mapped[fieldId] = String(val || '').trim();
+                    }
+                });
+                return mapped;
+            });
+
+            uploadZone.classList.add('loaded');
+            uploadZone.querySelector('.label').textContent = '✓ ' + file.name + ' – ' + allRows.length + ' Einträge geladen';
+            renderTable(allRows);
+            showToast(allRows.length + ' Einträge geladen');
+        } catch (err) { showToast('Fehler: ' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function renderTable(rows) {
+    document.getElementById('thead').innerHTML = '<tr><th></th>' + TABLE_COLS.map(c => '<th>' + c.label + '</th>').join('') + '</tr>';
+    renderRows(rows);
+    document.getElementById('rowCount').textContent = rows.length + ' Veranstalter';
+    document.getElementById('tableWrapper').classList.add('show');
+}
+
+function renderRows(rows) {
+    document.getElementById('tbody').innerHTML = rows.map(row =>
+        '<tr onclick="selectRow(' + row._index + ')" class="' + (row._index === selectedIndex ? 'selected' : '') + '" data-idx="' + row._index + '">' +
+        '<td><span class="radio-dot"></span></td>' +
+        TABLE_COLS.map(c => '<td title="' + (row[c.key] || '') + '">' + (row[c.key] || '—') + '</td>').join('') +
+        '</tr>'
+    ).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    if (!q) { renderRows(allRows); document.getElementById('rowCount').textContent = allRows.length + ' Veranstalter'; return; }
+    const filtered = allRows.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
+    renderRows(filtered);
+    document.getElementById('rowCount').textContent = filtered.length + ' von ' + allRows.length + ' Veranstalter';
+});
+
+function selectRow(idx) {
+    selectedIndex = idx;
+    const row = allRows.find(r => r._index === idx);
+    if (!row) return;
+
+    document.querySelectorAll('tbody tr').forEach(tr => { tr.classList.toggle('selected', parseInt(tr.dataset.idx) === idx); });
+
+    ['verein','vorname','nachname','email','ev','strasse','hausnr','plz','ort',
+     'finanzamt','steuernr','veranlagung','freistellung',
+     'art','veranstaltungsdatum','teilnehmer',
+     'lief_strasse','lief_nr','lief_plz','lief_ort'
+    ].forEach(id => {
+        const el = document.getElementById('f-' + id);
+        if (el && row[id] !== undefined) el.value = row[id];
+    });
+
+    if (!document.getElementById('f-sachzuwendung').value) document.getElementById('f-sachzuwendung').value = 'Sponsoring-Paket Pferdefutter';
+
+    document.getElementById('detailTitle').textContent = row.verein || 'Veranstalter';
+    document.getElementById('detailPanel').classList.add('show');
+    document.getElementById('outputSection').classList.remove('show');
+    setTimeout(() => document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function generateLink() {
+    const params = new URLSearchParams();
+    ['verein','ev','vorname','nachname','email','strasse','hausnr','plz','ort',
+     'finanzamt','steuernr','veranlagung','freistellung',
+     'art','veranstaltungsdatum','sachzuwendung','wert','zuwendungsdatum',
+     'lief_strasse','lief_nr','lief_plz','lief_ort'
+    ].forEach(id => {
+        const val = document.getElementById('f-' + id).value.trim();
+        if (val) params.set(id, val);
+    });
+
+    generatedLink = BASE_URL + '?' + params.toString();
+    document.getElementById('linkText').textContent = generatedLink;
+
+    const v = id => document.getElementById('f-' + id).value || '';
+    document.getElementById('emailTemplate').innerHTML =
+        '<strong>Betreff:</strong> Sponsoring-Zusage Kristallkraft – ' + v('verein') + '<br><br>' +
+        'Sehr geehrte/r ' + v('vorname') + ' ' + v('nachname') + ',<br><br>' +
+        'wir freuen uns, ' + v('verein') + ' für ' + (v('art') || 'Ihre Veranstaltung') +
+        (v('veranstaltungsdatum') ? ' am ' + v('veranstaltungsdatum') : '') +
+        ' mit einem Sponsoring-Paket zu unterstützen.<br><br>' +
+        'Das Paket wird in Kürze per DHL an Sie versendet.<br><br>' +
+        'Bitte füllen Sie die folgende Spendenbescheinigung aus und unterschreiben Sie digital:<br>' +
+        '<strong><a href="' + generatedLink + '" target="_blank" style="color:var(--accent);word-break:break-all;">' + generatedLink + '</a></strong><br><br>' +
+        'Bitte senden Sie uns die unterschriebene PDF nach Erhalt des Pakets an <strong>info@kristallkraft.com</strong> zurück.<br><br>' +
+        'Mit freundlichen Grüßen<br><em>[Name der Bearbeiterin]</em>';
+
+    document.getElementById('outputSection').classList.add('show');
+    showToast('Link generiert!');
+}
+
+function copyLink() {
+    if (!generatedLink) generateLink();
+    navigator.clipboard.writeText(generatedLink).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✓ Kopiert'; btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Kopieren'; btn.classList.remove('copied'); }, 2000);
+        showToast('Link kopiert!');
+    });
+}
+
+function copyEmail() {
+    if (!generatedLink) generateLink();
+    navigator.clipboard.writeText(document.getElementById('emailTemplate').innerText).then(() => showToast('E-Mail-Text kopiert!'));
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
