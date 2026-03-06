@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendenbescheinigung – Kristallkraft</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+        :root {
+            --ink: #1a1a2e;
+            --paper: #fafaf7;
+            --accent: #2c5530;
+            --accent-light: #e8f0e9;
+            --border: #c8c5bb;
+            --muted: #6b6b6b;
+            --warm: #f5f0e8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--warm);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeDown 0.6s ease-out;
+        }
+        .page-header h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+        }
+        .page-header p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        .document {
+            background: var(--paper);
+            width: 100%;
+            max-width: 720px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
+            padding: 2.5rem 2.5rem 2rem;
+            animation: fadeUp 0.5s ease-out 0.1s both;
+        }
+
+        @media (max-width: 600px) {
+            .document { padding: 1.5rem 1.2rem 1.5rem; }
+        }
+
+        .doc-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--ink);
+            border-bottom: 2px solid var(--ink);
+            padding-bottom: 0.6rem;
+            margin-bottom: 0.4rem;
+        }
+        .doc-subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        .section-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 0.6rem;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem 1.2rem;
+        }
+        .field-grid.full { grid-template-columns: 1fr; }
+
+        @media (max-width: 500px) {
+            .field-grid { grid-template-columns: 1fr; }
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+        .field label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 0.15rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .field .value {
+            font-size: 0.95rem;
+            padding: 0.35rem 0;
+            border-bottom: 1px solid var(--border);
+            min-height: 1.6rem;
+            word-break: break-word;
+        }
+
+        .legal-text {
+            font-size: 0.78rem;
+            line-height: 1.55;
+            color: #444;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--accent-light);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .signature-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .signature-section .section-label {
+            margin-bottom: 0.8rem;
+        }
+
+        .signature-pad-wrapper {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .signature-pad-wrapper:hover,
+        .signature-pad-wrapper.active {
+            border-color: var(--accent);
+        }
+        .signature-pad-wrapper .hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #bbb;
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .signature-pad-wrapper.has-sig .hint { opacity: 0; }
+
+        canvas#signatureCanvas {
+            display: block;
+            width: 100%;
+            height: 160px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .sig-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+        .btn-clear {
+            font-size: 0.78rem;
+            color: var(--muted);
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-clear:hover { border-color: var(--ink); color: var(--ink); }
+
+        .submit-row {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .btn-submit {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            padding: 0.85rem 2.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.02em;
+        }
+        .btn-submit:hover { background: #1e3d22; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(44,85,48,0.25); }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .success-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26,26,46,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .success-overlay.show { display: flex; }
+        .success-card {
+            background: var(--paper);
+            padding: 2.5rem 3rem;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 420px;
+            animation: scaleIn 0.3s ease-out;
+        }
+        .success-card .checkmark {
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .success-card .checkmark svg { stroke: #fff; width: 28px; height: 28px; }
+        .success-card h2 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+        .success-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+
+        .error-msg {
+            color: #c0392b;
+            font-size: 0.82rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+        .date-place {
+            display: flex;
+            gap: 1.2rem;
+            margin-top: 1rem;
+            align-items: flex-end;
+        }
+        .date-place .field { flex: 1; }
+        .date-place .value {
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>Kristallkraft GmbH & Co. KG</h1>
+    <p>Digitale Spendenbescheinigung</p>
+</div>
+
+<div class="document" id="document">
+    <div class="doc-title">Bestätigung über Sachzuwendungen</div>
+    <div class="doc-subtitle">im Sinne des § 10b des Einkommensteuergesetzes an inländische Empfänger</div>
+
+    <!-- Empfänger / Verein -->
+    <div class="section">
+        <div class="section-label">Zuwendungsempfänger (Verein)</div>
+        <div class="field-grid">
+            <div class="field">
+                <label>Vereinsname</label>
+                <div class="value" id="val-verein"></div>
+            </div>
+            <div class="field">
+                <label>Ansprechpartner</label>
+                <div class="value" id="val-ansprech"></div>
+            </div>
+            <div class="field span2">
+                <label>Adresse</label>
+                <div class="value" id="val-adresse"></div>
+            </div>
+            <div class="field">
+                <label>E-Mail</label>
+                <div class="value" id="val-email"></div>
+            </div>
+            <div class="field">
+                <label>Eingetragener Verein</label>
+                <div class="value" id="val-ev"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Steuerliche Angaben -->
+    <div class="section">
+        <div class="section-label">Steuerliche Angaben</div>
+        <div class="field-grid">
+            <div class="field">
+                <label>Zuständiges Finanzamt</label>
+                <div class="value" id="val-finanzamt"></div>
+            </div>
+            <div class="field">
+                <label>Steuernummer</label>
+                <div class="value" id="val-steuernr"></div>
+            </div>
+            <div class="field">
+                <label>Veranlagungszeitraum</label>
+                <div class="value" id="val-veranlagung"></div>
+            </div>
+            <div class="field">
+                <label>Datum Freistellungsbescheid</label>
+                <div class="value" id="val-freistellung"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Veranstaltung -->
+    <div class="section">
+        <div class="section-label">Veranstaltung</div>
+        <div class="field-grid">
+            <div class="field">
+                <label>Art der Veranstaltung</label>
+                <div class="value" id="val-art"></div>
+            </div>
+            <div class="field">
+                <label>Datum der Veranstaltung</label>
+                <div class="value" id="val-datum"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zuwendung / Spende -->
+    <div class="section">
+        <div class="section-label">Angaben zur Sachzuwendung</div>
+        <div class="field-grid">
+            <div class="field">
+                <label>Zuwendender (Spender)</label>
+                <div class="value">Kristallkraft GmbH & Co. KG</div>
+            </div>
+            <div class="field">
+                <label>Bezeichnung der Sachzuwendung</label>
+                <div class="value" id="val-sachzuwendung">Sponsoring-Paket Pferdefutter</div>
+            </div>
+            <div class="field">
+                <label>Wert der Sachzuwendung (EUR)</label>
+                <div class="value" id="val-wert"></div>
+            </div>
+            <div class="field">
+                <label>Datum der Zuwendung</label>
+                <div class="value" id="val-zuwendungsdatum"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal text -->
+    <div class="legal-text">
+        Es wird bestätigt, dass die Sachzuwendung ausschließlich und unmittelbar für den steuerbegünstigten Zweck 
+        des Vereins verwendet wird. Der Verein ist nach dem letzten zugegangenen Freistellungsbescheid des 
+        zuständigen Finanzamtes als gemeinnützig anerkannt und berechtigt, Zuwendungsbestätigungen auszustellen.
+        <br><br>
+        Es wird bestätigt, dass es sich bei der Zuwendung nicht um den Verzicht auf die Erstattung von Aufwendungen handelt.
+    </div>
+
+    <!-- Lieferadresse (Info) -->
+    <div class="section">
+        <div class="section-label">Lieferadresse des Sponsoring-Pakets</div>
+        <div class="field-grid full">
+            <div class="field">
+                <label>Adresse</label>
+                <div class="value" id="val-lieferadresse"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unterschrift -->
+    <div class="signature-section">
+        <div class="section-label">Unterschrift des Zuwendungsempfängers</div>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.8rem;">
+            Bitte unterschreiben Sie hier mit dem Finger oder Stift auf Ihrem Touchscreen.
+        </p>
+        <div class="signature-pad-wrapper" id="sigWrapper">
+            <span class="hint">Hier unterschreiben ✍️</span>
+            <canvas id="signatureCanvas"></canvas>
+        </div>
+        <div class="sig-actions">
+            <button class="btn-clear" onclick="clearSignature()">Unterschrift löschen</button>
+        </div>
+
+        <div class="date-place">
+            <div class="field">
+                <label>Ort</label>
+                <div class="value" id="val-ort-sig"></div>
+            </div>
+            <div class="field">
+                <label>Datum</label>
+                <div class="value" id="val-datum-sig"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg">Bitte unterschreiben Sie die Bescheinigung.</div>
+
+    <div class="submit-row">
+        <button class="btn-submit" id="submitBtn" onclick="generatePDF()">
+            Unterschreiben & PDF erstellen
+        </button>
+    </div>
+</div>
+
+<!-- Success Overlay -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+        <div class="checkmark">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <h2>Vielen Dank!</h2>
+        <p>Ihre unterschriebene Spendenbescheinigung wurde als PDF erstellt und heruntergeladen. 
+           Bitte senden Sie die Datei an <strong>info@kristallkraft.com</strong> zurück, 
+           falls der automatische Upload nicht verfügbar ist.</p>
+    </div>
+</div>
+
+<script>
+// ─── URL Parameter Parsing ───
+const params = new URLSearchParams(window.location.search);
+
+function p(key, fallback = '') {
+    return decodeURIComponent(params.get(key) || fallback);
+}
+
+// Fill fields from URL parameters
+document.getElementById('val-verein').textContent = p('verein');
+document.getElementById('val-ansprech').textContent = [p('vorname'), p('nachname')].filter(Boolean).join(' ');
+document.getElementById('val-adresse').textContent = [p('strasse'), p('hausnr'), p('plz'), p('ort')].filter(Boolean).join(', ');
+document.getElementById('val-email').textContent = p('email');
+document.getElementById('val-ev').textContent = p('ev', 'Ja');
+document.getElementById('val-finanzamt').textContent = p('finanzamt');
+document.getElementById('val-steuernr').textContent = p('steuernr');
+document.getElementById('val-veranlagung').textContent = p('veranlagung');
+document.getElementById('val-freistellung').textContent = p('freistellung');
+document.getElementById('val-art').textContent = p('art');
+document.getElementById('val-datum').textContent = p('veranstaltungsdatum');
+document.getElementById('val-wert').textContent = p('wert', '—') + (p('wert') ? ' €' : '');
+document.getElementById('val-zuwendungsdatum').textContent = p('zuwendungsdatum', new Date().toLocaleDateString('de-DE'));
+document.getElementById('val-lieferadresse').textContent = [p('lief_strasse'), p('lief_nr'), p('lief_plz'), p('lief_ort')].filter(Boolean).join(', ');
+document.getElementById('val-ort-sig').textContent = p('ort', '');
+document.getElementById('val-datum-sig').textContent = new Date().toLocaleDateString('de-DE');
+
+if (p('sachzuwendung')) {
+    document.getElementById('val-sachzuwendung').textContent = p('sachzuwendung');
+}
+
+// ─── Signature Pad ───
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+const wrapper = document.getElementById('sigWrapper');
+let isDrawing = false;
+let hasSigned = false;
+
+function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+}
+resizeCanvas();
+window.addEventListener('resize', () => { if (!hasSigned) resizeCanvas(); });
+
+function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+}
+
+function startDraw(e) {
+    e.preventDefault();
+    isDrawing = true;
+    wrapper.classList.add('active');
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    hasSigned = true;
+    wrapper.classList.add('has-sig');
+}
+
+function endDraw(e) {
+    if (isDrawing) {
+        e.preventDefault();
+        isDrawing = false;
+        wrapper.classList.remove('active');
+    }
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('mouseleave', endDraw);
+canvas.addEventListener('touchstart', startDraw, { passive: false });
+canvas.addEventListener('touchmove', draw, { passive: false });
+canvas.addEventListener('touchend', endDraw);
+
+function clearSignature() {
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    hasSigned = false;
+    wrapper.classList.remove('has-sig');
+    document.getElementById('errorMsg').classList.remove('show');
+}
+
+// ─── PDF Generation ───
+function generatePDF() {
+    if (!hasSigned) {
+        document.getElementById('errorMsg').classList.add('show');
+        return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'PDF wird erstellt…';
+
+    setTimeout(() => {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const w = 210;
+            let y = 18;
+
+            // Header
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text('Kristallkraft GmbH & Co. KG', w / 2, y, { align: 'center' });
+            y += 8;
+
+            doc.setFontSize(14);
+            doc.text('Bestätigung über Sachzuwendungen', w / 2, y, { align: 'center' });
+            y += 5;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text('im Sinne des § 10b des Einkommensteuergesetzes an inländische Empfänger', w / 2, y, { align: 'center' });
+            y += 2;
+            doc.setDrawColor(30, 30, 30);
+            doc.setLineWidth(0.4);
+            doc.line(20, y, w - 20, y);
+            y += 8;
+
+            function sectionTitle(title) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(44, 85, 48);
+                doc.text(title.toUpperCase(), 20, y);
+                doc.setTextColor(0, 0, 0);
+                y += 5;
+            }
+
+            function fieldRow(label, value, x, fieldWidth) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7);
+                doc.setTextColor(120, 120, 120);
+                doc.text(label, x, y);
+                doc.setFontSize(10);
+                doc.setTextColor(26, 26, 46);
+                doc.text(String(value || '—'), x, y + 4.5);
+                doc.setDrawColor(200, 197, 187);
+                doc.setLineWidth(0.2);
+                doc.line(x, y + 6, x + fieldWidth, y + 6);
+            }
+
+            // Zuwendungsempfänger
+            sectionTitle('Zuwendungsempfänger (Verein)');
+            fieldRow('Vereinsname', p('verein'), 20, 75);
+            fieldRow('Ansprechpartner', [p('vorname'), p('nachname')].filter(Boolean).join(' '), 110, 75);
+            y += 11;
+            fieldRow('Adresse', [p('strasse'), p('hausnr'), p('plz'), p('ort')].filter(Boolean).join(', '), 20, 120);
+            y += 11;
+            fieldRow('E-Mail', p('email'), 20, 75);
+            fieldRow('Eingetragener Verein', p('ev', 'Ja'), 110, 75);
+            y += 14;
+
+            // Steuerliche Angaben
+            sectionTitle('Steuerliche Angaben');
+            fieldRow('Zuständiges Finanzamt', p('finanzamt'), 20, 75);
+            fieldRow('Steuernummer', p('steuernr'), 110, 75);
+            y += 11;
+            fieldRow('Veranlagungszeitraum', p('veranlagung'), 20, 75);
+            fieldRow('Datum Freistellungsbescheid', p('freistellung'), 110, 75);
+            y += 14;
+
+            // Veranstaltung
+            sectionTitle('Veranstaltung');
+            fieldRow('Art der Veranstaltung', p('art'), 20, 75);
+            fieldRow('Datum der Veranstaltung', p('veranstaltungsdatum'), 110, 75);
+            y += 14;
+
+            // Sachzuwendung
+            sectionTitle('Angaben zur Sachzuwendung');
+            fieldRow('Zuwendender (Spender)', 'Kristallkraft GmbH & Co. KG', 20, 75);
+            fieldRow('Bezeichnung', p('sachzuwendung', 'Sponsoring-Paket Pferdefutter'), 110, 75);
+            y += 11;
+            fieldRow('Wert der Sachzuwendung', (p('wert') || '—') + (p('wert') ? ' EUR' : ''), 20, 75);
+            fieldRow('Datum der Zuwendung', p('zuwendungsdatum', new Date().toLocaleDateString('de-DE')), 110, 75);
+            y += 14;
+
+            // Legal text
+            doc.setFillColor(232, 240, 233);
+            doc.roundedRect(20, y, w - 40, 22, 1, 1, 'F');
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(68, 68, 68);
+            const legalLines = doc.splitTextToSize(
+                'Es wird bestätigt, dass die Sachzuwendung ausschließlich und unmittelbar für den steuerbegünstigten Zweck des Vereins verwendet wird. Der Verein ist nach dem letzten zugegangenen Freistellungsbescheid des zuständigen Finanzamtes als gemeinnützig anerkannt und berechtigt, Zuwendungsbestätigungen auszustellen. Es wird bestätigt, dass es sich bei der Zuwendung nicht um den Verzicht auf die Erstattung von Aufwendungen handelt.',
+                w - 48
+            );
+            doc.text(legalLines, 24, y + 4.5);
+            y += 28;
+
+            // Lieferadresse
+            sectionTitle('Lieferadresse des Sponsoring-Pakets');
+            fieldRow('Adresse', [p('lief_strasse'), p('lief_nr'), p('lief_plz'), p('lief_ort')].filter(Boolean).join(', '), 20, 165);
+            y += 16;
+
+            // Signature
+            doc.setDrawColor(200, 197, 187);
+            doc.setLineWidth(0.3);
+            doc.line(20, y, w - 20, y);
+            y += 6;
+
+            sectionTitle('Unterschrift des Zuwendungsempfängers');
+
+            // Add signature image
+            const sigData = canvas.toDataURL('image/png');
+            doc.addImage(sigData, 'PNG', 20, y, 70, 25);
+            y += 28;
+
+            // Ort + Datum
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(120, 120, 120);
+            doc.text('Ort', 20, y);
+            doc.text('Datum', 110, y);
+            doc.setFontSize(10);
+            doc.setTextColor(26, 26, 46);
+            doc.text(p('ort', ''), 20, y + 4.5);
+            doc.text(new Date().toLocaleDateString('de-DE'), 110, y + 4.5);
+
+            // Save
+            const filename = `Spendenbescheinigung_${(p('verein') || 'Verein').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+            doc.save(filename);
+
+            document.getElementById('successOverlay').classList.add('show');
+        } catch (err) {
+            console.error(err);
+            alert('Fehler bei der PDF-Erstellung: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Unterschreiben & PDF erstellen';
+        }
+    }, 100);
+}
+
+// Close overlay
+document.getElementById('successOverlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+});
+</script>
+
+</body>
+</html>
