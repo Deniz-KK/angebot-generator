@@ -123,9 +123,16 @@
           const d = date.getDate().toString().padStart(2, '0');
           const m = (date.getMonth() + 1).toString().padStart(2, '0');
           const y = date.getFullYear().toString().slice(-2);
-          return `${d}.${m}.${y}`;
+          return d + '.' + m + '.' + y;
         }
         return date.toString();
+      };
+
+      const formatDateLong = (date) => {
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+        return d + '.' + m + '.' + y;
       };
 
       const generateDHLCSV = () => {
@@ -137,21 +144,23 @@
         }
 
         const today = new Date();
-        const deliveryDate = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear().toString().slice(-2)}`;
+        const dd = today.getDate().toString().padStart(2, '0');
+        const mm = (today.getMonth() + 1).toString().padStart(2, '0');
+        const yy = today.getFullYear().toString().slice(-2);
+        const deliveryDate = dd + '.' + mm + '.' + yy;
         
-        // DHL CSV Header - korrektes Format mit | als Trennzeichen
-        const header = `"OrderNo"|"s_name1"|"s_name2"|"s_street"|"s_zipcodeno"|"s_town"|"s_country"|"s_phone"|"s_mail"|"quantity"|"products"|"delivery_date"|"CustomerNo"|"Total_weight"|"Abrechnungsnummer"|"AbsName"|"AbsStrasse"|"AbsPLZOrt"|"AbsLand"|"Zuordnung"|"AbsTel"`;
+        const header = '"OrderNo"|"s_name1"|"s_name2"|"s_street"|"s_zipcodeno"|"s_town"|"s_country"|"s_phone"|"s_mail"|"quantity"|"products"|"delivery_date"|"CustomerNo"|"Total_weight"|"Abrechnungsnummer"|"AbsName"|"AbsStrasse"|"AbsPLZOrt"|"AbsLand"|"Zuordnung"|"AbsTel"';
         
-        const rows = selectedEntries.map((entry, idx) => {
-          const orderNo = `Sponsoring-${entry.oderId}`;
-          const name1 = `${entry.vorname} ${entry.nachname}`.trim();
+        const rows = selectedEntries.map((entry) => {
+          const orderNo = 'Sponsoring-' + entry.oderId;
+          const name1 = (entry.vorname + ' ' + entry.nachname).trim();
           const name2 = entry.vereinsname;
-          const street = `${entry.strasse} ${entry.nummer}`.trim();
+          const street = (entry.strasse + ' ' + entry.nummer).trim();
           const plz = entry.plz.toString().replace('.0', '').split('.')[0];
           const town = entry.ort;
           const email = entry.email;
           
-          return `"${orderNo}"|"${name1}"|"${name2}"|"${street}"|"${plz}"|"${town}"|"DE"|""|"${email}"|"1"|"CL-7, KK-8"|"${deliveryDate}"|""|"15,9"|"60796335170102"|"Kristallkraft Naturprodukte"|"Hauptstraße 3"|"29499 Zernien"|"DE"|"V01PAK"|"4958639836090"`;
+          return '"' + orderNo + '"|"' + name1 + '"|"' + name2 + '"|"' + street + '"|"' + plz + '"|"' + town + '"|"DE"|""|"' + email + '"|"1"|"CL-7, KK-8"|"' + deliveryDate + '"|""|"15,9"|"60796335170102"|"Kristallkraft Naturprodukte"|"Hauptstraße 3"|"29499 Zernien"|"DE"|"V01PAK"|"4958639836090"';
         });
 
         const csvContent = '\uFEFF' + header + '\r\n' + rows.join('\r\n');
@@ -160,13 +169,82 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        const dateStr = `${today.getDate().toString().padStart(2, '0')}_${(today.getMonth() + 1).toString().padStart(2, '0')}_${today.getFullYear().toString().slice(-2)}`;
-        const timeStr = `${today.getHours().toString().padStart(2, '0')}_${today.getMinutes().toString().padStart(2, '0')}_${today.getSeconds().toString().padStart(2, '0')}`;
-        link.download = `DHL_ZL_DE_-_${dateStr}_-_${timeStr}.csv`;
+        const hh = today.getHours().toString().padStart(2, '0');
+        const min = today.getMinutes().toString().padStart(2, '0');
+        const ss = today.getSeconds().toString().padStart(2, '0');
+        link.download = 'DHL_ZL_DE_-_' + dd + '_' + mm + '_' + yy + '_-_' + hh + '_' + min + '_' + ss + '.csv';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+      };
+
+      const generateAnschreiben = () => {
+        const selectedEntries = entries.filter(e => selectedIds.has(e.id) && !e.isAlreadySent);
+        
+        if (selectedEntries.length === 0) {
+          alert('Keine Einträge ausgewählt.');
+          return;
+        }
+
+        const today = new Date();
+        const dateStr = formatDateLong(today);
+
+        let anschreibenHTML = '';
+        
+        selectedEntries.forEach((entry, idx) => {
+          const plz = entry.plz.toString().replace('.0', '').split('.')[0];
+          const pageBreak = idx > 0 ? ' style="page-break-before: always;"' : '';
+          
+          anschreibenHTML += '<div class="page"' + pageBreak + '>';
+          anschreibenHTML += '<div class="date">' + dateStr + '</div>';
+          anschreibenHTML += '<div class="sender">Kristallkraft Naturprodukte GmbH &amp; Co. KG · Hauptstr. 3 · 29499 Gülden</div>';
+          anschreibenHTML += '<div class="recipient">';
+          anschreibenHTML += entry.vereinsname + '<br>';
+          anschreibenHTML += entry.vorname + ' ' + entry.nachname + '<br>';
+          anschreibenHTML += entry.strasse + ' ' + entry.nummer + '<br>';
+          anschreibenHTML += plz + ' ' + entry.ort;
+          anschreibenHTML += '</div>';
+          anschreibenHTML += '<div class="subject">Unsere Sachspende</div>';
+          anschreibenHTML += '<div class="content">';
+          anschreibenHTML += '<p>Gern unterstützen wir euch bei eurer Veranstaltung mit unserem Sponsoring-Paket, bestehend aus zwei in unserer Hofmanufaktur liebevoll hergestellten Kristallkraft-Produkten:</p>';
+          anschreibenHTML += '<table class="products">';
+          anschreibenHTML += '<tr><td>1 x Art. CL-7</td><td>Kristallkraft Coolly im Wert von 72,90 €</td></tr>';
+          anschreibenHTML += '<tr><td>1 x Art. KK-8</td><td>Kristallkraft No1 im Wert von 59,90 €</td></tr>';
+          anschreibenHTML += '</table>';
+          anschreibenHTML += '<p>Bitte sendet uns die per Email an die Emailadresse (<strong>' + entry.email + '</strong>) versendete Spendenbescheinigung spätestens 14 Tage nach der Veranstaltung ausgefüllt zurück.</p>';
+          anschreibenHTML += '<p>Ich wünsche euch eine schöne Veranstaltung und viel Erfolg.</p>';
+          anschreibenHTML += '<p>Herzliche Grüße</p>';
+          anschreibenHTML += '<div class="signature">';
+          anschreibenHTML += '<p><strong>Katrin Bachmann</strong></p>';
+          anschreibenHTML += '<p>Kristallkraft Naturprodukte GmbH &amp; Co. KG</p>';
+          anschreibenHTML += '</div></div></div>';
+        });
+
+        const printWindow = window.open('', '_blank');
+        let htmlContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Anschreiben</title>';
+        htmlContent += '<style>';
+        htmlContent += '@page { size: A4; margin: 0; }';
+        htmlContent += '* { box-sizing: border-box; margin: 0; padding: 0; }';
+        htmlContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }';
+        htmlContent += '.page { padding: 20mm 25mm; min-height: 297mm; }';
+        htmlContent += '.date { text-align: right; margin-bottom: 20px; }';
+        htmlContent += '.sender { font-size: 9pt; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 30px; }';
+        htmlContent += '.recipient { margin-bottom: 40px; line-height: 1.6; }';
+        htmlContent += '.subject { font-weight: bold; font-size: 14pt; margin-bottom: 25px; }';
+        htmlContent += '.content p { margin-bottom: 15px; }';
+        htmlContent += '.products { width: 100%; border-collapse: collapse; margin: 20px 0; }';
+        htmlContent += '.products td { padding: 10px; border: 1px solid #ddd; }';
+        htmlContent += '.products td:first-child { width: 120px; font-weight: bold; }';
+        htmlContent += '.signature { margin-top: 40px; }';
+        htmlContent += '.signature p { margin-bottom: 5px; }';
+        htmlContent += '</style></head><body>';
+        htmlContent += anschreibenHTML;
+        htmlContent += '<script>window.onload = function() { window.print(); }<\/script>';
+        htmlContent += '</body></html>';
+        
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
       };
 
       const selectedCount = [...selectedIds].filter(id => !entries.find(e => e.id === id)?.isAlreadySent).length;
@@ -175,7 +253,6 @@
 
       return (
         <div style={{ minHeight: '100vh', padding: '24px' }}>
-          {/* Header */}
           <div style={{
             maxWidth: '1400px',
             margin: '0 auto 24px',
@@ -223,7 +300,6 @@
             )}
           </div>
 
-          {/* Upload Area */}
           {entries.length === 0 && (
             <div 
               onDrop={handleFileDrop}
@@ -264,10 +340,8 @@
             </div>
           )}
 
-          {/* Entries Table */}
           {entries.length > 0 && !isLoading && (
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-              {/* Actions Bar */}
               <div style={{
                 display: 'flex',
                 gap: '12px',
@@ -330,6 +404,29 @@
                 <div style={{ flex: 1 }} />
                 
                 <button
+                  onClick={generateAnschreiben}
+                  disabled={selectedCount === 0}
+                  style={{
+                    padding: '12px 28px',
+                    background: selectedCount > 0 
+                      ? 'linear-gradient(135deg, #60a5fa, #3b82f6)' 
+                      : 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: selectedCount > 0 ? '#fff' : '#666',
+                    cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: selectedCount > 0 ? '0 4px 20px rgba(59,130,246,0.3)' : 'none'
+                  }}
+                >
+                  📄 Anschreiben ({selectedCount})
+                </button>
+                
+                <button
                   onClick={generateDHLCSV}
                   disabled={selectedCount === 0}
                   style={{
@@ -349,11 +446,10 @@
                     boxShadow: selectedCount > 0 ? '0 4px 20px rgba(255,215,0,0.3)' : 'none'
                   }}
                 >
-                  📦 DHL CSV exportieren ({selectedCount})
+                  📦 DHL CSV ({selectedCount})
                 </button>
               </div>
 
-              {/* File Name */}
               <div style={{
                 background: 'rgba(255,255,255,0.05)',
                 borderRadius: '8px',
@@ -371,7 +467,6 @@
                 </span>
               </div>
 
-              {/* Table */}
               <div style={{
                 background: 'rgba(0,0,0,0.3)',
                 borderRadius: '12px',
@@ -386,9 +481,7 @@
                   }}>
                     <thead>
                       <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                        <th style={{ padding: '14px 12px', textAlign: 'center', width: '50px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          ✓
-                        </th>
+                        <th style={{ padding: '14px 12px', textAlign: 'center', width: '50px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>✓</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Name</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Verein</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Lieferadresse</th>
@@ -499,7 +592,6 @@
                 </div>
               </div>
 
-              {/* Footer Info */}
               <div style={{
                 marginTop: '16px',
                 padding: '16px',
