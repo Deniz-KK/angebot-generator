@@ -90,7 +90,7 @@
   <div id="step1" class="fade-in">
     <div class="card">
       <h2><span class="icon">&#x1F4C4;</span> Rechnung hochladen</h2>
-      <p style="color:var(--text-muted);font-size:14px;margin-bottom:18px">Lade die Kristallkraft-Rechnung als PDF hoch. Die Daten werden automatisch ausgelesen.</p>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:18px">Laden Sie die Kristallkraft-Rechnung als PDF hoch. Die Daten werden automatisch ausgelesen.</p>
       <div class="upload-zone" id="uploadZone">
         <span class="upload-icon">&#x1F4E4;</span>
         <div class="upload-label">PDF hier ablegen oder klicken</div>
@@ -150,9 +150,18 @@
           <div class="toggle-desc">Aktivieren, wenn der Influencer Kleinunternehmer ist (keine MwSt. auf der Gutschrift)</div>
         </div>
       </div>
-      <div class="form-group" id="steuernummerGroup">
-        <label>Steuernummer</label>
-        <input type="text" id="infSteuer" placeholder="z.B. 12/345/67890">
+      <div class="form-row" id="steuernummerGroup">
+        <div class="form-group">
+          <label>Art der Steuernummer</label>
+          <select id="infSteuerTyp">
+            <option value="steuernummer">Steuernummer</option>
+            <option value="ustid">USt.-IdNr.</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label id="steuerLabel">Steuernummer</label>
+          <input type="text" id="infSteuer" placeholder="z.B. 12/345/67890">
+        </div>
       </div>
     </div>
     <div class="card fade-in">
@@ -196,6 +205,13 @@ uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('dragove
 uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('dragover');if(e.dataTransfer.files.length&&e.dataTransfer.files[0].type==='application/pdf')handleFile(e.dataTransfer.files[0])});
 fileInput.addEventListener('change',e=>{if(e.target.files.length)handleFile(e.target.files[0])});
 removeFileBtn.addEventListener('click',()=>{pdfFile=null;fileInput.value='';uploadZone.classList.remove('hidden');fileLoaded.classList.add('hidden');btnParse.disabled=true});
+
+document.getElementById('infSteuerTyp').addEventListener('change',function(){
+  const lbl=document.getElementById('steuerLabel');
+  const inp=document.getElementById('infSteuer');
+  if(this.value==='ustid'){lbl.textContent='USt.-IdNr.';inp.placeholder='z.B. DE123456789'}
+  else{lbl.textContent='Steuernummer';inp.placeholder='z.B. 12/345/67890'}
+});
 
 function handleFile(f){pdfFile=f;fileNameEl.textContent=f.name;uploadZone.classList.add('hidden');fileLoaded.classList.remove('hidden');uploadError.classList.add('hidden');btnParse.disabled=false}
 
@@ -284,12 +300,13 @@ function getAmounts(){
 function renderPreview(){
   const n=document.getElementById('infName').value,st=document.getElementById('infStreet').value,
     z=document.getElementById('infZip').value,c=document.getElementById('infCity').value,
-    sx=document.getElementById('infSteuer').value,gn=document.getElementById('gsNumber').value,
+    sx=document.getElementById('infSteuer').value,sTyp=document.getElementById('infSteuerTyp').value,
+    sLabel=sTyp==='ustid'?'USt.-IdNr.':'Steuernummer',gn=document.getElementById('gsNumber').value,
     gd=fDateDE(document.getElementById('gsDate').value),a=getAmounts();
 
   let h=`<div style="text-align:center;margin-bottom:24px"><strong style="font-size:16px">Gutschrift Nr.${gn} v. ${gd}</strong></div>
     <div style="margin-bottom:4px"><strong>Aussteller:</strong></div><div>${n}</div><div>${st}</div><div>${z} ${c}</div>`;
-  if(sx)h+=`<div>Steuernummer: ${sx}</div>`;
+  if(sx)h+=`<div>${sLabel}: ${sx}</div>`;
   h+=`<br><br><br><div style="margin-bottom:4px"><strong>Empf\u00e4nger:</strong></div>
     <div>Kristallkraft Naturprodukte GmbH &amp; Co. KG</div><div>Hauptstra\u00dfe 3</div><div>29499 G\u00fclden</div><div>USt-IdNr.: DE296319042</div><br>
     <div style="margin-bottom:16px">Gem\u00e4\u00df Kooperationsvertrag erfolgt die Rechnungsausstellung im Gutschriftverfahren gem\u00e4\u00df \u00a7 14 UStG</div>
@@ -316,7 +333,8 @@ function generatePDF(){
   const doc=new jsPDF({unit:'mm',format:'a4'});
   const n=document.getElementById('infName').value,st=document.getElementById('infStreet').value,
     z=document.getElementById('infZip').value,c=document.getElementById('infCity').value,
-    sx=document.getElementById('infSteuer').value,gn=document.getElementById('gsNumber').value,
+    sx=document.getElementById('infSteuer').value,sTyp=document.getElementById('infSteuerTyp').value,
+    sLabel=sTyp==='ustid'?'USt.-IdNr.':'Steuernummer',gn=document.getElementById('gsNumber').value,
     gd=fDateDE(document.getElementById('gsDate').value),a=getAmounts();
 
   const L=25,R=185;
@@ -332,7 +350,7 @@ function generatePDF(){
   doc.text(n,L,y);y+=lh;
   doc.text(st,L,y);y+=lh;
   doc.text(z+' '+c,L,y);y+=lh;
-  if(sx){doc.text('Steuernummer: '+sx,L,y);y+=lh}
+  if(sx){doc.text(sLabel+': '+sx,L,y);y+=lh}
 
   y+=30;
 
