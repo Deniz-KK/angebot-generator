@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Kristallkraft Angebotsgenerator - Robust Tracking</title>
-  
+  <title>Kristallkraft Angebotsgenerator</title>
+
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MSBJB2KWM"></script>
   <script>
@@ -12,52 +12,21 @@
     gtag('js', new Date());
     gtag('config', 'G-8MSBJB2KWM', {
       page_title: 'Kristallkraft Angebotsgenerator',
-      page_location: window.location.href,
-      custom_map: {
-        'custom_parameter_1': 'beraterin',
-        'custom_parameter_2': 'kontaktkanal',
-        'custom_parameter_3': 'session_id'
-      }
+      page_location: window.location.href
     });
   </script>
-  
+
   <style>
     body {
       font-family: sans-serif;
       padding: 40px;
+      padding-bottom: 80px;
       background-color: #fafafa;
       font-size: 15px;
       line-height: 1.5;
     }
 
-    .tracking-status {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 12px;
-      z-index: 1000;
-      max-width: 300px;
-    }
-
-    .tracking-status.working {
-      background: #d4edda;
-      border-color: #c3e6cb;
-      color: #155724;
-    }
-
-    .tracking-status.blocked {
-      background: #f8d7da;
-      border-color: #f5c6cb;
-      color: #721c24;
-    }
-
-    h2, h3 {
-      margin-top: 25px;
-    }
+    h2, h3 { margin-top: 25px; }
 
     .form-section {
       max-width: 1200px;
@@ -77,14 +46,10 @@
     }
 
     @media (max-width: 600px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+      .form-grid { grid-template-columns: 1fr; }
     }
 
-    label {
-      font-weight: 600;
-    }
+    label { font-weight: 600; }
 
     input, select, textarea {
       padding: 12px;
@@ -112,10 +77,7 @@
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
-
-    button:hover {
-      background-color: #005fa3;
-    }
+    button:hover { background-color: #005fa3; }
 
     .add-product-button {
       background-color: #28a745;
@@ -123,10 +85,7 @@
       padding: 12px 20px;
       font-size: 15px;
     }
-
-    .add-product-button:hover {
-      background-color: #218838;
-    }
+    .add-product-button:hover { background-color: #218838; }
 
     .remove-button {
       background-color: #dc3545;
@@ -134,10 +93,7 @@
       font-size: 14px;
       margin-left: 12px;
     }
-
-    .remove-button:hover {
-      background-color: #c82333;
-    }
+    .remove-button:hover { background-color: #c82333; }
 
     .product-selection {
       background-color: #f8f9fa;
@@ -152,7 +108,6 @@
       background-color: #e9ecef;
       border-bottom: 2px solid #dee2e6;
       padding: 12px 20px;
-      margin-bottom: 0;
       display: grid;
       grid-template-columns: 180px 90px 130px 90px 130px 90px 110px;
       gap: 10px;
@@ -172,13 +127,7 @@
       white-space: nowrap;
     }
 
-    .product-header div:first-child {
-      text-align: center;
-    }
-
-    .product-input-row {
-      padding: 20px;
-    }
+    .product-input-row { padding: 20px; }
 
     .product-row {
       display: grid;
@@ -189,18 +138,9 @@
     }
 
     @media (max-width: 800px) {
-      .product-row {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-
-      .product-header {
-        display: none;
-      }
-
-      .product-input-row {
-        padding: 16px;
-      }
+      .product-row { grid-template-columns: 1fr; gap: 8px; }
+      .product-header { display: none; }
+      .product-input-row { padding: 16px; }
     }
 
     .added-product {
@@ -216,22 +156,9 @@
       gap: 12px;
     }
 
-    .product-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-    }
-
-    .product-icon {
-      height: 32px;
-      width: auto;
-    }
-
-    .product-details {
-      font-size: 14px;
-      color: #666;
-    }
+    .product-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+    .product-icon { height: 32px; width: auto; }
+    .product-details { font-size: 14px; color: #666; }
 
     #angebotHTML {
       border: 1px solid #ccc;
@@ -256,10 +183,7 @@
       padding: 8px 16px;
       font-size: 14px;
     }
-
-    .copy-button:hover {
-      background-color: #218838;
-    }
+    .copy-button:hover { background-color: #218838; }
 
     .no-products {
       text-align: center;
@@ -268,35 +192,168 @@
       padding: 20px;
     }
 
-    .debug-info {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
+    /* ========== STATS FOOTER ========== */
+    .stats-footer {
+      max-width: 1200px;
+      margin-top: 60px;
+      background: #fff;
       border-radius: 8px;
-      padding: 16px;
-      margin-top: 20px;
-      font-family: monospace;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .stats-header {
+      background: linear-gradient(135deg, #1a3a4a, #2a5a6a);
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stats-header h3 { margin: 0; font-size: 16px; color: #fff; }
+    .stats-total { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+
+    .stats-table-wrap {
+      overflow-x: auto;
+      padding: 0;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .stats-table thead th {
+      background: #f1f3f5;
+      padding: 10px 14px;
+      text-align: center;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+
+    .stats-table thead th:first-child {
+      text-align: left;
+      padding-left: 24px;
+    }
+
+    .stats-table tbody td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    .stats-table tbody td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      padding-left: 24px;
+      white-space: nowrap;
+    }
+
+    .stats-table tbody tr:hover { background: #f8f9fa; }
+
+    .stats-table tbody tr.month-row { cursor: default; }
+
+    .stats-table tbody tr.berater-detail {
+      background: #f7fafc;
+    }
+
+    .stats-table tbody tr.berater-detail td {
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .stats-table tbody tr.berater-detail td:first-child {
+      padding-left: 44px;
+      font-weight: 400;
+      color: #888;
+    }
+
+    .kw-cell {
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 4px;
+    }
+
+    .kw-cell:hover { background: #e3f2fd; }
+
+    .kw-cell.active { background: #d0eaff; font-weight: 700; }
+
+    .kw-count {
+      display: inline-block;
+      min-width: 24px;
+      height: 24px;
+      line-height: 24px;
+      border-radius: 12px;
+      font-weight: 600;
       font-size: 12px;
     }
 
-    .debug-info h4 {
-      margin-top: 0;
-      color: #495057;
+    .kw-count.has-data {
+      background: #0077cc;
+      color: #fff;
     }
 
-    .debug-info pre {
-      background: #ffffff;
-      padding: 8px;
-      border-radius: 4px;
-      overflow-x: auto;
-      margin: 8px 0;
+    .kw-count.no-data {
+      color: #ccc;
+    }
+
+    .stats-detail-panel {
+      background: #f7fafc;
+      border-top: 2px solid #0077cc;
+      padding: 16px 24px;
+      display: none;
+      animation: slideDown 0.2s ease;
+    }
+
+    .stats-detail-panel.visible { display: block; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .detail-item {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .detail-item .name { font-size: 12px; color: #666; margin-bottom: 2px; }
+    .detail-item .count { font-size: 20px; font-weight: 700; color: #0077cc; }
+
+    .stats-loading {
+      text-align: center;
+      padding: 30px;
+      color: #999;
     }
   </style>
 </head>
 <body>
-  <!-- Tracking Status Anzeige -->
-  <div id="trackingStatus" class="tracking-status">
-    <strong>Tracking Status:</strong> <span id="trackingStatusText">Wird geprüft...</span>
-  </div>
 
   <h2 style="margin-bottom: 25px;">🛍️ Produkte & Fütterung konfigurieren</h2>
 
@@ -322,7 +379,6 @@
         <option value="Tatjana">Tatjana</option>
       </select>
     </div>
-
     <div class="form-grid">
       <label for="kontaktkanal">☎️ Kontaktkanal:</label>
       <select id="kontaktkanal">
@@ -332,7 +388,6 @@
         <option value="e-mail">E-Mail</option>
       </select>
     </div>
-
     <div class="form-grid">
       <label for="outputMode">📝 Ausgabeformat:</label>
       <select id="outputMode">
@@ -349,7 +404,6 @@
     </div>
   </section>
 
-  <!-- Produkt-Auswahl Sektion -->
   <section class="form-section">
     <h3 style="margin-bottom: 25px;">🛒 Produkte hinzufügen</h3>
 
@@ -366,9 +420,7 @@
 
       <div class="product-input-row">
         <div class="product-row">
-          <select id="produktSelect">
-            <option value="">– Produkt wählen –</option>
-          </select>
+          <select id="produktSelect"><option value="">– Produkt wählen –</option></select>
           <input type="number" id="mengeInput" placeholder="Menge" min="0" value="1">
           <select id="dauerSelect">
             <option value="">Wochen...</option>
@@ -395,7 +447,6 @@
       </div>
     </div>
 
-    <!-- Hinzugefügte Produkte -->
     <div id="addedProductsList">
       <div class="no-products">Noch keine Produkte hinzugefügt</div>
     </div>
@@ -412,19 +463,34 @@
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
   <div id="angebotHTML" style="display:none;"></div>
 
-  <!-- Debug-Informationen -->
-  <div class="debug-info">
-    <h4>📊 Tracking Debug Info</h4>
-    <div><strong>Session ID:</strong> <span id="debugSessionId">-</span></div>
-    <div><strong>Tracking Status:</strong> <span id="debugTrackingStatus">-</span></div>
-    <div><strong>Events heute:</strong> <span id="debugEventCount">0</span></div>
-    <div><strong>Letzte Events:</strong></div>
-    <pre id="debugEvents">Noch keine Events</pre>
+  <!-- ========== STATS FOOTER ========== -->
+  <div class="stats-footer" id="statsFooter">
+    <div class="stats-header">
+      <h3>📊 Generierte Angebote</h3>
+      <div class="stats-total" id="statsTotal">–</div>
+    </div>
+    <div class="stats-table-wrap">
+      <table class="stats-table" id="statsTable">
+        <thead id="statsHead"></thead>
+        <tbody id="statsBody"></tbody>
+      </table>
+    </div>
+    <div class="stats-detail-panel" id="statsDetail">
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-grid" id="detailGrid"></div>
+    </div>
+    <div class="stats-loading" id="statsLoading">Lade Statistiken…</div>
   </div>
 
-  <script>
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+
+<script>
 document.addEventListener("DOMContentLoaded", function () {
+
+  // ===================== CONFIG =====================
   const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
+
   const produkte = [
     { id: "42640144892146", name: "Kristallkraft No1" },
     { id: "42640145514738", name: "Kristallkraft No2" },
@@ -454,276 +520,227 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   let addedProducts = [];
-  let sessionId = getOrCreateSessionId();
-  let trackingWorking = false;
-  let trackingMethods = {
-    googleAnalytics: false,
-    localStorage: false,
-    serverside: false
-  };
 
-  // Session ID Management
-  function getOrCreateSessionId() {
-    let sessionId = sessionStorage.getItem('kristallkraft_session_id');
-    if (!sessionId) {
-      sessionId = generateUniqueId();
-      sessionStorage.setItem('kristallkraft_session_id', sessionId);
-    }
-    return sessionId;
+  // ===================== PERSISTENT STATS =====================
+  // Storage key format: stats:YYYY-WXX
+  // Value: JSON { total: N, berater: { "Name": N, ... } }
+
+  function getISOWeek(d) {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
+    return { year: date.getUTCFullYear(), week: weekNo };
   }
 
-  function generateUniqueId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  function getWeekKey(d) {
+    const { year, week } = getISOWeek(d || new Date());
+    return `stats:${year}-W${String(week).padStart(2, '0')}`;
   }
 
-  // **ROBUSTES TRACKING SYSTEM**
-  // Mehrere Tracking-Methoden als Fallback
-  
-  // 1. Google Analytics Tracking (Original)
-  function trackGoogleAnalytics(eventName, eventData) {
-    try {
-      if (typeof gtag !== 'undefined') {
-        gtag('event', eventName, {
-          event_category: 'Angebotsgenerator',
-          event_label: eventData.label || eventName,
-          beraterin: eventData.beraterin || '',
-          kontaktkanal: eventData.kontaktkanal || '',
-          session_id: sessionId,
-          value: eventData.value || 0,
-          currency: 'EUR',
-          ...eventData
-        });
-        trackingMethods.googleAnalytics = true;
-        return true;
+  function getWeeksInRange(monthsBack) {
+    const weeks = [];
+    const now = new Date();
+    const { year: curYear, week: curWeek } = getISOWeek(now);
+
+    // Go back day by day for monthsBack months, collect unique week keys
+    const startDate = new Date(now);
+    startDate.setMonth(startDate.getMonth() - monthsBack);
+
+    const seen = new Set();
+    const d = new Date(startDate);
+    while (d <= now) {
+      const { year, week } = getISOWeek(d);
+      const key = `${year}-W${String(week).padStart(2, '0')}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        weeks.push({ year, week, key, storageKey: `stats:${key}` });
       }
-    } catch (error) {
-      console.warn('Google Analytics tracking failed:', error);
+      d.setDate(d.getDate() + 1);
     }
-    return false;
+    return weeks;
   }
 
-  // 2. Lokales Tracking (SessionStorage + IndexedDB)
-  function trackLocal(eventName, eventData) {
-    try {
-      const event = {
-        event: eventName,
-        timestamp: new Date().toISOString(),
-        sessionId: sessionId,
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        beraterin: eventData.beraterin || '',
-        kontaktkanal: eventData.kontaktkanal || '',
-        ...eventData
-      };
+  // Group weeks by month for table display
+  function groupByMonth(weeks) {
+    const months = {};
+    weeks.forEach(w => {
+      // Approximate: Thursday of ISO week determines month
+      const jan4 = new Date(Date.UTC(w.year, 0, 4));
+      const dayOfWeek = jan4.getUTCDay() || 7;
+      const firstMonday = new Date(jan4);
+      firstMonday.setUTCDate(jan4.getUTCDate() - dayOfWeek + 1);
+      const weekStart = new Date(firstMonday);
+      weekStart.setUTCDate(firstMonday.getUTCDate() + (w.week - 1) * 7);
+      // Thursday of that week
+      const thu = new Date(weekStart);
+      thu.setUTCDate(weekStart.getUTCDate() + 3);
 
-      // SessionStorage
-      const events = JSON.parse(sessionStorage.getItem('kristallkraft_events') || '[]');
-      events.push(event);
-      sessionStorage.setItem('kristallkraft_events', JSON.stringify(events));
+      const monthKey = `${thu.getUTCFullYear()}-${String(thu.getUTCMonth() + 1).padStart(2, '0')}`;
+      const monthLabel = thu.toLocaleString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-      // LocalStorage (persistenter)
-      const localEvents = JSON.parse(localStorage.getItem('kristallkraft_events') || '[]');
-      localEvents.push(event);
-      // Nur die letzten 1000 Events behalten
-      if (localEvents.length > 1000) {
-        localEvents.splice(0, localEvents.length - 1000);
+      if (!months[monthKey]) {
+        months[monthKey] = { label: monthLabel, weeks: [] };
       }
-      localStorage.setItem('kristallkraft_events', JSON.stringify(localEvents));
-
-      trackingMethods.localStorage = true;
-      return true;
-    } catch (error) {
-      console.warn('Local tracking failed:', error);
-    }
-    return false;
+      months[monthKey].weeks.push(w);
+    });
+    return months;
   }
 
-  // 3. Server-seitiges Tracking (GET-Request basiert)
-  function trackServer(eventName, eventData) {
-    try {
-      // Verwende einen GET-Request als Pixel-Tracking
-      // Das ist weniger blockierbar als POST-Requests
-      const trackingUrl = new URL(`https://${SHOP_DOMAIN}/api/track`);
-      
-      const params = {
-        event: eventName,
-        timestamp: new Date().toISOString(),
-        sessionId: sessionId,
-        beraterin: eventData.beraterin || '',
-        kontaktkanal: eventData.kontaktkanal || '',
-        produktAnzahl: eventData.produktAnzahl || 0,
-        ...eventData
-      };
+  async function incrementStats(beraterin) {
+    const key = getWeekKey();
+    let data = { total: 0, berater: {} };
 
-      Object.keys(params).forEach(key => {
-        if (params[key] !== '' && params[key] !== null && params[key] !== undefined) {
-          trackingUrl.searchParams.append(key, params[key]);
+    try {
+      const existing = await window.storage.get(key, true);
+      if (existing && existing.value) {
+        data = JSON.parse(existing.value);
+      }
+    } catch (e) {
+      // Key doesn't exist yet
+    }
+
+    data.total = (data.total || 0) + 1;
+    if (beraterin) {
+      data.berater = data.berater || {};
+      data.berater[beraterin] = (data.berater[beraterin] || 0) + 1;
+    }
+
+    try {
+      await window.storage.set(key, JSON.stringify(data), true);
+    } catch (e) {
+      console.error('Stats save failed:', e);
+    }
+  }
+
+  async function loadAndRenderStats() {
+    const loading = document.getElementById('statsLoading');
+    const table = document.getElementById('statsTable');
+
+    try {
+      const weeks = getWeeksInRange(12);
+      const months = groupByMonth(weeks);
+
+      // Fetch all week data
+      const weekData = {};
+      let grandTotal = 0;
+
+      for (const w of weeks) {
+        try {
+          const result = await window.storage.get(w.storageKey, true);
+          if (result && result.value) {
+            weekData[w.key] = JSON.parse(result.value);
+            grandTotal += weekData[w.key].total || 0;
+          }
+        } catch (e) {
+          // No data for this week
         }
+      }
+
+      document.getElementById('statsTotal').textContent = grandTotal;
+
+      // Build table
+      const monthEntries = Object.entries(months).sort((a, b) => a[0].localeCompare(b[0]));
+
+      // Find max weeks in any month for column count
+      const maxWeeks = Math.max(...monthEntries.map(([, m]) => m.weeks.length));
+
+      // Header
+      const thead = document.getElementById('statsHead');
+      let headerHTML = '<tr><th>Monat</th>';
+      for (let i = 0; i < maxWeeks; i++) {
+        headerHTML += `<th>KW</th>`;
+      }
+      headerHTML += '<th>Σ</th></tr>';
+      thead.innerHTML = headerHTML;
+
+      // Body
+      const tbody = document.getElementById('statsBody');
+      let bodyHTML = '';
+
+      monthEntries.forEach(([monthKey, month]) => {
+        let monthTotal = 0;
+
+        bodyHTML += '<tr class="month-row">';
+        bodyHTML += `<td>${month.label}</td>`;
+
+        month.weeks.forEach((w) => {
+          const d = weekData[w.key];
+          const count = d ? d.total : 0;
+          monthTotal += count;
+
+          bodyHTML += `<td class="kw-cell" data-week="${w.key}" title="KW ${w.week}">`;
+          bodyHTML += `<div style="font-size:10px;color:#999;">KW${w.week}</div>`;
+          if (count > 0) {
+            bodyHTML += `<span class="kw-count has-data">${count}</span>`;
+          } else {
+            bodyHTML += `<span class="kw-count no-data">–</span>`;
+          }
+          bodyHTML += '</td>';
+        });
+
+        // Pad remaining cells
+        for (let i = month.weeks.length; i < maxWeeks; i++) {
+          bodyHTML += '<td></td>';
+        }
+
+        bodyHTML += `<td><strong>${monthTotal}</strong></td>`;
+        bodyHTML += '</tr>';
       });
 
-      // Pixel-Tracking (sehr schwer blockierbar)
-      const img = new Image();
-      img.onload = () => {
-        trackingMethods.serverside = true;
-        console.log('Server tracking successful');
-      };
-      img.onerror = () => {
-        console.warn('Server tracking failed');
-      };
-      img.src = trackingUrl.toString();
+      tbody.innerHTML = bodyHTML;
 
-      return true;
-    } catch (error) {
-      console.warn('Server tracking failed:', error);
-    }
-    return false;
-  }
+      // Click handler for KW cells -> show berater breakdown
+      tbody.querySelectorAll('.kw-cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+          const weekKey = cell.dataset.week;
+          const d = weekData[weekKey];
+          showDetail(weekKey, d);
 
-  // 4. Beacon API (für wichtige Events)
-  function trackBeacon(eventName, eventData) {
-    try {
-      if (navigator.sendBeacon) {
-        const data = JSON.stringify({
-          event: eventName,
-          timestamp: new Date().toISOString(),
-          sessionId: sessionId,
-          ...eventData
+          // Toggle active state
+          tbody.querySelectorAll('.kw-cell').forEach(c => c.classList.remove('active'));
+          cell.classList.add('active');
         });
-        
-        const success = navigator.sendBeacon(
-          `https://${SHOP_DOMAIN}/api/beacon-track`,
-          data
-        );
-        
-        if (success) {
-          console.log('Beacon tracking successful');
-          return true;
-        }
-      }
-    } catch (error) {
-      console.warn('Beacon tracking failed:', error);
-    }
-    return false;
-  }
+      });
 
-  // **HAUPTTRACKING-FUNKTION**
-  function trackEvent(eventName, eventData = {}) {
-    const results = {
-      googleAnalytics: false,
-      local: false,
-      server: false,
-      beacon: false
-    };
+      loading.style.display = 'none';
+      table.style.display = 'table';
 
-    // Alle Tracking-Methoden versuchen
-    results.googleAnalytics = trackGoogleAnalytics(eventName, eventData);
-    results.local = trackLocal(eventName, eventData);
-    results.server = trackServer(eventName, eventData);
-    
-    // Beacon nur für wichtige Events
-    if (['angebot_generated', 'page_loaded'].includes(eventName)) {
-      results.beacon = trackBeacon(eventName, eventData);
-    }
-
-    // Mindestens eine Methode muss funktionieren
-    trackingWorking = results.googleAnalytics || results.local || results.server || results.beacon;
-
-    console.log(`📊 Event "${eventName}" tracked:`, results);
-    updateTrackingStatus();
-    updateDebugInfo();
-
-    return results;
-  }
-
-  // **TRACKING STATUS ÜBERWACHUNG**
-  function updateTrackingStatus() {
-    const statusElement = document.getElementById('trackingStatus');
-    const statusText = document.getElementById('trackingStatusText');
-    
-    if (trackingMethods.googleAnalytics) {
-      statusElement.className = 'tracking-status working';
-      statusText.textContent = 'Google Analytics funktioniert';
-    } else if (trackingMethods.localStorage) {
-      statusElement.className = 'tracking-status working';
-      statusText.textContent = 'Lokales Tracking aktiv (GA blockiert)';
-    } else {
-      statusElement.className = 'tracking-status blocked';
-      statusText.textContent = 'Tracking blockiert - Lokale Speicherung aktiv';
+    } catch (e) {
+      console.error('Stats load error:', e);
+      loading.textContent = 'Statistiken konnten nicht geladen werden.';
     }
   }
 
-  // **DEBUG-INFORMATIONEN**
-  function updateDebugInfo() {
-    document.getElementById('debugSessionId').textContent = sessionId;
-    
-    const trackingStatus = Object.keys(trackingMethods)
-      .filter(key => trackingMethods[key])
-      .join(', ') || 'Nur lokal';
-    document.getElementById('debugTrackingStatus').textContent = trackingStatus;
+  function showDetail(weekKey, data) {
+    const panel = document.getElementById('statsDetail');
+    const title = document.getElementById('detailTitle');
+    const grid = document.getElementById('detailGrid');
 
-    const events = JSON.parse(sessionStorage.getItem('kristallkraft_events') || '[]');
-    document.getElementById('debugEventCount').textContent = events.length;
-    
-    // Die letzten 3 Events anzeigen
-    const recentEvents = events.slice(-3).map(e => ({
-      event: e.event,
-      timestamp: e.timestamp.split('T')[1]?.split('.')[0],
-      beraterin: e.beraterin,
-      kontaktkanal: e.kontaktkanal
-    }));
-    
-    document.getElementById('debugEvents').textContent = JSON.stringify(recentEvents, null, 2);
+    const kwNum = weekKey.split('-W')[1];
+    title.textContent = `KW ${parseInt(kwNum)} – Aufschlüsselung nach Beraterin`;
+
+    if (!data || !data.berater || Object.keys(data.berater).length === 0) {
+      grid.innerHTML = '<div class="detail-item"><div class="name">Keine Daten</div><div class="count">–</div></div>';
+      panel.classList.add('visible');
+      return;
+    }
+
+    // Sort by count descending
+    const sorted = Object.entries(data.berater).sort((a, b) => b[1] - a[1]);
+
+    grid.innerHTML = sorted.map(([name, count]) => `
+      <div class="detail-item">
+        <div class="name">${name}</div>
+        <div class="count">${count}</div>
+      </div>
+    `).join('');
+
+    panel.classList.add('visible');
   }
 
-  // **BACKUP-SYSTEM FÜR MITARBEITER-STATISTIKEN**
-  function getDailyStats() {
-    const today = new Date().toISOString().split('T')[0];
-    const events = JSON.parse(localStorage.getItem('kristallkraft_events') || '[]');
-    
-    const todaysEvents = events.filter(e => e.timestamp.startsWith(today));
-    const stats = {};
-    
-    todaysEvents.forEach(event => {
-      const berater = event.beraterin || 'Unbekannt';
-      if (!stats[berater]) {
-        stats[berater] = {
-          angebote: 0,
-          produkte: 0,
-          kontakte: []
-        };
-      }
-      
-      if (event.event === 'angebot_generated') {
-        stats[berater].angebote++;
-        stats[berater].produkte += event.produktAnzahl || 0;
-        if (event.kontaktkanal && !stats[berater].kontakte.includes(event.kontaktkanal)) {
-          stats[berater].kontakte.push(event.kontaktkanal);
-        }
-      }
-    });
-    
-    return stats;
-  }
-
-  // **EXPORTFUNKTION FÜR STATISTIKEN**
-  function exportStats() {
-    const stats = getDailyStats();
-    const csvContent = "data:text/csv;charset=utf-8," + 
-      "Berater,Angebote,Produkte,Kontaktkanäle\n" +
-      Object.entries(stats).map(([berater, data]) => 
-        `${berater},${data.angebote},${data.produkte},"${data.kontakte.join(';')}"`
-      ).join('\n');
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `kristallkraft-stats-${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  // Dropdown mit Produkten füllen
+  // ===================== PRODUCT DROPDOWN =====================
   const produktSelect = document.getElementById("produktSelect");
   produkte.forEach(prod => {
     const option = document.createElement("option");
@@ -732,60 +749,33 @@ document.addEventListener("DOMContentLoaded", function () {
     produktSelect.appendChild(option);
   });
 
-  // **EVENT HANDLERS MIT ROBUSTEM TRACKING**
-  
-  // Berater speichern
+  // ===================== SESSION RESTORE =====================
   const savedBeraterin = sessionStorage.getItem("beraterin");
-  if (savedBeraterin) {
-    document.getElementById("beraterin").value = savedBeraterin;
-  }
+  if (savedBeraterin) document.getElementById("beraterin").value = savedBeraterin;
 
   document.getElementById("beraterin").addEventListener("change", (e) => {
     sessionStorage.setItem("beraterin", e.target.value);
-    trackEvent('berater_selected', { beraterin: e.target.value });
-  });
-
-  document.getElementById("kontaktkanal").addEventListener("change", (e) => {
-    trackEvent('kontaktkanal_selected', { kontaktkanal: e.target.value });
   });
 
   document.getElementById("outputMode").addEventListener("change", (e) => {
-    trackEvent('output_mode_selected', { outputMode: e.target.value });
-    
     const copyButton = document.getElementById("copyButton");
-    if (e.target.value === "text") {
-      if (document.getElementById("angebotText").value !== "Noch kein Angebot erstellt.") {
-        copyButton.style.display = "inline-block";
-      }
+    if (e.target.value === "text" && document.getElementById("angebotText").value !== "Noch kein Angebot erstellt.") {
+      copyButton.style.display = "inline-block";
     } else {
       copyButton.style.display = "none";
     }
   });
 
   document.getElementById("copyButton").addEventListener("click", () => {
-    const mode = document.getElementById("outputMode").value;
     const textArea = document.getElementById("angebotText");
-    
-    if (mode === "text") {
-      textArea.select();
-      document.execCommand('copy');
-    }
-
-    trackEvent('angebot_copied', {
-      outputMode: mode,
-      produktAnzahl: addedProducts.length
-    });
-
+    textArea.select();
+    document.execCommand('copy');
     const button = document.getElementById("copyButton");
-    const originalText = button.textContent;
     button.textContent = "✅ Kopiert!";
-    button.style.backgroundColor = "#28a745";
-    setTimeout(() => {
-      button.textContent = originalText;
-      button.style.backgroundColor = "#28a745";
-    }, 2000);
+    setTimeout(() => { button.textContent = "📋 Text kopieren"; }, 2000);
   });
 
+  // ===================== ADD / REMOVE PRODUCTS =====================
   document.getElementById("addProductButton").addEventListener("click", () => {
     const produktId = document.getElementById("produktSelect").value;
     const menge = parseInt(document.getElementById("mengeInput").value);
@@ -794,50 +784,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const ab = document.getElementById("abSelect").value;
     const nach = document.getElementById("nachInput").value.trim();
 
-    if (!produktId) {
-      alert("Bitte wähle ein Produkt aus.");
-      return;
-    }
-
-    if (isNaN(menge) || menge <= 0) {
-      alert("Bitte gib eine gültige Menge ein.");
-      return;
-    }
+    if (!produktId) { alert("Bitte wähle ein Produkt aus."); return; }
+    if (isNaN(menge) || menge <= 0) { alert("Bitte gib eine gültige Menge ein."); return; }
 
     const produkt = produkte.find(p => p.id === produktId);
     if (!produkt) return;
 
-    trackEvent('product_added', {
-      produktName: produkt.name,
-      produktId: produktId,
-      menge: menge,
-      dauer: dauer,
-      totalProdukte: addedProducts.length + 1,
-      beraterin: document.getElementById("beraterin").value,
-      kontaktkanal: document.getElementById("kontaktkanal").value
-    });
-
     const existingIndex = addedProducts.findIndex(p => p.id === produktId);
+    const entry = { id: produktId, name: produkt.name, menge, dauer, start, ab, nach };
+
     if (existingIndex !== -1) {
-      addedProducts[existingIndex] = {
-        id: produktId,
-        name: produkt.name,
-        menge,
-        dauer,
-        start,
-        ab,
-        nach
-      };
+      addedProducts[existingIndex] = entry;
     } else {
-      addedProducts.push({
-        id: produktId,
-        name: produkt.name,
-        menge,
-        dauer,
-        start,
-        ab,
-        nach
-      });
+      addedProducts.push(entry);
     }
 
     updateAddedProductsList();
@@ -855,7 +814,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateAddedProductsList() {
     const container = document.getElementById("addedProductsList");
-
     if (addedProducts.length === 0) {
       container.innerHTML = '<div class="no-products">Noch keine Produkte hinzugefügt</div>';
       return;
@@ -866,7 +824,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (prod.start && prod.dauer) details.push(`${prod.start} Messbecher täglich für ${prod.dauer}`);
       else if (prod.start) details.push(`${prod.start} Messbecher täglich`);
       if (prod.ab && prod.nach) details.push(`${prod.ab} ${prod.nach} Messbecher täglich`);
-
       const detailsText = details.length > 0 ? `<div class="product-details">${details.join(", ")}</div>` : "";
 
       return `
@@ -885,22 +842,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.removeProduct = function(index) {
-    const removedProduct = addedProducts[index];
-    
-    trackEvent('product_removed', {
-      produktName: removedProduct.name,
-      produktId: removedProduct.id,
-      totalProdukte: addedProducts.length - 1,
-      beraterin: document.getElementById("beraterin").value,
-      kontaktkanal: document.getElementById("kontaktkanal").value
-    });
-
     addedProducts.splice(index, 1);
     updateAddedProductsList();
   };
 
-  // **HAUPTFUNKTION - ANGEBOT GENERIEREN**
-  document.getElementById("generateButton").addEventListener("click", () => {
+  // ===================== GENERATE ANGEBOT =====================
+  function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  document.getElementById("generateButton").addEventListener("click", async () => {
     const kunde = document.getElementById("kundenname").value.trim();
     const pferd = document.getElementById("pferdename")?.value.trim() || "";
     const kanal = document.getElementById("kontaktkanal").value.trim();
@@ -914,30 +865,33 @@ document.addEventListener("DOMContentLoaded", function () {
       outputText.value = "❗ Bitte füge mindestens ein Produkt hinzu.";
       outputHTML.style.display = "none";
       outputText.style.display = "block";
-      
-      trackEvent('generation_error', {
-        error: 'no_products',
-        kunde: kunde,
-        beraterin: berater,
-        kontaktkanal: kanal
-      });
-      
       return;
     }
+
+    // ** PERSISTENT TRACKING **
+    await incrementStats(berater);
+
+    // GA tracking (best-effort)
+    try {
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'angebot_generated', {
+          event_category: 'Angebotsgenerator',
+          beraterin: berater,
+          kontaktkanal: kanal,
+          produkt_anzahl: addedProducts.length
+        });
+      }
+    } catch (e) { /* GA blocked */ }
 
     const trackingParams = new URLSearchParams();
     trackingParams.set('utm_source', 'servicelink');
     if (kanal) trackingParams.set('utm_medium', kanal);
     if (berater) trackingParams.set('utm_content', berater);
-
     const linkId = generateUniqueId();
     trackingParams.set('link_id', linkId);
-    trackingParams.set('session_id', sessionId);
-    trackingParams.set('created', Date.now());
 
     let items = [];
     let textProdukte = [];
-    let produktWert = 0;
 
     addedProducts.forEach(prod => {
       let details = [];
@@ -948,30 +902,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
       items.push(`${prod.id}:${prod.menge}`);
       textProdukte.push(`${prod.name}${zusatz}`);
-      produktWert += prod.menge;
     });
 
     const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${trackingParams.toString()}`;
 
-    // **KRITISCHES TRACKING - ANGEBOT GENERIERT**
-    trackEvent('angebot_generated', {
-      kunde: kunde,
-      pferd: pferd,
-      beraterin: berater,
-      kontaktkanal: kanal,
-      outputMode: mode,
-      anrede: anrede,
-      linkId: linkId,
-      produktAnzahl: addedProducts.length,
-      produktWert: produktWert,
-      produkte: addedProducts.map(p => ({ name: p.name, menge: p.menge })),
-      cartUrl: cartUrl
-    });
-
     let begruessung = `Hallo ${kunde},\n\n`;
-    let einleitung = "";
-    let hinweis = "";
-    let abschluss = "";
+    let einleitung, hinweis, abschluss;
 
     if (anrede === "du") {
       einleitung = `danke für die ganzen Infos!\nAuf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` ${pferd}` : ""}:\n\n`;
@@ -1005,7 +941,7 @@ document.addEventListener("DOMContentLoaded", function () {
           : `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:`
         }</p>
         <p>
-          👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;" onclick="trackEvent('cart_link_clicked', {linkId: '${linkId}', produktAnzahl: ${addedProducts.length}, beraterin: '${berater}', kontaktkanal: '${kanal}'});">🛒 Jetzt bestellen</a>
+          👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
         </p>
         <p>${anrede === "du"
           ? `Wenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`
@@ -1014,137 +950,74 @@ document.addEventListener("DOMContentLoaded", function () {
       `;
       document.getElementById("copyButton").style.display = "none";
     }
-    
+
     document.getElementById("successNotification").style.display = "block";
-    setTimeout(() => {
-      document.getElementById("successNotification").style.display = "none";
-    }, 5000);
+    setTimeout(() => { document.getElementById("successNotification").style.display = "none"; }, 5000);
+
+    // Refresh stats in footer
+    loadAndRenderStats();
   });
 
-  // **INITIAL SETUP**
-  trackEvent('page_loaded', {
-    userAgent: navigator.userAgent,
-    referrer: document.referrer,
-    timestamp: new Date().toISOString()
-  });
+  // ===================== INIT =====================
+  loadAndRenderStats();
 
-  // Test Google Analytics Verfügbarkeit
-  setTimeout(() => {
-    if (typeof gtag === 'undefined') {
-      console.warn('Google Analytics nicht verfügbar - verwende Fallback-Tracking');
-      trackingMethods.googleAnalytics = false;
-    } else {
-      trackingMethods.googleAnalytics = true;
+  // ===================== CONFETTI =====================
+  const canvas = document.getElementById("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function launchConfettiFromButton(button) {
+    const rect = button.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    const particles = [];
+    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+
+    for (let i = 0; i < 80; i++) {
+      const angle = Math.random() * 2 * Math.PI;
+      const speed = Math.random() * 5 + 2;
+      particles.push({
+        x: originX, y: originY,
+        dx: Math.cos(angle) * speed,
+        dy: Math.sin(angle) * speed,
+        radius: Math.random() * 4 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 60
+      });
     }
-    updateTrackingStatus();
-  }, 1000);
 
-  // Seiten-Verlassen Tracking
-  window.addEventListener('beforeunload', () => {
-    trackEvent('page_unload', {
-      timeOnPage: Date.now() - performance.timing.navigationStart,
-      produkteHinzugefuegt: addedProducts.length
-    });
-  });
-
-  // **ZUSÄTZLICHE UTILITIES**
-  
-  // Keyboard Shortcut für Export (Strg+E)
-  document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'e') {
-      e.preventDefault();
-      exportStats();
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        p.dy += 0.2;
+        p.life--;
+      });
+      for (let i = particles.length - 1; i >= 0; i--) {
+        if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+      if (particles.length > 0) requestAnimationFrame(animate);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
+    animate();
+  }
+
+  document.getElementById("generateButton").addEventListener("click", (e) => {
+    launchConfettiFromButton(e.currentTarget);
   });
 
-  // Periodische Debug-Updates
-  setInterval(updateDebugInfo, 5000);
-
-  // **GLOBALE FUNKTIONEN FÜR DEBUGGING**
-  window.kristallkraftDebug = {
-    getStats: getDailyStats,
-    exportStats: exportStats,
-    getEvents: () => JSON.parse(localStorage.getItem('kristallkraft_events') || '[]'),
-    clearEvents: () => {
-      localStorage.removeItem('kristallkraft_events');
-      sessionStorage.removeItem('kristallkraft_events');
-      console.log('Events cleared');
-    },
-    forceTrack: (eventName, data) => trackEvent(eventName, data)
-  };
-
-  console.log('🎯 Kristallkraft Tracking aktiv. Debug-Funktionen verfügbar über window.kristallkraftDebug');
 });
 </script>
-
-  <!-- Confetti Animation -->
-  <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
-  <script>
-    const canvas = document.getElementById("confettiCanvas");
-    const ctx = canvas.getContext("2d");
-  
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-  
-    function launchConfettiFromButton(button) {
-      const rect = button.getBoundingClientRect();
-      const originX = rect.left + rect.width / 2;
-      const originY = rect.top + rect.height / 2;
-  
-      const particles = [];
-      const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
-  
-      for (let i = 0; i < 80; i++) {
-        const angle = Math.random() * 2 * Math.PI;
-        const speed = Math.random() * 5 + 2;
-        particles.push({
-          x: originX,
-          y: originY,
-          dx: Math.cos(angle) * speed,
-          dy: Math.sin(angle) * speed,
-          radius: Math.random() * 4 + 2,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          life: 60
-        });
-      }
-  
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
-          ctx.fillStyle = p.color;
-          ctx.fill();
-          p.x += p.dx;
-          p.y += p.dy;
-          p.dy += 0.2;
-          p.life--;
-        });
-  
-        for (let i = particles.length - 1; i >= 0; i--) {
-          if (particles[i].life <= 0) {
-            particles.splice(i, 1);
-          }
-        }
-  
-        if (particles.length > 0) {
-          requestAnimationFrame(animate);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-      }
-  
-      animate();
-    }
-  
-    document.getElementById("generateButton").addEventListener("click", (e) => {
-      const button = e.currentTarget;
-      launchConfettiFromButton(button);
-    });
-  </script>
 </body>
 </html>
