@@ -4,16 +4,13 @@
   <meta charset="UTF-8" />
   <title>Kristallkraft Angebotsgenerator</title>
 
-  <!-- Google Analytics -->
+  <!-- Google Analytics (best-effort) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8MSBJB2KWM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-8MSBJB2KWM', {
-      page_title: 'Kristallkraft Angebotsgenerator',
-      page_location: window.location.href
-    });
+    gtag('config', 'G-8MSBJB2KWM', { page_title: 'Kristallkraft Angebotsgenerator' });
   </script>
 
   <style>
@@ -122,9 +119,6 @@
       text-transform: uppercase;
       letter-spacing: 0.3px;
       line-height: 1.2;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .product-input-row { padding: 20px; }
@@ -140,7 +134,6 @@
     @media (max-width: 800px) {
       .product-row { grid-template-columns: 1fr; gap: 8px; }
       .product-header { display: none; }
-      .product-input-row { padding: 16px; }
     }
 
     .added-product {
@@ -214,10 +207,7 @@
     .stats-header h3 { margin: 0; font-size: 16px; color: #fff; }
     .stats-total { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
 
-    .stats-table-wrap {
-      overflow-x: auto;
-      padding: 0;
-    }
+    .stats-table-wrap { overflow-x: auto; }
 
     .stats-table {
       width: 100%;
@@ -246,7 +236,6 @@
       padding: 10px 14px;
       text-align: center;
       border-bottom: 1px solid #eee;
-      position: relative;
     }
 
     .stats-table tbody td:first-child {
@@ -259,33 +248,12 @@
 
     .stats-table tbody tr:hover { background: #f8f9fa; }
 
-    .stats-table tbody tr.month-row { cursor: default; }
-
-    .stats-table tbody tr.berater-detail {
-      background: #f7fafc;
-    }
-
-    .stats-table tbody tr.berater-detail td {
-      padding: 6px 14px;
-      font-size: 12px;
-      color: #666;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .stats-table tbody tr.berater-detail td:first-child {
-      padding-left: 44px;
-      font-weight: 400;
-      color: #888;
-    }
-
     .kw-cell {
       cursor: pointer;
       transition: background 0.15s;
       border-radius: 4px;
     }
-
     .kw-cell:hover { background: #e3f2fd; }
-
     .kw-cell.active { background: #d0eaff; font-weight: 700; }
 
     .kw-count {
@@ -297,15 +265,8 @@
       font-weight: 600;
       font-size: 12px;
     }
-
-    .kw-count.has-data {
-      background: #0077cc;
-      color: #fff;
-    }
-
-    .kw-count.no-data {
-      color: #ccc;
-    }
+    .kw-count.has-data { background: #0077cc; color: #fff; }
+    .kw-count.no-data { color: #ccc; }
 
     .stats-detail-panel {
       background: #f7fafc;
@@ -314,7 +275,6 @@
       display: none;
       animation: slideDown 0.2s ease;
     }
-
     .stats-detail-panel.visible { display: block; }
 
     @keyframes slideDown {
@@ -322,12 +282,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .detail-title {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 10px;
-      color: #333;
-    }
+    .detail-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; color: #333; }
 
     .detail-grid {
       display: grid;
@@ -346,11 +301,8 @@
     .detail-item .name { font-size: 12px; color: #666; margin-bottom: 2px; }
     .detail-item .count { font-size: 20px; font-weight: 700; color: #0077cc; }
 
-    .stats-loading {
-      text-align: center;
-      padding: 30px;
-      color: #999;
-    }
+    .stats-loading { text-align: center; padding: 30px; color: #999; }
+    .stats-error { text-align: center; padding: 20px; color: #dc3545; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -406,7 +358,6 @@
 
   <section class="form-section">
     <h3 style="margin-bottom: 25px;">🛒 Produkte hinzufügen</h3>
-
     <div class="product-selection">
       <div class="product-header">
         <div>Produkt</div>
@@ -417,7 +368,6 @@
         <div>Fütter-<br>menge</div>
         <div></div>
       </div>
-
       <div class="product-input-row">
         <div class="product-row">
           <select id="produktSelect"><option value="">– Produkt wählen –</option></select>
@@ -446,7 +396,6 @@
         </div>
       </div>
     </div>
-
     <div id="addedProductsList">
       <div class="no-products">Noch keine Produkte hinzugefügt</div>
     </div>
@@ -455,22 +404,20 @@
   <button type="button" id="generateButton">🚀 Angebotstext generieren</button>
   <button type="button" id="copyButton" class="copy-button" style="display:none;">📋 Text kopieren</button>
 
-  <div class="success-notification" id="successNotification">
-    ✅ Angebot erfolgreich erstellt!
-  </div>
+  <div class="success-notification" id="successNotification">✅ Angebot erfolgreich erstellt!</div>
 
   <h3 style="margin-top: 25px;">📋 Dein Angebotstext:</h3>
   <textarea id="angebotText" readonly>Noch kein Angebot erstellt.</textarea>
   <div id="angebotHTML" style="display:none;"></div>
 
-  <!-- ========== STATS FOOTER ========== -->
+  <!-- STATS FOOTER -->
   <div class="stats-footer" id="statsFooter">
     <div class="stats-header">
       <h3>📊 Generierte Angebote</h3>
       <div class="stats-total" id="statsTotal">–</div>
     </div>
     <div class="stats-table-wrap">
-      <table class="stats-table" id="statsTable">
+      <table class="stats-table" id="statsTable" style="display:none;">
         <thead id="statsHead"></thead>
         <tbody id="statsBody"></tbody>
       </table>
@@ -482,13 +429,40 @@
     <div class="stats-loading" id="statsLoading">Lade Statistiken…</div>
   </div>
 
-  <!-- Confetti Canvas -->
+  <!-- Confetti -->
   <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  // ===================== CONFIG =====================
+  // ===================== SUPABASE CONFIG =====================
+  const SUPABASE_URL = 'https://rirphktyuzkcczyawqsj.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcnBoa3R5dXprY2N6eWF3cXNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMTgwNTYsImV4cCI6MjA4ODc5NDA1Nn0.z-6Usp3WpoxJ5-fM1ZrUf4xYX5Y7E6fWQ9xxMCPWVX4';
+  const REST_URL = SUPABASE_URL + '/rest/v1';
+
+  async function supabaseInsert(table, data) {
+    const res = await fetch(REST_URL + '/' + table, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Insert failed: ' + res.status + ' ' + (await res.text()));
+    return true;
+  }
+
+  async function supabaseSelect(table, query) {
+    const res = await fetch(REST_URL + '/' + table + '?' + query, {
+      headers: { 'apikey': SUPABASE_KEY, 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Select failed: ' + res.status + ' ' + (await res.text()));
+    return res.json();
+  }
+
+  // ===================== SHOP CONFIG =====================
   const SHOP_DOMAIN = "kristallkraft-pferdefutter.de";
 
   const produkte = [
@@ -521,184 +495,118 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let addedProducts = [];
 
-  // ===================== PERSISTENT STATS =====================
-  // Storage key format: stats:YYYY-WXX
-  // Value: JSON { total: N, berater: { "Name": N, ... } }
-
+  // ===================== KW HELPERS =====================
   function getISOWeek(d) {
     const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     const dayNum = date.getUTCDay() || 7;
     date.setUTCDate(date.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
-    return { year: date.getUTCFullYear(), week: weekNo };
+    return { year: date.getUTCFullYear(), week: Math.ceil(((date - yearStart) / 86400000 + 1) / 7) };
   }
 
-  function getWeekKey(d) {
-    const { year, week } = getISOWeek(d || new Date());
-    return `stats:${year}-W${String(week).padStart(2, '0')}`;
+  function getCurrentKW() {
+    const { year, week } = getISOWeek(new Date());
+    return year + '-W' + String(week).padStart(2, '0');
   }
 
   function getWeeksInRange(monthsBack) {
-    const weeks = [];
-    const now = new Date();
-    const { year: curYear, week: curWeek } = getISOWeek(now);
-
-    // Go back day by day for monthsBack months, collect unique week keys
-    const startDate = new Date(now);
-    startDate.setMonth(startDate.getMonth() - monthsBack);
-
-    const seen = new Set();
-    const d = new Date(startDate);
+    const weeks = [], now = new Date(), start = new Date(now);
+    start.setMonth(start.getMonth() - monthsBack);
+    const seen = new Set(), d = new Date(start);
     while (d <= now) {
       const { year, week } = getISOWeek(d);
-      const key = `${year}-W${String(week).padStart(2, '0')}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        weeks.push({ year, week, key, storageKey: `stats:${key}` });
-      }
+      const key = year + '-W' + String(week).padStart(2, '0');
+      if (!seen.has(key)) { seen.add(key); weeks.push({ year, week, key }); }
       d.setDate(d.getDate() + 1);
     }
     return weeks;
   }
 
-  // Group weeks by month for table display
   function groupByMonth(weeks) {
     const months = {};
     weeks.forEach(w => {
-      // Approximate: Thursday of ISO week determines month
       const jan4 = new Date(Date.UTC(w.year, 0, 4));
-      const dayOfWeek = jan4.getUTCDay() || 7;
-      const firstMonday = new Date(jan4);
-      firstMonday.setUTCDate(jan4.getUTCDate() - dayOfWeek + 1);
-      const weekStart = new Date(firstMonday);
-      weekStart.setUTCDate(firstMonday.getUTCDate() + (w.week - 1) * 7);
-      // Thursday of that week
-      const thu = new Date(weekStart);
-      thu.setUTCDate(weekStart.getUTCDate() + 3);
-
-      const monthKey = `${thu.getUTCFullYear()}-${String(thu.getUTCMonth() + 1).padStart(2, '0')}`;
-      const monthLabel = thu.toLocaleString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-
-      if (!months[monthKey]) {
-        months[monthKey] = { label: monthLabel, weeks: [] };
-      }
-      months[monthKey].weeks.push(w);
+      const dow = jan4.getUTCDay() || 7;
+      const fm = new Date(jan4); fm.setUTCDate(jan4.getUTCDate() - dow + 1);
+      const ws = new Date(fm); ws.setUTCDate(fm.getUTCDate() + (w.week - 1) * 7);
+      const thu = new Date(ws); thu.setUTCDate(ws.getUTCDate() + 3);
+      const mk = thu.getUTCFullYear() + '-' + String(thu.getUTCMonth() + 1).padStart(2, '0');
+      const ml = thu.toLocaleString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+      if (!months[mk]) months[mk] = { label: ml, weeks: [] };
+      months[mk].weeks.push(w);
     });
     return months;
   }
 
-  async function incrementStats(beraterin) {
-    const key = getWeekKey();
-    let data = { total: 0, berater: {} };
-
+  // ===================== STATS: WRITE =====================
+  async function recordAngebot(beraterin, kontaktkanal, produktAnzahl) {
     try {
-      const existing = await window.storage.get(key, true);
-      if (existing && existing.value) {
-        data = JSON.parse(existing.value);
-      }
+      await supabaseInsert('angebot_stats', {
+        kalenderwoche: getCurrentKW(),
+        beraterin: beraterin || null,
+        kontaktkanal: kontaktkanal || null,
+        produkt_anzahl: produktAnzahl
+      });
+      console.log('✅ Stat recorded');
     } catch (e) {
-      // Key doesn't exist yet
-    }
-
-    data.total = (data.total || 0) + 1;
-    if (beraterin) {
-      data.berater = data.berater || {};
-      data.berater[beraterin] = (data.berater[beraterin] || 0) + 1;
-    }
-
-    try {
-      await window.storage.set(key, JSON.stringify(data), true);
-    } catch (e) {
-      console.error('Stats save failed:', e);
+      console.error('❌ Stat recording failed:', e);
     }
   }
 
+  // ===================== STATS: READ & RENDER =====================
   async function loadAndRenderStats() {
     const loading = document.getElementById('statsLoading');
     const table = document.getElementById('statsTable');
 
     try {
       const weeks = getWeeksInRange(12);
-      const months = groupByMonth(weeks);
+      const kwFilter = weeks.map(w => '"' + w.key + '"').join(',');
+      const rows = await supabaseSelect('angebot_stats', 'kalenderwoche=in.(' + kwFilter + ')&select=kalenderwoche,beraterin');
 
-      // Fetch all week data
       const weekData = {};
       let grandTotal = 0;
-
-      for (const w of weeks) {
-        try {
-          const result = await window.storage.get(w.storageKey, true);
-          if (result && result.value) {
-            weekData[w.key] = JSON.parse(result.value);
-            grandTotal += weekData[w.key].total || 0;
-          }
-        } catch (e) {
-          // No data for this week
-        }
-      }
+      rows.forEach(row => {
+        const kw = row.kalenderwoche;
+        if (!weekData[kw]) weekData[kw] = { total: 0, berater: {} };
+        weekData[kw].total++;
+        grandTotal++;
+        const b = row.beraterin || 'Unbekannt';
+        weekData[kw].berater[b] = (weekData[kw].berater[b] || 0) + 1;
+      });
 
       document.getElementById('statsTotal').textContent = grandTotal;
 
-      // Build table
-      const monthEntries = Object.entries(months).sort((a, b) => a[0].localeCompare(b[0]));
+      const months = groupByMonth(weeks);
+      const me = Object.entries(months).sort((a, b) => a[0].localeCompare(b[0]));
+      const maxW = Math.max(...me.map(([, m]) => m.weeks.length));
 
-      // Find max weeks in any month for column count
-      const maxWeeks = Math.max(...monthEntries.map(([, m]) => m.weeks.length));
+      let hHTML = '<tr><th>Monat</th>';
+      for (let i = 0; i < maxW; i++) hHTML += '<th>KW</th>';
+      hHTML += '<th>Σ</th></tr>';
+      document.getElementById('statsHead').innerHTML = hHTML;
 
-      // Header
-      const thead = document.getElementById('statsHead');
-      let headerHTML = '<tr><th>Monat</th>';
-      for (let i = 0; i < maxWeeks; i++) {
-        headerHTML += `<th>KW</th>`;
-      }
-      headerHTML += '<th>Σ</th></tr>';
-      thead.innerHTML = headerHTML;
-
-      // Body
-      const tbody = document.getElementById('statsBody');
-      let bodyHTML = '';
-
-      monthEntries.forEach(([monthKey, month]) => {
-        let monthTotal = 0;
-
-        bodyHTML += '<tr class="month-row">';
-        bodyHTML += `<td>${month.label}</td>`;
-
-        month.weeks.forEach((w) => {
-          const d = weekData[w.key];
-          const count = d ? d.total : 0;
-          monthTotal += count;
-
-          bodyHTML += `<td class="kw-cell" data-week="${w.key}" title="KW ${w.week}">`;
-          bodyHTML += `<div style="font-size:10px;color:#999;">KW${w.week}</div>`;
-          if (count > 0) {
-            bodyHTML += `<span class="kw-count has-data">${count}</span>`;
-          } else {
-            bodyHTML += `<span class="kw-count no-data">–</span>`;
-          }
-          bodyHTML += '</td>';
+      let bHTML = '';
+      me.forEach(([, month]) => {
+        let mt = 0;
+        bHTML += '<tr><td>' + month.label + '</td>';
+        month.weeks.forEach(w => {
+          const d = weekData[w.key], c = d ? d.total : 0;
+          mt += c;
+          bHTML += '<td class="kw-cell" data-week="' + w.key + '" title="KW ' + w.week + '">';
+          bHTML += '<div style="font-size:10px;color:#999;">KW' + w.week + '</div>';
+          bHTML += c > 0 ? '<span class="kw-count has-data">' + c + '</span>' : '<span class="kw-count no-data">–</span>';
+          bHTML += '</td>';
         });
-
-        // Pad remaining cells
-        for (let i = month.weeks.length; i < maxWeeks; i++) {
-          bodyHTML += '<td></td>';
-        }
-
-        bodyHTML += `<td><strong>${monthTotal}</strong></td>`;
-        bodyHTML += '</tr>';
+        for (let i = month.weeks.length; i < maxW; i++) bHTML += '<td></td>';
+        bHTML += '<td><strong>' + mt + '</strong></td></tr>';
       });
 
-      tbody.innerHTML = bodyHTML;
+      const tbody = document.getElementById('statsBody');
+      tbody.innerHTML = bHTML;
 
-      // Click handler for KW cells -> show berater breakdown
       tbody.querySelectorAll('.kw-cell').forEach(cell => {
         cell.addEventListener('click', () => {
-          const weekKey = cell.dataset.week;
-          const d = weekData[weekKey];
-          showDetail(weekKey, d);
-
-          // Toggle active state
+          showDetail(cell.dataset.week, weekData[cell.dataset.week]);
           tbody.querySelectorAll('.kw-cell').forEach(c => c.classList.remove('active'));
           cell.classList.add('active');
         });
@@ -706,10 +614,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       loading.style.display = 'none';
       table.style.display = 'table';
-
     } catch (e) {
       console.error('Stats load error:', e);
-      loading.textContent = 'Statistiken konnten nicht geladen werden.';
+      loading.innerHTML = '<div class="stats-error">⚠️ Statistiken konnten nicht geladen werden.<br><small>' + e.message + '</small></div>';
     }
   }
 
@@ -717,90 +624,57 @@ document.addEventListener("DOMContentLoaded", function () {
     const panel = document.getElementById('statsDetail');
     const title = document.getElementById('detailTitle');
     const grid = document.getElementById('detailGrid');
-
-    const kwNum = weekKey.split('-W')[1];
-    title.textContent = `KW ${parseInt(kwNum)} – Aufschlüsselung nach Beraterin`;
+    title.textContent = 'KW ' + parseInt(weekKey.split('-W')[1]) + ' – Aufschlüsselung nach Beraterin';
 
     if (!data || !data.berater || Object.keys(data.berater).length === 0) {
       grid.innerHTML = '<div class="detail-item"><div class="name">Keine Daten</div><div class="count">–</div></div>';
-      panel.classList.add('visible');
-      return;
+    } else {
+      const sorted = Object.entries(data.berater).sort((a, b) => b[1] - a[1]);
+      grid.innerHTML = sorted.map(([n, c]) => '<div class="detail-item"><div class="name">' + n + '</div><div class="count">' + c + '</div></div>').join('');
     }
-
-    // Sort by count descending
-    const sorted = Object.entries(data.berater).sort((a, b) => b[1] - a[1]);
-
-    grid.innerHTML = sorted.map(([name, count]) => `
-      <div class="detail-item">
-        <div class="name">${name}</div>
-        <div class="count">${count}</div>
-      </div>
-    `).join('');
-
     panel.classList.add('visible');
   }
 
   // ===================== PRODUCT DROPDOWN =====================
   const produktSelect = document.getElementById("produktSelect");
   produkte.forEach(prod => {
-    const option = document.createElement("option");
-    option.value = prod.id;
-    option.textContent = prod.name;
-    produktSelect.appendChild(option);
+    const o = document.createElement("option"); o.value = prod.id; o.textContent = prod.name;
+    produktSelect.appendChild(o);
   });
 
-  // ===================== SESSION RESTORE =====================
-  const savedBeraterin = sessionStorage.getItem("beraterin");
-  if (savedBeraterin) document.getElementById("beraterin").value = savedBeraterin;
+  // ===================== SESSION =====================
+  const sb = sessionStorage.getItem("beraterin");
+  if (sb) document.getElementById("beraterin").value = sb;
+  document.getElementById("beraterin").addEventListener("change", e => sessionStorage.setItem("beraterin", e.target.value));
 
-  document.getElementById("beraterin").addEventListener("change", (e) => {
-    sessionStorage.setItem("beraterin", e.target.value);
-  });
-
-  document.getElementById("outputMode").addEventListener("change", (e) => {
-    const copyButton = document.getElementById("copyButton");
-    if (e.target.value === "text" && document.getElementById("angebotText").value !== "Noch kein Angebot erstellt.") {
-      copyButton.style.display = "inline-block";
-    } else {
-      copyButton.style.display = "none";
-    }
+  document.getElementById("outputMode").addEventListener("change", e => {
+    const cb = document.getElementById("copyButton");
+    cb.style.display = (e.target.value === "text" && document.getElementById("angebotText").value !== "Noch kein Angebot erstellt.") ? "inline-block" : "none";
   });
 
   document.getElementById("copyButton").addEventListener("click", () => {
-    const textArea = document.getElementById("angebotText");
-    textArea.select();
+    document.getElementById("angebotText").select();
     document.execCommand('copy');
-    const button = document.getElementById("copyButton");
-    button.textContent = "✅ Kopiert!";
-    setTimeout(() => { button.textContent = "📋 Text kopieren"; }, 2000);
+    const b = document.getElementById("copyButton");
+    b.textContent = "✅ Kopiert!";
+    setTimeout(() => { b.textContent = "📋 Text kopieren"; }, 2000);
   });
 
-  // ===================== ADD / REMOVE PRODUCTS =====================
+  // ===================== ADD / REMOVE =====================
   document.getElementById("addProductButton").addEventListener("click", () => {
-    const produktId = document.getElementById("produktSelect").value;
-    const menge = parseInt(document.getElementById("mengeInput").value);
+    const pId = document.getElementById("produktSelect").value;
+    const m = parseInt(document.getElementById("mengeInput").value);
     const dauer = document.getElementById("dauerSelect").value;
     const start = document.getElementById("startInput").value.trim();
     const ab = document.getElementById("abSelect").value;
     const nach = document.getElementById("nachInput").value.trim();
-
-    if (!produktId) { alert("Bitte wähle ein Produkt aus."); return; }
-    if (isNaN(menge) || menge <= 0) { alert("Bitte gib eine gültige Menge ein."); return; }
-
-    const produkt = produkte.find(p => p.id === produktId);
-    if (!produkt) return;
-
-    const existingIndex = addedProducts.findIndex(p => p.id === produktId);
-    const entry = { id: produktId, name: produkt.name, menge, dauer, start, ab, nach };
-
-    if (existingIndex !== -1) {
-      addedProducts[existingIndex] = entry;
-    } else {
-      addedProducts.push(entry);
-    }
-
-    updateAddedProductsList();
-    clearProductForm();
+    if (!pId) { alert("Bitte wähle ein Produkt aus."); return; }
+    if (isNaN(m) || m <= 0) { alert("Bitte gib eine gültige Menge ein."); return; }
+    const p = produkte.find(x => x.id === pId); if (!p) return;
+    const entry = { id: pId, name: p.name, menge: m, dauer, start, ab, nach };
+    const ei = addedProducts.findIndex(x => x.id === pId);
+    if (ei !== -1) addedProducts[ei] = entry; else addedProducts.push(entry);
+    updateAddedProductsList(); clearProductForm();
   });
 
   function clearProductForm() {
@@ -813,43 +687,22 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateAddedProductsList() {
-    const container = document.getElementById("addedProductsList");
-    if (addedProducts.length === 0) {
-      container.innerHTML = '<div class="no-products">Noch keine Produkte hinzugefügt</div>';
-      return;
-    }
-
-    container.innerHTML = addedProducts.map((prod, index) => {
-      let details = [];
-      if (prod.start && prod.dauer) details.push(`${prod.start} Messbecher täglich für ${prod.dauer}`);
-      else if (prod.start) details.push(`${prod.start} Messbecher täglich`);
-      if (prod.ab && prod.nach) details.push(`${prod.ab} ${prod.nach} Messbecher täglich`);
-      const detailsText = details.length > 0 ? `<div class="product-details">${details.join(", ")}</div>` : "";
-
-      return `
-        <div class="added-product">
-          <div class="product-info">
-            <img src="${icons[prod.name] || ''}" alt="${prod.name}" class="product-icon">
-            <div>
-              <strong>${prod.name}</strong> (${prod.menge}x)
-              ${detailsText}
-            </div>
-          </div>
-          <button type="button" class="remove-button" onclick="removeProduct(${index})">🗑️ Entfernen</button>
-        </div>
-      `;
+    const c = document.getElementById("addedProductsList");
+    if (!addedProducts.length) { c.innerHTML = '<div class="no-products">Noch keine Produkte hinzugefügt</div>'; return; }
+    c.innerHTML = addedProducts.map((p, i) => {
+      let d = [];
+      if (p.start && p.dauer) d.push(p.start + ' Messbecher täglich für ' + p.dauer);
+      else if (p.start) d.push(p.start + ' Messbecher täglich');
+      if (p.ab && p.nach) d.push(p.ab + ' ' + p.nach + ' Messbecher täglich');
+      const dt = d.length ? '<div class="product-details">' + d.join(", ") + '</div>' : '';
+      return '<div class="added-product"><div class="product-info"><img src="' + (icons[p.name]||'') + '" alt="' + p.name + '" class="product-icon"><div><strong>' + p.name + '</strong> (' + p.menge + 'x)' + dt + '</div></div><button type="button" class="remove-button" onclick="removeProduct(' + i + ')">🗑️ Entfernen</button></div>';
     }).join("");
   }
 
-  window.removeProduct = function(index) {
-    addedProducts.splice(index, 1);
-    updateAddedProductsList();
-  };
+  window.removeProduct = function(i) { addedProducts.splice(i, 1); updateAddedProductsList(); };
 
-  // ===================== GENERATE ANGEBOT =====================
-  function generateUniqueId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
+  // ===================== GENERATE =====================
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 
   document.getElementById("generateButton").addEventListener("click", async () => {
     const kunde = document.getElementById("kundenname").value.trim();
@@ -858,104 +711,72 @@ document.addEventListener("DOMContentLoaded", function () {
     const berater = document.getElementById("beraterin").value.trim();
     const mode = document.getElementById("outputMode").value;
     const anrede = document.getElementById("anrede")?.value || "du";
-    const outputText = document.getElementById("angebotText");
-    const outputHTML = document.getElementById("angebotHTML");
+    const oT = document.getElementById("angebotText");
+    const oH = document.getElementById("angebotHTML");
 
-    if (addedProducts.length === 0) {
-      outputText.value = "❗ Bitte füge mindestens ein Produkt hinzu.";
-      outputHTML.style.display = "none";
-      outputText.style.display = "block";
-      return;
+    if (!addedProducts.length) {
+      oT.value = "❗ Bitte füge mindestens ein Produkt hinzu.";
+      oH.style.display = "none"; oT.style.display = "block"; return;
     }
 
-    // ** PERSISTENT TRACKING **
-    await incrementStats(berater);
+    // Fire-and-forget to Supabase
+    recordAngebot(berater, kanal, addedProducts.length);
 
-    // GA tracking (best-effort)
-    try {
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'angebot_generated', {
-          event_category: 'Angebotsgenerator',
-          beraterin: berater,
-          kontaktkanal: kanal,
-          produkt_anzahl: addedProducts.length
-        });
-      }
-    } catch (e) { /* GA blocked */ }
+    // GA best-effort
+    try { if (typeof gtag !== 'undefined') gtag('event', 'angebot_generated', { event_category: 'Angebotsgenerator', beraterin: berater, kontaktkanal: kanal, produkt_anzahl: addedProducts.length }); } catch(e) {}
 
-    const trackingParams = new URLSearchParams();
-    trackingParams.set('utm_source', 'servicelink');
-    if (kanal) trackingParams.set('utm_medium', kanal);
-    if (berater) trackingParams.set('utm_content', berater);
-    const linkId = generateUniqueId();
-    trackingParams.set('link_id', linkId);
+    const tp = new URLSearchParams();
+    tp.set('utm_source', 'servicelink');
+    if (kanal) tp.set('utm_medium', kanal);
+    if (berater) tp.set('utm_content', berater);
+    tp.set('link_id', uid());
 
-    let items = [];
-    let textProdukte = [];
-
-    addedProducts.forEach(prod => {
-      let details = [];
-      if (prod.start && prod.dauer) details.push(`${prod.start} Messbecher täglich für ${prod.dauer}`);
-      else if (prod.start) details.push(`${prod.start} Messbecher täglich`);
-      if (prod.ab && prod.nach) details.push(`${prod.ab} ${prod.nach} Messbecher täglich`);
-
-      const zusatz = details.length > 0 ? ` (${details.join(", ")})` : "";
-      items.push(`${prod.id}:${prod.menge}`);
-      textProdukte.push(`${prod.name}${zusatz}`);
+    let items = [], textP = [];
+    addedProducts.forEach(p => {
+      let d = [];
+      if (p.start && p.dauer) d.push(p.start + ' Messbecher täglich für ' + p.dauer);
+      else if (p.start) d.push(p.start + ' Messbecher täglich');
+      if (p.ab && p.nach) d.push(p.ab + ' ' + p.nach + ' Messbecher täglich');
+      items.push(p.id + ':' + p.menge);
+      textP.push(p.name + (d.length ? ' (' + d.join(", ") + ')' : ''));
     });
 
-    const cartUrl = `https://${SHOP_DOMAIN}/cart/${items.join(',')}?${trackingParams.toString()}`;
+    const cartUrl = 'https://' + SHOP_DOMAIN + '/cart/' + items.join(',') + '?' + tp.toString();
 
-    let begruessung = `Hallo ${kunde},\n\n`;
-    let einleitung, hinweis, abschluss;
-
+    let b = 'Hallo ' + kunde + ',\n\n', e, h, a;
     if (anrede === "du") {
-      einleitung = `danke für die ganzen Infos!\nAuf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` ${pferd}` : ""}:\n\n`;
-      hinweis = `Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:\n`;
-      abschluss = `\nWenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`;
+      e = 'danke für die ganzen Infos!\nAuf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd' + (pferd ? ' ' + pferd : '') + ':\n\n';
+      h = 'Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:\n';
+      a = '\nWenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!';
     } else {
-      einleitung = `danke für die ganzen Informationen!\nAuf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` ${pferd}` : ""}:\n\n`;
-      hinweis = `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:\n`;
-      abschluss = `\nSollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`;
+      e = 'danke für die ganzen Informationen!\nAuf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd' + (pferd ? ' ' + pferd : '') + ':\n\n';
+      h = 'Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:\n';
+      a = '\nSollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!';
     }
 
-    const bodyText = `${begruessung}${einleitung}${textProdukte.join("\n")}\n\n${hinweis}👉 Jetzt bestellen: ${cartUrl}${abschluss}`;
+    const body = b + e + textP.join("\n") + '\n\n' + h + '👉 Jetzt bestellen: ' + cartUrl + a;
 
     if (mode === "text") {
-      outputText.style.display = "block";
-      outputHTML.style.display = "none";
-      outputText.value = bodyText;
+      oT.style.display = "block"; oH.style.display = "none"; oT.value = body;
       document.getElementById("copyButton").style.display = "inline-block";
     } else {
-      outputText.style.display = "none";
-      outputHTML.style.display = "block";
-      outputHTML.innerHTML = `
-        <p>${kunde ? `Hallo ${kunde},` : ""}</p>
-        <p>${anrede === "du"
-          ? `danke für die ganzen Infos!<br>Auf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd${pferd ? ` „${pferd}"` : ""}:`
-          : `danke für die ganzen Informationen!<br>Auf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd${pferd ? ` „${pferd}"` : ""}:`
-        }</p>
-        <ul>${textProdukte.map(p => `<li>${p}</li>`).join("")}</ul>
-        <p>${anrede === "du"
-          ? `Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:`
-          : `Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:`
-        }</p>
-        <p>
-          👉 <a href="${cartUrl}" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a>
-        </p>
-        <p>${anrede === "du"
-          ? `Wenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!`
-          : `Sollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!`
-        }</p>
-      `;
+      oT.style.display = "none"; oH.style.display = "block";
+      oH.innerHTML = '<p>' + (kunde ? 'Hallo ' + kunde + ',' : '') + '</p><p>' +
+        (anrede === "du"
+          ? 'danke für die ganzen Infos!<br>Auf dieser Basis empfehlen wir dir folgende Produkte für dein Pferd' + (pferd ? ' „' + pferd + '"' : '') + ':'
+          : 'danke für die ganzen Informationen!<br>Auf dieser Basis empfehlen wir Ihnen folgende Produkte für Ihr Pferd' + (pferd ? ' „' + pferd + '"' : '') + ':') +
+        '</p><ul>' + textP.map(p => '<li>' + p + '</li>').join('') + '</ul><p>' +
+        (anrede === "du"
+          ? 'Du musst einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch deinem Warenkorb hinzugefügt:'
+          : 'Sie müssen einfach nur auf den Link klicken und schon werden die entsprechenden Produkte automatisch Ihrem Warenkorb hinzugefügt:') +
+        '</p><p>👉 <a href="' + cartUrl + '" target="_blank" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">🛒 Jetzt bestellen</a></p><p>' +
+        (anrede === "du" ? 'Wenn du weitere Fragen hast, melde dich gerne jederzeit wieder bei uns!' : 'Sollten Sie weitere Fragen haben, melden Sie sich gerne jederzeit wieder bei uns!') + '</p>';
       document.getElementById("copyButton").style.display = "none";
     }
 
     document.getElementById("successNotification").style.display = "block";
     setTimeout(() => { document.getElementById("successNotification").style.display = "none"; }, 5000);
-
-    // Refresh stats in footer
-    loadAndRenderStats();
+    setTimeout(() => loadAndRenderStats(), 1000);
   });
 
   // ===================== INIT =====================
@@ -964,57 +785,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // ===================== CONFETTI =====================
   const canvas = document.getElementById("confettiCanvas");
   const ctx = canvas.getContext("2d");
+  function rc() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  rc(); window.addEventListener('resize', rc);
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  function launchConfettiFromButton(button) {
-    const rect = button.getBoundingClientRect();
-    const originX = rect.left + rect.width / 2;
-    const originY = rect.top + rect.height / 2;
-    const particles = [];
-    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
-
-    for (let i = 0; i < 80; i++) {
-      const angle = Math.random() * 2 * Math.PI;
-      const speed = Math.random() * 5 + 2;
-      particles.push({
-        x: originX, y: originY,
-        dx: Math.cos(angle) * speed,
-        dy: Math.sin(angle) * speed,
-        radius: Math.random() * 4 + 2,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        life: 60
-      });
-    }
-
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        p.dy += 0.2;
-        p.life--;
-      });
-      for (let i = particles.length - 1; i >= 0; i--) {
-        if (particles[i].life <= 0) particles.splice(i, 1);
-      }
-      if (particles.length > 0) requestAnimationFrame(animate);
-      else ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    animate();
-  }
-
-  document.getElementById("generateButton").addEventListener("click", (e) => {
-    launchConfettiFromButton(e.currentTarget);
+  document.getElementById("generateButton").addEventListener("click", function(ev) {
+    const r = ev.currentTarget.getBoundingClientRect();
+    const ox = r.left + r.width/2, oy = r.top + r.height/2;
+    const ps = [], cs = ['#f00','#0f0','#00f','#ff0','#0ff','#f0f'];
+    for (let i=0;i<80;i++) { const an=Math.random()*2*Math.PI, sp=Math.random()*5+2; ps.push({x:ox,y:oy,dx:Math.cos(an)*sp,dy:Math.sin(an)*sp,r:Math.random()*4+2,c:cs[Math.floor(Math.random()*cs.length)],l:60}); }
+    (function anim() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ps.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fillStyle=p.c;ctx.fill();p.x+=p.dx;p.y+=p.dy;p.dy+=0.2;p.l--;});
+      for(let i=ps.length-1;i>=0;i--) if(ps[i].l<=0) ps.splice(i,1);
+      if(ps.length>0) requestAnimationFrame(anim); else ctx.clearRect(0,0,canvas.width,canvas.height);
+    })();
   });
 
 });
