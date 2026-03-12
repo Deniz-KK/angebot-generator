@@ -268,13 +268,13 @@ function clearSignature(){var r=canvas.getBoundingClientRect();ctx.clearRect(0,0
 
 // ═══════════════════════════════════════════════════════════════════════
 // PDF – exakt nach BMF-Muster 034123 (Sachzuwendung / Verein)
-// Großzügiges Spacing, korrekte Datumswerte, keine doppelte Rechtsform
+// Spacing 1:1 abgemessen an der Original-Vorlage
 // ═══════════════════════════════════════════════════════════════════════
 function buildPDF() {
     var jsPDF = window.jspdf.jsPDF;
     var doc = new jsPDF('p','mm','a4');
     var W=210, H=297, LM=20, RM=190, CW=170;
-    var y = 12;
+    var y;
 
     // -- Helpers --
     function black(){doc.setTextColor(0,0,0);}
@@ -282,151 +282,148 @@ function buildPDF() {
     function setF(style,size){doc.setFont('helvetica',style);doc.setFontSize(size);black();}
     function hline(yy,w){doc.setDrawColor(0);doc.setLineWidth(w||0.3);doc.line(LM,yy,RM,yy);}
     function box(x,yy,w,h){doc.setDrawColor(0);doc.setLineWidth(0.3);doc.rect(x,yy,w,h);}
-    function chk(x,yy,on){box(x,yy,4,4);if(on){setF('bold',9);doc.text('X',x+0.7,yy+3.4);}}
+    function chk(x,yy,on){box(x,yy,5,5);if(on){setF('bold',10);doc.text('X',x+0.7,yy+4);}}
 
-    // Line height for 7pt text
-    var LH7 = 3.2;
-    var LH8 = 3.6;
-
-    // ── 1. Aussteller ──
+    // ── 1. Aussteller (y=10..27) ──
+    y = 10;
     gray(); doc.setFontSize(7);
     doc.text('Aussteller (Bezeichnung und Anschrift der steuerbegünstigten Einrichtung)', LM, y);
-    y += 1;
-    box(LM, y, CW, 14);
+    y = 12;
+    box(LM, y, CW, 16);
     setF('bold', 11);
     doc.text(vereinMitRF, LM+2, y+6);
     setF('normal', 9);
-    doc.text(vereinAdresse, LM+2, y+11);
-    y += 16;
+    doc.text(vereinAdresse, LM+2, y+12);
 
-    // ── 2. Titel ──
+    // ── 2. Titel (y=30) ──
+    y = 32;
     setF('bold', 13);
     doc.text('Bestätigung über Sachzuwendungen', W/2, y, {align:'center'});
-    y += 5;
+    y = 37;
     setF('normal', 7.5);
     var sub = doc.splitTextToSize('im Sinne des § 10b des Einkommensteuergesetzes an eine der in § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes bezeichneten Körperschaften, Personenvereinigungen oder Vermögensmassen', CW - 20);
     doc.text(sub, W/2, y, {align:'center'});
-    y += sub.length * LH7 + 3;
 
-    // ── 3. Zuwendender ──
+    // ── 3. Zuwendender (y=44..66) ──
+    y = 45;
     gray(); doc.setFontSize(7);
     doc.text('Name und Anschrift des Zuwendenden:', LM, y);
-    y += 1;
-    box(LM, y, CW, 12);
+    y = 47;
+    box(LM, y, CW, 18);
     setF('bold', 10);
-    doc.text('Kristallkraft Naturprodukte GmbH & Co. KG, Hauptstraße 3, 29499 Gülden', LM+2, y+7);
-    y += 14;
+    doc.text('Kristallkraft Naturprodukte GmbH & Co. KG, Hauptstraße 3, 29499 Gülden', LM+2, y+10);
 
-    // ── 4. Wert / Buchstaben / Tag ──
+    // ── 4. Wert / Buchstaben / Tag (y=68..82) ──
+    y = 68;
     var c1=55, c2=73, c3=42;
-    box(LM, y, c1, 12);
-    box(LM+c1, y, c2, 12);
-    box(LM+c1+c2, y, c3, 12);
+    box(LM, y, c1, 14);
+    box(LM+c1, y, c2, 14);
+    box(LM+c1+c2, y, c3, 14);
     gray(); doc.setFontSize(6.5);
-    doc.text('Wert der Zuwendung - in Ziffern -', LM+1.5, y+3.5);
-    doc.text('- in Buchstaben -', LM+c1+1.5, y+3.5);
-    doc.text('Tag der Zuwendung:', LM+c1+c2+1.5, y+3.5);
-    setF('bold', 11);
-    doc.text(wertFormatiert, LM+2, y+9);
+    doc.text('Wert der Zuwendung - in Ziffern -', LM+1.5, y+4);
+    doc.text('- in Buchstaben -', LM+c1+1.5, y+4);
+    doc.text('Tag der Zuwendung:', LM+c1+c2+1.5, y+4);
+    setF('bold', 12);
+    doc.text(wertFormatiert, LM+3, y+11);
     setF('normal', 9);
-    doc.text(wertWorte, LM+c1+2, y+9);
-    doc.text(zuwendungsdatum, LM+c1+c2+2, y+9);
-    y += 15;
+    doc.text(wertWorte, LM+c1+3, y+11);
+    doc.text(zuwendungsdatum, LM+c1+c2+3, y+11);
 
-    // ── 5. Bezeichnung ──
+    // ── 5. Bezeichnung (y=85..100) ──
+    y = 86;
     setF('normal', 8);
     doc.text('Genaue Bezeichnung der Sachzuwendung mit Alter, Zustand, Kaufpreis usw.', LM, y);
-    y += 1.5;
-    box(LM, y, CW, 10);
+    y = 89;
     setF('normal', 9);
-    doc.text(sachzuwendung, LM+3, y+6);
-    y += 13;
+    doc.text(sachzuwendung, LM+5, y+6);
 
-    // ── 6. Herkunft ──
-    setF('normal', 7.5);
+    // ── 6. Herkunft Checkboxen (y=100..) ──
+    y = 100;
+    var LH = 3.5;  // line height for 8pt text
+    var IX = LM+7; // indent after checkbox
 
     // Betriebsvermögen (X)
     chk(LM, y, true);
-    var bvTxt = doc.splitTextToSize('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Betriebsvermögen. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.', CW-8);
-    doc.text(bvTxt, LM+6, y+3);
-    y += bvTxt.length * LH7 + 3;
+    setF('bold', 8);
+    var bvTxt = doc.splitTextToSize('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Betriebsvermögen. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.', CW-9);
+    doc.text(bvTxt, IX, y+4);
+    y += bvTxt.length * LH + 5;
 
     // Privatvermögen
+    setF('normal', 8);
     chk(LM, y, false);
-    doc.text('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.', LM+6, y+3);
-    y += 7;
+    doc.text('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.', IX, y+4);
+    y += 8;
 
     // Keine Angaben
     chk(LM, y, false);
-    doc.text('Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.', LM+6, y+3);
-    y += 7;
-
-    // Unterlagen (X) – bold
-    chk(LM, y, true);
-    setF('bold', 7.5);
-    doc.text('Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.', LM+6, y+3);
+    doc.text('Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.', IX, y+4);
     y += 8;
 
-    // ── 7. Freistellungsbescheid (X) ──
-    setF('normal', 7.5);
+    // Unterlagen (X)
     chk(LM, y, true);
+    setF('normal', 8);
+    doc.text('Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.', IX, y+4);
+    y += 9;
+
+    // ── 7. Freistellungsbescheid (X) ──
+    chk(LM, y, true);
+    setF('bold', 8);
     var zweckTxt = zweck || '(Angabe des begünstigten Zwecks / der begünstigten Zwecke)';
-    doc.text('Wir sind wegen Förderung ' + zweckTxt, LM+6, y+3);
-    y += 5;
+    doc.text('Wir sind wegen Förderung ' + zweckTxt, IX, y+4);
+    y += 6;
 
-    // Freistellungs-Details – eingerückt
-    var indent = LM + 6;
     setF('normal', 7.5);
-    doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes', indent, y);
-    y += LH7 + 0.5;
-
     var faVal = finanzamt || '____________';
     var snVal = steuernr || '____________';
     var frVal = freistellung || '____________';
     var vzVal = veranlagung || '____________';
 
-    doc.text(faVal + ', StNr. ' + snVal + ', vom ' + frVal + ' für den letzten', indent, y);
-    y += LH7 + 0.5;
-    doc.text('Veranlagungszeitraum ' + vzVal + ' nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', indent, y);
-    y += LH7 + 0.5;
-    doc.text('Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.', indent, y);
-    y += 6;
+    doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes', IX, y);
+    y += LH;
+    doc.text(faVal + ', StNr. ' + snVal + ', vom ' + frVal + ' für den letzten', IX, y);
+    y += LH;
+    doc.text('Veranlagungszeitraum ' + vzVal + ' nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', IX, y);
+    y += LH;
+    doc.text('Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.', IX, y);
+    y += 7;
 
     // ── 8. Satzungsmäßige Voraussetzungen (leer) ──
     chk(LM, y, false);
-    var satTxt = doc.splitTextToSize('Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt', CW-8);
-    doc.text(satTxt, LM+6, y+3);
-    y += satTxt.length * LH7 + 2;
+    setF('normal', 7.5);
+    var satTxt = doc.splitTextToSize('Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt', CW-9);
+    doc.text(satTxt, IX, y+4);
+    y += satTxt.length * LH + 2;
 
-    doc.text('____________, StNr. ____________, mit Bescheid vom ____________ nach § 60a AO', indent, y);
-    y += LH7 + 0.5;
-    doc.text('gesondert festgestellt. Wir fördern nach unserer Satzung (Angabe des begünstigten Zwecks / der begünstigsten Zwecke)', indent, y);
-    y += 7;
+    doc.text('____________, StNr. ____________, mit Bescheid vom ____________ nach § 60a AO', IX, y);
+    y += LH;
+    doc.text('gesondert festgestellt. Wir fördern nach unserer Satzung (Angabe des begünstigten Zwecks / der begünstigsten Zwecke)', IX, y);
+    y += 8;
 
     // ── 9. Bestätigung Zweckbindung ──
     setF('normal', 7.5);
     doc.text('Es wird bestätigt, dass die Zuwendung nur zur Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)', LM, y);
-    y += 2;
-    box(LM, y, CW, 10);
+    y += 3;
+    box(LM, y, CW, 12);
     setF('bold', 10);
-    doc.text(zweck || '—', LM+3, y+6.5);
-    y += 11;
+    doc.text(zweck || '—', LM+3, y+7);
+    y += 14;
     setF('normal', 7.5);
     doc.text('verwendet wird.', LM, y);
     y += 6;
 
     // ── 10. Unterschrift ──
     hline(y, 0.6);
-    y += 2;
+    y += 3;
 
     // Signatur-Bild
     var sigData = canvas.toDataURL('image/png');
-    doc.addImage(sigData, 'PNG', LM, y, 55, 20);
+    doc.addImage(sigData, 'PNG', LM, y, 55, 22);
 
     // Ort + Datum
     setF('normal', 10);
-    doc.text(p('ort','') + ', ' + new Date().toLocaleDateString('de-DE'), LM+70, y+12);
-    y += 23;
+    doc.text(p('ort','') + ', ' + new Date().toLocaleDateString('de-DE'), LM+80, y+14);
+    y += 26;
 
     gray(); doc.setFontSize(7);
     doc.text('(Ort, Datum und Unterschrift des Zuwendungsempfängers)', LM, y);
@@ -443,9 +440,8 @@ function buildPDF() {
 
     var h2 = doc.splitTextToSize('Diese Bestätigung wird nicht als Nachweis für die steuerliche Berücksichtigung der Zuwendung anerkannt, wenn das Datum des Freistellungsbescheides länger als 5 Jahre bzw. das Datum der Feststellung der Einhaltung der satzungsmäßigen Voraussetzungen nach § 60a Abs. 1 AO länger als 3 Jahre seit Ausstellung des Bescheides zurückliegt (§ 63 Abs. 5 AO).', CW);
     doc.text(h2, LM, y);
-    y += h2.length * 2.8 + 4;
 
-    // ── 12. Formularnummer ──
+    // ── 12. Formularnummer (immer ganz unten) ──
     setF('bold', 7);
     doc.text('034123', LM, H - 10);
     setF('normal', 7);
