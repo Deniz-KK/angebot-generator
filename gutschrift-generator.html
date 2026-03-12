@@ -304,7 +304,7 @@ function renderPreview(){
     sLabel=sTyp==='ustid'?'USt.-IdNr.':'Steuernummer',gn=document.getElementById('gsNumber').value,
     gd=fDateDE(document.getElementById('gsDate').value),a=getAmounts();
 
-  let h=`<div style="text-align:center;margin-bottom:24px"><strong style="font-size:16px">Gutschrift Nr.${gn} v. ${gd}</strong></div>
+  let h=`<div style="text-align:center;margin-bottom:24px"><strong style="font-size:16px">Gutschrift Nr. ${gn} v. ${gd}</strong></div>
     <div style="margin-bottom:4px"><strong>Aussteller:</strong></div><div>${n}</div><div>${st}</div><div>${z} ${c}</div>`;
   if(sx)h+=`<div>${sLabel}: ${sx}</div>`;
   h+=`<br><br><br><div style="margin-bottom:4px"><strong>Empf\u00e4nger:</strong></div>
@@ -342,7 +342,7 @@ function generatePDF(){
   const lh=6;
 
   doc.setFont('helvetica','bold');doc.setFontSize(13);
-  doc.text('Gutschrift Nr.'+gn+' v. '+gd,105,y,{align:'center'});
+  doc.text('Gutschrift Nr. '+gn+' v. '+gd,105,y,{align:'center'});
   y+=14;
 
   doc.setFont('helvetica','normal');doc.setFontSize(10.5);
