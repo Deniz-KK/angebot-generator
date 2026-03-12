@@ -139,6 +139,9 @@
                 <div class="field"><label>Wert in EUR</label><input id="f-wert" type="number" step="0.01"></div>
                 <div class="field"><label>Datum der Zuwendung</label><input id="f-zuwendungsdatum" type="date"></div>
 
+                <div class="section-label">Begünstigter Zweck (BMF-Pflichtfeld)</div>
+                <div class="field" style="grid-column: 1 / -1;"><label>Förderung von … (z.B. "des Reitsports", "des Tierschutzes")</label><input id="f-zweck" placeholder="z.B. des Reitsports"></div>
+
                 <div class="section-label">Lieferadresse</div>
                 <div class="field"><label>Straße (Lieferung)</label><input id="f-lief_strasse"></div>
                 <div class="field"><label>Hausnummer</label><input id="f-lief_nr"></div>
@@ -195,6 +198,8 @@ const COLUMN_MAP = {
     'Nummer': 'lief_nr',
     'Postleitzahl/ Lief.': 'lief_plz',
     'Lieferort': 'lief_ort',
+    'Begünstigter Zweck': 'zweck',
+    'Zweck': 'zweck',
     'geantwortet': 'geantwortet',
     'Versendet': 'versendet',
     'Spendenbescheinigung erhalten': 'bescheinigung'
@@ -286,7 +291,7 @@ function selectRow(idx) {
 
     ['verein','vorname','nachname','email','ev','strasse','hausnr','plz','ort',
      'finanzamt','steuernr','veranlagung','freistellung',
-     'art','veranstaltungsdatum','teilnehmer',
+     'art','veranstaltungsdatum','teilnehmer','zweck',
      'lief_strasse','lief_nr','lief_plz','lief_ort'
     ].forEach(id => {
         const el = document.getElementById('f-' + id);
@@ -305,7 +310,7 @@ function generateLink() {
     const params = new URLSearchParams();
     ['verein','ev','vorname','nachname','email','strasse','hausnr','plz','ort',
      'finanzamt','steuernr','veranlagung','freistellung',
-     'art','veranstaltungsdatum','sachzuwendung','wert','zuwendungsdatum',
+     'art','veranstaltungsdatum','sachzuwendung','wert','zuwendungsdatum','zweck',
      'lief_strasse','lief_nr','lief_plz','lief_ort'
     ].forEach(id => {
         const val = document.getElementById('f-' + id).value.trim();
