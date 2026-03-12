@@ -6,670 +6,373 @@
     <title>Spendenbescheinigung – Kristallkraft</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
-
-        :root {
-            --ink: #1a1a2e;
-            --paper: #fafaf7;
-            --accent: #2c5530;
-            --accent-light: #e8f0e9;
-            --border: #c8c5bb;
-            --muted: #6b6b6b;
-            --warm: #f5f0e8;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--warm);
-            color: var(--ink);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-        }
-
-        .page-header { text-align: center; margin-bottom: 2rem; animation: fadeDown 0.6s ease-out; }
-        .page-header h1 { font-family: 'Crimson Pro', serif; font-size: 1.6rem; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
-        .page-header p { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
-
-        .document {
-            background: var(--paper);
-            width: 100%;
-            max-width: 720px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
-            padding: 2.5rem 2.5rem 2rem;
-            animation: fadeUp 0.5s ease-out 0.1s both;
-        }
-        @media (max-width: 600px) { .document { padding: 1.5rem 1.2rem 1.5rem; } }
-
-        .doc-title { font-family: 'Crimson Pro', serif; font-size: 1.25rem; font-weight: 700; text-align: center; color: var(--ink); border-bottom: 2px solid var(--ink); padding-bottom: 0.6rem; margin-bottom: 0.3rem; }
-        .doc-subtitle { text-align: center; font-size: 0.75rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.4; }
-        .doc-ref { text-align: right; font-size: 0.68rem; color: var(--muted); margin-bottom: 1rem; }
-
-        .section { margin-bottom: 1.2rem; }
-        .section-label { font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.5rem; }
-
-        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; }
-        .field-grid.full { grid-template-columns: 1fr; }
-        .field-grid.three { grid-template-columns: 1fr 1fr 1fr; }
-        @media (max-width: 500px) { .field-grid, .field-grid.three { grid-template-columns: 1fr; } }
-
-        .field { display: flex; flex-direction: column; }
-        .field label { font-size: 0.68rem; color: var(--muted); margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.03em; }
-        .field .value { font-size: 0.92rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); min-height: 1.5rem; word-break: break-word; }
-        .field .value.static { color: var(--ink); }
-
-        .legal-block {
-            font-size: 0.74rem;
-            line-height: 1.5;
-            color: #444;
-            margin: 1rem 0;
-            padding: 0.8rem 1rem;
-            background: var(--accent-light);
-            border-left: 3px solid var(--accent);
-            border-radius: 0 3px 3px 0;
-        }
-        .legal-block strong { color: var(--ink); }
-
-        .checkbox-line {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            padding: 0.3rem 0;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            color: #333;
-        }
-        .checkbox-line .box {
-            flex-shrink: 0;
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 2px;
-            margin-top: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-        }
-        .checkbox-line .box.checked {
-            border-color: var(--accent);
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .hint-block {
-            margin-top: 1rem;
-            padding: 0.8rem 1rem;
-            background: #fff8e1;
-            border-left: 3px solid #f0c040;
-            border-radius: 0 3px 3px 0;
-            font-size: 0.7rem;
-            line-height: 1.5;
-            color: #555;
-        }
-        .hint-block strong { color: #333; }
-
-        .signature-section { margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
-        .signature-section .section-label { margin-bottom: 0.6rem; }
-
-        .signature-pad-wrapper { position: relative; border: 2px dashed var(--border); border-radius: 6px; background: #fff; overflow: hidden; transition: border-color 0.2s; }
-        .signature-pad-wrapper:hover, .signature-pad-wrapper.active { border-color: var(--accent); }
-        .signature-pad-wrapper .hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #bbb; font-size: 0.85rem; pointer-events: none; transition: opacity 0.3s; }
-        .signature-pad-wrapper.has-sig .hint { opacity: 0; }
-
-        canvas#signatureCanvas { display: block; width: 100%; height: 150px; cursor: crosshair; touch-action: none; }
-
-        .sig-actions { display: flex; gap: 0.6rem; margin-top: 0.4rem; }
-        .btn-clear { font-size: 0.76rem; color: var(--muted); background: none; border: 1px solid var(--border); padding: 0.25rem 0.7rem; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
-        .btn-clear:hover { border-color: var(--ink); color: var(--ink); }
-
-        .submit-row { margin-top: 1.5rem; display: flex; justify-content: center; }
-        .btn-submit { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; color: #fff; background: var(--accent); border: none; padding: 0.8rem 2.5rem; border-radius: 4px; cursor: pointer; transition: all 0.25s; letter-spacing: 0.02em; }
-        .btn-submit:hover { background: #1e3d22; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(44,85,48,0.25); }
-        .btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .success-overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.7); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 1rem; }
-        .success-overlay.show { display: flex; }
-        .success-card { background: var(--paper); padding: 2.5rem; border-radius: 8px; text-align: center; max-width: 440px; width: 100%; animation: scaleIn 0.3s ease-out; }
-        .success-card .checkmark { width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
-        .success-card .checkmark svg { stroke: #fff; width: 28px; height: 28px; }
-        .success-card h2 { font-family: 'Crimson Pro', serif; font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--accent); }
-        .success-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
-        .status-line { font-size: 0.82rem; margin-top: 0.8rem; padding: 0.6rem 0.8rem; border-radius: 4px; }
-        .status-line.sending { background: #fff3cd; color: #856404; }
-        .status-line.sent { background: #d4edda; color: #155724; }
-        .status-line.failed { background: #f8d7da; color: #721c24; line-height: 1.5; }
-
-        .error-msg { color: #c0392b; font-size: 0.82rem; margin-top: 0.5rem; text-align: center; display: none; }
-        .error-msg.show { display: block; }
-
-        .date-place { display: flex; gap: 1rem; margin-top: 0.8rem; align-items: flex-end; }
-        .date-place .field { flex: 1; }
-
-        .esig-note { font-size: 0.7rem; color: var(--muted); margin-top: 0.6rem; font-style: italic; }
-
-        @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+        :root { --ink:#1a1a2e; --paper:#fafaf7; --accent:#2c5530; --accent-light:#e8f0e9; --border:#c8c5bb; --muted:#6b6b6b; --warm:#f5f0e8; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans',sans-serif; background:var(--warm); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:2rem 1rem; }
+        .page-header { text-align:center; margin-bottom:1.5rem; }
+        .page-header h1 { font-size:1.3rem; font-weight:700; color:var(--accent); }
+        .page-header p { color:var(--muted); font-size:.85rem; margin-top:.3rem; }
+        /* BMF Form preview */
+        .document { background:#fff; width:100%; max-width:700px; border:1px solid #999; padding:2rem 2.2rem 1.5rem; font-family:Arial,Helvetica,sans-serif; font-size:.82rem; line-height:1.45; color:#000; }
+        @media(max-width:600px){.document{padding:1.2rem 1rem; font-size:.75rem;}}
+        .form-box { border:1px solid #000; padding:.4rem .5rem; min-height:2.2rem; margin-bottom:.15rem; }
+        .form-box.tall { min-height:3rem; }
+        .form-label { font-size:.72rem; color:#333; margin-bottom:.15rem; }
+        .form-value { font-size:.85rem; font-weight:600; }
+        .form-row { display:flex; gap:0; }
+        .form-row .form-cell { border:1px solid #000; padding:.4rem .5rem; flex:1; }
+        .form-row .form-cell+.form-cell { border-left:none; }
+        .form-row .form-cell.narrow { flex:0 0 28%; }
+        .doc-title { font-size:1.05rem; font-weight:700; margin:.6rem 0 .15rem; }
+        .doc-subtitle { font-size:.72rem; color:#333; margin-bottom:.5rem; line-height:1.4; }
+        .checkbox-row { display:flex; gap:.5rem; margin:.25rem 0; align-items:flex-start; }
+        .checkbox-row .cbox { flex-shrink:0; width:14px; height:14px; border:1.5px solid #000; display:flex; align-items:center; justify-content:center; margin-top:2px; font-size:.65rem; font-weight:700; }
+        .checkbox-row .cbox.checked::after { content:'X'; }
+        .checkbox-row .ctext { font-size:.78rem; line-height:1.4; }
+        .inline-field { border-bottom:1px solid #000; display:inline; padding:0 .2rem; min-width:4rem; font-weight:600; }
+        .section-gap { margin-top:.6rem; }
+        .heavy-line { border-top:2px solid #000; margin:.5rem 0; }
+        .hinweis-block { font-size:.68rem; line-height:1.45; color:#333; margin-top:.4rem; }
+        .hinweis-block strong { font-size:.7rem; }
+        .form-footer { font-size:.68rem; color:#333; margin-top:.8rem; }
+        /* Signature section */
+        .sig-section { max-width:700px; width:100%; margin-top:1.5rem; background:var(--paper); border:1px solid var(--border); border-radius:6px; padding:1.5rem; }
+        .sig-section h3 { font-size:.9rem; color:var(--accent); margin-bottom:.5rem; }
+        .sig-section p { font-size:.82rem; color:var(--muted); margin-bottom:.6rem; }
+        .signature-pad-wrapper { position:relative; border:2px dashed var(--border); border-radius:6px; background:#fff; overflow:hidden; transition:border-color .2s; }
+        .signature-pad-wrapper:hover,.signature-pad-wrapper.active { border-color:var(--accent); }
+        .signature-pad-wrapper .hint { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#bbb; font-size:.85rem; pointer-events:none; transition:opacity .3s; }
+        .signature-pad-wrapper.has-sig .hint { opacity:0; }
+        canvas#signatureCanvas { display:block; width:100%; height:140px; cursor:crosshair; touch-action:none; }
+        .sig-actions { display:flex; gap:.6rem; margin-top:.4rem; }
+        .btn-clear { font-size:.76rem; color:var(--muted); background:none; border:1px solid var(--border); padding:.25rem .7rem; border-radius:3px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+        .btn-clear:hover { border-color:var(--ink); color:var(--ink); }
+        .esig-note { font-size:.7rem; color:var(--muted); margin-top:.6rem; font-style:italic; }
+        .submit-row { margin-top:1.2rem; display:flex; justify-content:center; }
+        .btn-submit { font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:600; color:#fff; background:var(--accent); border:none; padding:.8rem 2.5rem; border-radius:4px; cursor:pointer; transition:all .25s; }
+        .btn-submit:hover { background:#1e3d22; transform:translateY(-1px); box-shadow:0 4px 12px rgba(44,85,48,.25); }
+        .btn-submit:disabled { background:#aaa; cursor:not-allowed; transform:none; box-shadow:none; }
+        .error-msg { color:#c0392b; font-size:.82rem; margin-top:.5rem; text-align:center; display:none; }
+        .error-msg.show { display:block; }
+        .success-overlay { display:none; position:fixed; inset:0; background:rgba(26,26,46,.7); backdrop-filter:blur(4px); z-index:100; justify-content:center; align-items:center; padding:1rem; }
+        .success-overlay.show { display:flex; }
+        .success-card { background:var(--paper); padding:2.5rem; border-radius:8px; text-align:center; max-width:440px; width:100%; }
+        .success-card .checkmark { width:56px; height:56px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; }
+        .success-card .checkmark svg { stroke:#fff; width:28px; height:28px; }
+        .success-card h2 { font-size:1.3rem; margin-bottom:.5rem; color:var(--accent); }
+        .success-card p { font-size:.9rem; color:var(--muted); line-height:1.5; }
+        .status-line { font-size:.82rem; margin-top:.8rem; padding:.6rem .8rem; border-radius:4px; }
+        .status-line.sending { background:#fff3cd; color:#856404; }
+        .status-line.sent { background:#d4edda; color:#155724; }
+        .status-line.failed { background:#f8d7da; color:#721c24; line-height:1.5; }
     </style>
 </head>
 <body>
-
 <div class="page-header">
-    <h1>Kristallkraft Naturprodukte GmbH & Co. KG</h1>
-    <p>Digitale Spendenbescheinigung (Sachzuwendung)</p>
+    <h1>Kristallkraft Naturprodukte – Spendenbescheinigung</h1>
+    <p>Bitte prüfe die Angaben und unterschreibe unten digital.</p>
 </div>
 
 <div class="document" id="document">
-
-    <div class="doc-ref">Bestätigung gemäß § 50 Abs. 1 EStDV – amtlicher Vordruck (Sachzuwendung)</div>
-
-    <!-- Aussteller -->
-    <div class="section">
-        <div class="section-label">Aussteller (Zuwendungsempfänger)</div>
-        <div class="field-grid full">
-            <div class="field"><label>Name, Anschrift und Rechtsform</label><div class="value" id="val-aussteller"></div></div>
-        </div>
-    </div>
+    <div class="form-label">Aussteller (Bezeichnung und Anschrift der steuerbegünstigten Einrichtung)</div>
+    <div class="form-box tall"><div class="form-value" id="val-aussteller"></div></div>
 
     <div class="doc-title">Bestätigung über Sachzuwendungen</div>
-    <div class="doc-subtitle">
-        im Sinne des § 10b des Einkommensteuergesetzes an eine der in § 5 Abs. 1 Nr. 9 des
-        Körperschaftsteuergesetzes bezeichneten Körperschaften, Personenvereinigungen oder Vermögensmassen
+    <div class="doc-subtitle">im Sinne des § 10b des Einkommensteuergesetzes an eine der in § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes bezeichneten Körperschaften, Personenvereinigungen oder Vermögensmassen</div>
+
+    <div class="form-label">Name und Anschrift des Zuwendenden:</div>
+    <div class="form-box tall"><div class="form-value" id="val-zuwendender"></div></div>
+
+    <div class="form-row">
+        <div class="form-cell"><div class="form-label">Wert der Zuwendung - in Ziffern -</div><div class="form-value" id="val-wert-ziffern"></div></div>
+        <div class="form-cell"><div class="form-label">- in Buchstaben -</div><div class="form-value" id="val-wert-buchstaben"></div></div>
+        <div class="form-cell narrow"><div class="form-label">Tag der Zuwendung:</div><div class="form-value" id="val-tag-zuwendung"></div></div>
     </div>
 
-    <!-- Zuwendender (Spender) -->
-    <div class="section">
-        <div class="section-label">Name und Anschrift des Zuwendenden (Spender)</div>
-        <div class="field-grid full">
-            <div class="field"><label>Name und Anschrift</label><div class="value static">Kristallkraft Naturprodukte GmbH & Co. KG, Hauptstraße 3, 29499 Gülden</div></div>
-        </div>
+    <div class="section-gap"></div>
+    <div style="font-size:.78rem;">Genaue Bezeichnung der Sachzuwendung mit Alter, Zustand, Kaufpreis usw.</div>
+    <div class="form-box tall" style="min-height:2.8rem;"><div id="val-bezeichnung" style="font-size:.85rem;"></div></div>
+
+    <div class="section-gap"></div>
+    <div class="checkbox-row"><div class="cbox checked"></div><div class="ctext">Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Betriebsvermögen. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.</div></div>
+    <div class="checkbox-row"><div class="cbox"></div><div class="ctext">Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.</div></div>
+    <div class="checkbox-row"><div class="cbox"></div><div class="ctext">Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.</div></div>
+    <div class="checkbox-row"><div class="cbox checked"></div><div class="ctext">Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.</div></div>
+
+    <div class="section-gap"></div>
+    <div class="checkbox-row"><div class="cbox checked"></div><div class="ctext">Wir sind wegen Förderung <span id="val-zweck-1" style="font-weight:600;"></span></div></div>
+    <div style="font-size:.78rem; margin-left:1.3rem; line-height:1.7;">
+        nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes<br>
+        <span class="inline-field" id="val-fa-1"></span>, StNr. <span class="inline-field" id="val-stnr-1"></span>, vom <span class="inline-field" id="val-frei-1"></span> für den letzten<br>
+        Veranlagungszeitraum <span class="inline-field" id="val-vz-1"></span> nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der<br>
+        Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.
     </div>
 
-    <!-- Wert + Tag -->
-    <div class="section">
-        <div class="field-grid">
-            <div class="field"><label>Wert der Zuwendung – in Ziffern –</label><div class="value" id="val-wert-ziffern"></div></div>
-            <div class="field"><label>– in Buchstaben –</label><div class="value" id="val-wert-buchstaben"></div></div>
-            <div class="field"><label>Tag der Zuwendung</label><div class="value" id="val-tag-zuwendung"></div></div>
-        </div>
+    <div class="section-gap" style="margin-top:.3rem;"></div>
+    <div class="checkbox-row"><div class="cbox"></div><div class="ctext">Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt</div></div>
+    <div style="font-size:.78rem; margin-left:1.3rem; line-height:1.7;">
+        ____________, StNr. ____________, mit Bescheid vom ____________ nach § 60a AO<br>
+        gesondert festgestellt. Wir fördern nach unserer Satzung (Angabe des begünstigten Zwecks / der begünstigsten Zwecke)
     </div>
 
-    <!-- Genaue Bezeichnung -->
-    <div class="section">
-        <div class="section-label">Genaue Bezeichnung der Sachzuwendung mit Alter, Zustand, Kaufpreis usw.</div>
-        <div class="field-grid full">
-            <div class="field"><div class="value static" id="val-bezeichnung">1x Kristallkraft No1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59,90€<br>1x Kristallkraft Coolly &nbsp;&nbsp;&nbsp;&nbsp; 72,90€</div></div>
-        </div>
-    </div>
+    <div class="section-gap"></div>
+    <div style="font-size:.78rem;">Es wird bestätigt, dass die Zuwendung nur zur Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)</div>
+    <div class="form-box tall" style="min-height:2.5rem;"><div class="form-value" id="val-zweck-box"></div></div>
+    <div style="font-size:.78rem;">verwendet wird.</div>
 
-    <!-- Herkunft der Sachzuwendung -->
-    <div class="section">
-        <div class="section-label">Herkunft der Sachzuwendung</div>
-        <div class="checkbox-line">
-            <span class="box checked">✓</span>
-            <span>Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem <strong>Betriebsvermögen</strong>. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.</span>
-        </div>
-        <div class="checkbox-line">
-            <span class="box"></span>
-            <span>Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.</span>
-        </div>
-        <div class="checkbox-line">
-            <span class="box"></span>
-            <span>Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.</span>
-        </div>
-        <div class="checkbox-line" style="margin-top:0.3rem;">
-            <span class="box checked">✓</span>
-            <span>Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.</span>
-        </div>
-    </div>
+    <div class="heavy-line" style="margin-top:1rem;"></div>
+    <div style="font-size:.72rem; color:#333;">(Ort, Datum und Unterschrift des Zuwendungsempfängers)</div>
 
-    <!-- Keine Gegenleistung -->
-    <div class="section">
-        <div class="checkbox-line">
-            <span class="box checked">✓</span>
-            <span>Es handelt sich <strong>nicht</strong> um den Verzicht auf die Erstattung von Aufwendungen. Es wurde <strong>keine Gegenleistung</strong> für die Zuwendung gewährt.</span>
-        </div>
+    <div class="hinweis-block">
+        <strong>Hinweis:</strong><br>
+        Wer vorsätzlich oder grob fahrlässig eine unrichtige Zuwendungsbestätigung erstellt oder veranlasst, dass Zuwendungen nicht zu den in der Zuwendungsbestätigung angegebenen steuerbegünstigten Zwecken verwendet werden, haftet für die entgangene Steuer (§ 10b Abs. 4 EStG, § 9 Abs. 3 KStG, § 9 Nr. 5 GewStG).
+        <br><br>
+        Diese Bestätigung wird nicht als Nachweis für die steuerliche Berücksichtigung der Zuwendung anerkannt, wenn das Datum des Freistellungsbescheides länger als 5 Jahre bzw. das Datum der Feststellung der Einhaltung der satzungsmäßigen Voraussetzungen nach § 60a Abs. 1 AO länger als 3 Jahre seit Ausstellung des Bescheides zurückliegt (§ 63 Abs. 5 AO).
     </div>
-
-    <!-- Steuerliche Angaben des Empfängers -->
-    <div class="section">
-        <div class="section-label">Angaben zum Zuwendungsempfänger (Verein)</div>
-        <div class="field-grid">
-            <div class="field"><label>Vereinsname</label><div class="value" id="val-verein"></div></div>
-            <div class="field"><label>Rechtsform</label><div class="value" id="val-rechtsform"></div></div>
-            <div class="field"><label>Anschrift</label><div class="value" id="val-adresse"></div></div>
-            <div class="field"><label>E-Mail</label><div class="value" id="val-email"></div></div>
-        </div>
-    </div>
-
-    <!-- Gemeinnützigkeit -->
-    <div class="legal-block">
-        <strong>Bestätigung der Gemeinnützigkeit:</strong><br>
-        Es wird bestätigt, dass die Zuwendung nur zur Förderung
-        <span id="val-zweck">(gemeinnütziger Zweck laut Satzung des Vereins)</span>
-        verwendet wird.<br><br>
-        Wir sind wegen Förderung des genannten Zwecks nach dem Freistellungsbescheid bzw. nach der Anlage zum
-        Körperschaftsteuerbescheid des Finanzamtes
-        <strong><span id="val-finanzamt-text">–</span></strong>, StNr. <strong><span id="val-steuernr-text">–</span></strong>,
-        vom <strong><span id="val-freistellung-text">–</span></strong>
-        für den letzten Veranlagungszeitraum <strong><span id="val-veranlagung-text">–</span></strong>
-        nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der Körperschaftsteuer und nach
-        § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.<br><br>
-        Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt
-        festgestellt (§§ 51 ff. AO).
-    </div>
-
-    <!-- Veranstaltung -->
-    <div class="section">
-        <div class="section-label">Veranstaltung</div>
-        <div class="field-grid">
-            <div class="field"><label>Art der Veranstaltung</label><div class="value" id="val-art"></div></div>
-            <div class="field"><label>Datum der Veranstaltung</label><div class="value" id="val-datum"></div></div>
-        </div>
-    </div>
-
-    <!-- Lieferadresse -->
-    <div class="section">
-        <div class="section-label">Lieferadresse des Sponsoring-Pakets</div>
-        <div class="field-grid full">
-            <div class="field"><label>Adresse</label><div class="value" id="val-lieferadresse"></div></div>
-        </div>
-    </div>
-
-    <!-- Gesetzliche Hinweise -->
-    <div class="hint-block">
-        <strong>Hinweis:</strong> Wer vorsätzlich oder grob fahrlässig eine unrichtige Zuwendungsbestätigung erstellt oder veranlasst,
-        dass Zuwendungen nicht zu den in der Zuwendungsbestätigung angegebenen steuerbegünstigten Zwecken verwendet werden,
-        haftet für die entgangene Steuer (§ 10b Abs. 4 EStG, § 9 Abs. 3 KStG, § 9 Nr. 5 GewStG).<br><br>
-        Diese Bestätigung wird nicht als Nachweis für die steuerliche Berücksichtigung der Zuwendung anerkannt,
-        wenn das Datum des Freistellungsbescheides länger als 5 Jahre bzw. das Datum der Feststellung der Einhaltung
-        der satzungsmäßigen Voraussetzungen nach § 60a Abs. 1 AO länger als 3 Jahre seit Ausstellung des Bescheides
-        zurückliegt (§ 63 Abs. 5 AO).
-    </div>
-
-    <!-- Unterschrift -->
-    <div class="signature-section">
-        <div class="section-label">Ort, Datum und Unterschrift des Zuwendungsempfängers</div>
-        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.6rem;">
-            Bitte unterschreibe hier mit dem Finger oder Stift auf deinem Touchscreen.
-        </p>
-        <div class="signature-pad-wrapper" id="sigWrapper">
-            <span class="hint">Hier unterschreiben ✍️</span>
-            <canvas id="signatureCanvas"></canvas>
-        </div>
-        <div class="sig-actions">
-            <button class="btn-clear" onclick="clearSignature()">Unterschrift löschen</button>
-        </div>
-        <div class="date-place">
-            <div class="field"><label>Ort</label><div class="value" id="val-ort-sig"></div></div>
-            <div class="field"><label>Datum der Ausstellung</label><div class="value" id="val-datum-sig"></div></div>
-        </div>
-        <div class="esig-note">
-            Hinweis: Bei elektronischer Bescheinigung ist eine qualifizierte elektronische Signatur zulässig (§ 50 Abs. 1 EStDV).
-        </div>
-    </div>
-
-    <div class="error-msg" id="errorMsg">Bitte unterschreibe die Bescheinigung.</div>
-
-    <div class="submit-row">
-        <button class="btn-submit" id="submitBtn" onclick="generateAndSendPDF()">
-            Unterschreiben & absenden
-        </button>
-    </div>
+    <div class="form-footer"><strong>034123</strong> Bestätigung über Sachzuwendung / steuerbegünstigte Einrichtung / Verein (2013)</div>
 </div>
 
-<!-- Success Overlay -->
+<div class="sig-section">
+    <h3>Digitale Unterschrift</h3>
+    <p>Bitte unterschreibe hier mit dem Finger oder Stift auf deinem Touchscreen.</p>
+    <div class="signature-pad-wrapper" id="sigWrapper">
+        <span class="hint">Hier unterschreiben ✍️</span>
+        <canvas id="signatureCanvas"></canvas>
+    </div>
+    <div class="sig-actions"><button class="btn-clear" onclick="clearSignature()">Unterschrift löschen</button></div>
+    <div class="esig-note">Hinweis: Bei elektronischer Bestätigung ist eine qualifizierte elektronische Signatur zulässig (§ 50 Abs. 1 EStDV).</div>
+    <div class="error-msg" id="errorMsg">Bitte unterschreibe die Bescheinigung.</div>
+    <div class="submit-row"><button class="btn-submit" id="submitBtn" onclick="generateAndSendPDF()">Unterschreiben &amp; absenden</button></div>
+</div>
+
 <div class="success-overlay" id="successOverlay">
     <div class="success-card">
-        <div class="checkmark">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </div>
+        <div class="checkmark"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
         <h2>Vielen Dank!</h2>
         <p>Deine unterschriebene Spendenbescheinigung wurde erstellt.</p>
-        <div class="status-line sending" id="emailStatus">
-            ⏳ PDF wird an Kristallkraft gesendet…
-        </div>
+        <div class="status-line sending" id="emailStatus">⏳ PDF wird an Kristallkraft gesendet…</div>
     </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════
 const WEB3FORMS_KEY = '57c8561b-c8ee-4e9f-9839-19f88136b8fa';
-// ══════════════════════════════════════════════════════════════
-
 const params = new URLSearchParams(window.location.search);
-function p(key, fallback = '') { return decodeURIComponent(params.get(key) || fallback); }
+function p(key, fallback) { return decodeURIComponent(params.get(key) || (fallback !== undefined ? fallback : '')); }
 
-// Zahl in Worten (deutsch, vereinfacht)
 function zahlInWorten(n) {
     if (!n || isNaN(n)) return '—';
-    const einer = ['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn',
-        'elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
+    const einer = ['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
     const zehner = ['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'];
     n = parseFloat(n);
     const euro = Math.floor(n);
     const cent = Math.round((n - euro) * 100);
-    let wort = '';
-    if (euro === 0) { wort = 'null'; }
-    else if (euro < 20) { wort = einer[euro]; }
-    else if (euro < 100) {
-        const e = euro % 10;
-        const z = Math.floor(euro / 10);
-        wort = e > 0 ? einer[e] + 'und' + zehner[z] : zehner[z];
-    } else if (euro < 1000) {
-        const h = Math.floor(euro / 100);
-        const rest = euro % 100;
-        wort = einer[h] + 'hundert';
-        if (rest > 0 && rest < 20) wort += einer[rest];
-        else if (rest >= 20) {
-            const e = rest % 10;
-            const z = Math.floor(rest / 10);
-            wort += e > 0 ? einer[e] + 'und' + zehner[z] : zehner[z];
-        }
-    } else {
-        const t = Math.floor(euro / 1000);
-        const rest = euro % 1000;
-        wort = (t === 1 ? 'ein' : einer[t]) + 'tausend';
-        if (rest > 0) {
-            // recursive simplified
-            wort += rest < 20 ? einer[rest] : String(rest);
-        }
+    function cb(num) {
+        if (num === 0) return '';
+        if (num < 20) return einer[num];
+        if (num < 100) { const e = num%10, z = Math.floor(num/10); return e > 0 ? einer[e]+'und'+zehner[z] : zehner[z]; }
+        const h = Math.floor(num/100), rest = num%100;
+        let w = einer[h]+'hundert';
+        if (rest > 0) w += cb(rest);
+        return w;
     }
+    let wort = '';
+    if (euro === 0) wort = 'null';
+    else if (euro < 1000) wort = cb(euro);
+    else { const t = Math.floor(euro/1000), rest = euro%1000; wort = (t===1?'ein':cb(t))+'tausend'; if (rest>0) wort += cb(rest); }
     wort = wort.charAt(0).toUpperCase() + wort.slice(1);
     let result = wort + ' Euro';
     if (cent > 0) result += ' und ' + cent + ' Cent';
     return result;
 }
 
-// Fill fields
 const verein = p('verein');
-const vorname = p('vorname');
-const nachname = p('nachname');
-const ansprech = [vorname, nachname].filter(Boolean).join(' ');
-const adresse = [p('strasse'), p('hausnr'), p('plz'), p('ort')].filter(Boolean).join(', ');
+const ev = p('ev', 'Ja');
+const rechtsform = ev === 'Ja' ? ' e.V.' : '';
+const vereinAdresse = [p('strasse'), p('hausnr')].filter(Boolean).join(' ') + (p('plz')||p('ort') ? ', ' : '') + [p('plz'), p('ort')].filter(Boolean).join(' ');
+const wertNum = parseFloat(p('wert', '0'));
+const wertFormatiert = wertNum > 0 ? wertNum.toFixed(2).replace('.', ',') + ' €' : '—';
+const wertWorte = wertNum > 0 ? zahlInWorten(wertNum) : '—';
+const zuwendungsdatum = p('zuwendungsdatum', new Date().toLocaleDateString('de-DE'));
+const sachzuwendung = p('sachzuwendung', 'Sponsoring-Paket Pferdefutter');
+const zweck = p('zweck', '');
 
-document.getElementById('val-aussteller').textContent = verein + (verein ? ' (e.V.)' : '') + (adresse ? ', ' + adresse : '');
-document.getElementById('val-verein').textContent = verein;
-document.getElementById('val-rechtsform').textContent = p('ev', 'Ja') === 'Ja' ? 'Eingetragener Verein (e.V.)' : p('ev');
-document.getElementById('val-adresse').textContent = adresse;
-document.getElementById('val-email').textContent = p('email');
-document.getElementById('val-finanzamt-text').textContent = p('finanzamt') || '–';
-document.getElementById('val-steuernr-text').textContent = p('steuernr') || '–';
-document.getElementById('val-veranlagung-text').textContent = p('veranlagung') || '–';
-document.getElementById('val-freistellung-text').textContent = p('freistellung') || '–';
-document.getElementById('val-art').textContent = p('art');
-document.getElementById('val-datum').textContent = p('veranstaltungsdatum');
+document.getElementById('val-aussteller').innerHTML = '<strong>'+verein+rechtsform+'</strong><br>'+vereinAdresse;
+document.getElementById('val-zuwendender').textContent = 'Kristallkraft Naturprodukte GmbH & Co. KG, Hauptstraße 3, 29499 Gülden';
+document.getElementById('val-wert-ziffern').textContent = wertFormatiert;
+document.getElementById('val-wert-buchstaben').textContent = wertWorte;
+document.getElementById('val-tag-zuwendung').textContent = zuwendungsdatum;
+document.getElementById('val-bezeichnung').textContent = sachzuwendung;
+document.getElementById('val-zweck-1').textContent = zweck || '(Angabe des begünstigten Zwecks / der begünstigten Zwecke)';
+if (zweck) document.getElementById('val-zweck-1').style.fontWeight = '600';
+document.getElementById('val-zweck-box').textContent = zweck || '—';
+document.getElementById('val-fa-1').textContent = p('finanzamt') || '–';
+document.getElementById('val-stnr-1').textContent = p('steuernr') || '–';
+document.getElementById('val-frei-1').textContent = p('freistellung') || '–';
+document.getElementById('val-vz-1').textContent = p('veranlagung') || '–';
 
-const wertStr = p('wert');
-document.getElementById('val-wert-ziffern').textContent = '132,80 €';
-document.getElementById('val-wert-buchstaben').textContent = 'Hundertzweiunddreißig Euro und achtzig Cent';
-document.getElementById('val-tag-zuwendung').textContent = p('zuwendungsdatum', new Date().toLocaleDateString('de-DE'));
-
-document.getElementById('val-lieferadresse').textContent = [p('lief_strasse'), p('lief_nr'), p('lief_plz'), p('lief_ort')].filter(Boolean).join(', ');
-document.getElementById('val-ort-sig').textContent = p('ort', '');
-document.getElementById('val-datum-sig').textContent = new Date().toLocaleDateString('de-DE');
-
-// ─── Signature Pad ───
+// Signature Pad
 const canvas = document.getElementById('signatureCanvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('sigWrapper');
-let isDrawing = false;
-let hasSigned = false;
+let isDrawing = false, hasSigned = false;
+function resizeCanvas() { const rect=canvas.getBoundingClientRect(); const dpr=window.devicePixelRatio||1; canvas.width=rect.width*dpr; canvas.height=rect.height*dpr; ctx.scale(dpr,dpr); ctx.strokeStyle='#1a1a2e'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.lineJoin='round'; }
+resizeCanvas(); window.addEventListener('resize',()=>{if(!hasSigned)resizeCanvas();});
+function getPos(e){const rect=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-rect.left,y:t.clientY-rect.top};}
+function startDraw(e){e.preventDefault();isDrawing=true;wrapper.classList.add('active');const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
+function draw(e){if(!isDrawing)return;e.preventDefault();const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();hasSigned=true;wrapper.classList.add('has-sig');}
+function endDraw(e){if(isDrawing){e.preventDefault();isDrawing=false;wrapper.classList.remove('active');}}
+canvas.addEventListener('mousedown',startDraw);canvas.addEventListener('mousemove',draw);canvas.addEventListener('mouseup',endDraw);canvas.addEventListener('mouseleave',endDraw);
+canvas.addEventListener('touchstart',startDraw,{passive:false});canvas.addEventListener('touchmove',draw,{passive:false});canvas.addEventListener('touchend',endDraw);
+function clearSignature(){const rect=canvas.getBoundingClientRect();ctx.clearRect(0,0,rect.width,rect.height);hasSigned=false;wrapper.classList.remove('has-sig');document.getElementById('errorMsg').classList.remove('show');}
 
-function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-}
-resizeCanvas();
-window.addEventListener('resize', () => { if (!hasSigned) resizeCanvas(); });
-
-function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-}
-function startDraw(e) { e.preventDefault(); isDrawing = true; wrapper.classList.add('active'); const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
-function draw(e) { if (!isDrawing) return; e.preventDefault(); const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); hasSigned = true; wrapper.classList.add('has-sig'); }
-function endDraw(e) { if (isDrawing) { e.preventDefault(); isDrawing = false; wrapper.classList.remove('active'); } }
-
-canvas.addEventListener('mousedown', startDraw);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', endDraw);
-canvas.addEventListener('mouseleave', endDraw);
-canvas.addEventListener('touchstart', startDraw, { passive: false });
-canvas.addEventListener('touchmove', draw, { passive: false });
-canvas.addEventListener('touchend', endDraw);
-
-function clearSignature() {
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    hasSigned = false;
-    wrapper.classList.remove('has-sig');
-    document.getElementById('errorMsg').classList.remove('show');
-}
-
-// ─── PDF Generation (amtlicher Vordruck) ───
+// ═══ PDF – exakt nach BMF-Muster 034123 (Sachzuwendung / Verein) ═══
 function buildPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const w = 210;
-    const lm = 18; // left margin
-    const rm = w - 18; // right margin
-    const cw = rm - lm; // content width
-    let y = 14;
+    const doc = new jsPDF('p','mm','a4');
+    const W=210,H=297,LM=20,RM=W-20,CW=RM-LM;
+    let y = 12;
+    const black=()=>doc.setTextColor(0,0,0);
+    const gray=()=>doc.setTextColor(80,80,80);
+    const setFont=(s,sz)=>{doc.setFont('helvetica',s);doc.setFontSize(sz);black();};
+    const drawHLine=(yy,wt)=>{doc.setDrawColor(0);doc.setLineWidth(wt||.3);doc.line(LM,yy,RM,yy);};
+    const drawBox=(x,yy,w,h)=>{doc.setDrawColor(0);doc.setLineWidth(.3);doc.rect(x,yy,w,h);};
+    const cb=(x,yy,chk)=>{drawBox(x,yy,4,4);if(chk){setFont('bold',9);doc.text('X',x+.8,yy+3.3);}};
 
-    const gray = () => doc.setTextColor(100,100,100);
-    const black = () => doc.setTextColor(0,0,0);
-    const green = () => doc.setTextColor(44,85,48);
-    const setNormal = (size) => { doc.setFont('helvetica','normal'); doc.setFontSize(size || 9); black(); };
-    const setBold = (size) => { doc.setFont('helvetica','bold'); doc.setFontSize(size || 9); black(); };
-    const drawLine = () => { doc.setDrawColor(180); doc.setLineWidth(0.2); doc.line(lm, y, rm, y); y += 1; };
+    // 1. Aussteller
+    gray();doc.setFontSize(7);
+    doc.text('Aussteller (Bezeichnung und Anschrift der steuerbegünstigten Einrichtung)',LM,y);
+    y+=1;drawBox(LM,y,CW,12);
+    setFont('bold',10);doc.text(verein+rechtsform,LM+2,y+5);
+    setFont('normal',9);doc.text(vereinAdresse,LM+2,y+9.5);
+    y+=14;
 
-    // ── Aussteller ──
-    gray(); doc.setFontSize(7);
-    doc.text('Aussteller (Bezeichnung und Anschrift der steuerbegünstigten Einrichtung)', lm, y); y += 4;
-    setBold(10);
-    doc.text(verein + (verein ? ' (e.V.)' : ''), lm, y); y += 4;
-    setNormal(9);
-    doc.text(adresse, lm, y); y += 6;
-    drawLine(); y += 3;
+    // 2. Titel
+    setFont('bold',12);doc.text('Bestätigung über Sachzuwendungen',W/2,y,{align:'center'});y+=4.5;
+    setFont('normal',7);
+    const sub=doc.splitTextToSize('im Sinne des § 10b des Einkommensteuergesetzes an eine der in § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes bezeichneten Körperschaften, Personenvereinigungen oder Vermögensmassen',CW);
+    doc.text(sub,W/2,y,{align:'center'});y+=sub.length*3+2;
 
-    // ── Titel ──
-    setBold(13);
-    doc.text('Bestätigung über Sachzuwendungen', w/2, y, { align: 'center' }); y += 5;
-    setNormal(7);
-    const subLines = doc.splitTextToSize('im Sinne des § 10b des Einkommensteuergesetzes an eine der in § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes bezeichneten Körperschaften, Personenvereinigungen oder Vermögensmassen', cw);
-    doc.text(subLines, w/2, y, { align: 'center' }); y += subLines.length * 3 + 4;
-    drawLine(); y += 3;
+    // 3. Zuwendender
+    gray();doc.setFontSize(7);doc.text('Name und Anschrift des Zuwendenden:',LM,y);
+    y+=1;drawBox(LM,y,CW,10);
+    setFont('bold',9);doc.text('Kristallkraft Naturprodukte GmbH & Co. KG, Hauptstraße 3, 29499 Gülden',LM+2,y+5.5);
+    y+=12;
 
-    // ── Zuwendender ──
-    gray(); doc.setFontSize(7);
-    doc.text('Name und Anschrift des Zuwendenden:', lm, y); y += 4;
-    setBold(9);
-    doc.text('Kristallkraft Naturprodukte GmbH & Co. KG, Hauptstraße 3, 29499 Gülden', lm, y); y += 6;
-    drawLine(); y += 3;
+    // 4. Wert / Buchstaben / Tag
+    const c1=55,c2=CW-55-42,c3=42;
+    drawBox(LM,y,c1,11);drawBox(LM+c1,y,c2,11);drawBox(LM+c1+c2,y,c3,11);
+    gray();doc.setFontSize(6.5);
+    doc.text('Wert der Zuwendung - in Ziffern -',LM+1.5,y+3.5);
+    doc.text('- in Buchstaben -',LM+c1+1.5,y+3.5);
+    doc.text('Tag der Zuwendung:',LM+c1+c2+1.5,y+3.5);
+    setFont('bold',10);doc.text(wertFormatiert,LM+2,y+8.5);
+    setFont('normal',8);doc.text(wertWorte,LM+c1+2,y+8.5);
+    doc.text(zuwendungsdatum,LM+c1+c2+2,y+8.5);
+    y+=13;
 
-    // ── Wert ──
-    gray(); doc.setFontSize(7);
-    doc.text('Wert der Zuwendung – in Ziffern –', lm, y);
-    doc.text('– in Buchstaben –', lm + 55, y);
-    doc.text('Tag der Zuwendung', lm + 130, y);
-    y += 4;
-    setBold(10);
-    doc.text('132,80 €', lm, y);
-    setNormal(9);
-    doc.text('Hundertzweiunddreißig Euro und achtzig Cent', lm + 55, y);
-    doc.text(p('zuwendungsdatum', new Date().toLocaleDateString('de-DE')), lm + 130, y);
-    y += 5;
-    drawLine(); y += 3;
+    // 5. Bezeichnung
+    setFont('normal',8);doc.text('Genaue Bezeichnung der Sachzuwendung mit Alter, Zustand, Kaufpreis usw.',LM,y);
+    y+=1;drawBox(LM,y,CW,10);
+    setFont('normal',9);const sl=doc.splitTextToSize(sachzuwendung,CW-4);doc.text(sl,LM+2,y+4.5);
+    y+=12;
 
-    // ── Bezeichnung ──
-    gray(); doc.setFontSize(7);
-    doc.text('Genaue Bezeichnung der Sachzuwendung mit Alter, Zustand, Kaufpreis usw.', lm, y); y += 4;
-    setNormal(9);
-    doc.text('1x Kristallkraft No1                    59,90\u20AC', lm, y); y += 4;
-    doc.text('1x Kristallkraft Coolly                 72,90\u20AC', lm, y); y += 5;
-    drawLine(); y += 3;
+    // 6. Herkunft
+    cb(LM,y,true);setFont('normal',7.5);
+    const bv=doc.splitTextToSize('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Betriebsvermögen. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.',CW-7);
+    doc.text(bv,LM+6,y+3);y+=bv.length*3+2;
+    cb(LM,y,false);doc.text('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.',LM+6,y+3);y+=5.5;
+    cb(LM,y,false);doc.text('Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.',LM+6,y+3);y+=5.5;
+    cb(LM,y,true);doc.text('Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.',LM+6,y+3);y+=7;
 
-    // ── Herkunft ──
-    setBold(8); doc.text('Herkunft der Sachzuwendung:', lm, y); y += 4;
-    setNormal(8);
-    doc.text('[X]', lm, y);
-    const bvText = doc.splitTextToSize('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Betriebsvermögen. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.', cw - 10);
-    doc.text(bvText, lm + 8, y); y += bvText.length * 3.2 + 2;
+    // 7. Freistellungsbescheid
+    cb(LM,y,true);setFont('normal',7.5);
+    const zt=zweck||'(Angabe des begünstigten Zwecks / der begünstigten Zwecke)';
+    const wf=doc.splitTextToSize('Wir sind wegen Förderung '+zt,CW-7);
+    doc.text(wf,LM+6,y+3);y+=wf.length*3+2;
+    setFont('normal',7.5);
+    const fa=p('finanzamt')||'____________',stnr=p('steuernr')||'____________',fd=p('freistellung')||'____________',vz=p('veranlagung')||'____________';
+    doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes',LM+6,y);y+=3.5;
+    doc.text(fa+', StNr. '+stnr+', vom '+fd+' für den letzten',LM+6,y);y+=3.5;
+    doc.text('Veranlagungszeitraum '+vz+' nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der',LM+6,y);y+=3.5;
+    doc.text('Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.',LM+6,y);y+=5;
 
-    doc.text('[  ]', lm, y);
-    doc.text('Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.', lm + 8, y); y += 4;
+    // 8. Satzungsmäßige Voraussetzungen
+    cb(LM,y,false);
+    const st=doc.splitTextToSize('Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt',CW-7);
+    doc.text(st,LM+6,y+3);y+=st.length*3+2;
+    doc.text('____________, StNr. ____________, mit Bescheid vom ____________ nach § 60a AO',LM+6,y);y+=3.5;
+    const se=doc.splitTextToSize('gesondert festgestellt. Wir fördern nach unserer Satzung (Angabe des begünstigten Zwecks / der begünstigsten Zwecke)',CW-7);
+    doc.text(se,LM+6,y);y+=se.length*3+3;
 
-    doc.text('[  ]', lm, y);
-    doc.text('Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.', lm + 8, y); y += 5;
+    // 9. Bestätigung Zweckbindung
+    setFont('normal',7.5);
+    const bt=doc.splitTextToSize('Es wird bestätigt, dass die Zuwendung nur zur Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)',CW);
+    doc.text(bt,LM,y);y+=bt.length*3;
+    drawBox(LM,y,CW,10);setFont('bold',9);doc.text(zweck||'—',LM+2,y+6);y+=11.5;
+    setFont('normal',7.5);doc.text('verwendet wird.',LM,y);y+=5;
 
-    doc.text('[X]', lm, y);
-    doc.text('Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.', lm + 8, y); y += 5;
-    drawLine(); y += 2;
+    // 10. Unterschrift
+    drawHLine(y,.5);y+=1;
+    const sigData=canvas.toDataURL('image/png');
+    doc.addImage(sigData,'PNG',LM,y,55,18);
+    setFont('normal',9);doc.text(p('ort','')+', '+new Date().toLocaleDateString('de-DE'),LM+60,y+10);
+    y+=20;gray();doc.setFontSize(7);
+    doc.text('(Ort, Datum und Unterschrift des Zuwendungsempfängers)',LM,y);y+=5;
 
-    // ── Keine Gegenleistung ──
-    doc.text('[X]', lm, y);
-    const kgText = doc.splitTextToSize('Es handelt sich nicht um den Verzicht auf die Erstattung von Aufwendungen. Es wurde keine Gegenleistung für die Zuwendung gewährt.', cw - 10);
-    doc.text(kgText, lm + 8, y); y += kgText.length * 3.2 + 3;
-    drawLine(); y += 2;
+    // 11. Hinweis
+    setFont('bold',7);doc.text('Hinweis:',LM,y);y+=3;
+    setFont('normal',6.5);
+    const h1=doc.splitTextToSize('Wer vorsätzlich oder grob fahrlässig eine unrichtige Zuwendungsbestätigung erstellt oder veranlasst, dass Zuwendungen nicht zu den in der Zuwendungsbestätigung angegebenen steuerbegünstigten Zwecken verwendet werden, haftet für die entgangene Steuer (§ 10b Abs. 4 EStG, § 9 Abs. 3 KStG, § 9 Nr. 5 GewStG).',CW);
+    doc.text(h1,LM,y);y+=h1.length*2.5+2;
+    const h2=doc.splitTextToSize('Diese Bestätigung wird nicht als Nachweis für die steuerliche Berücksichtigung der Zuwendung anerkannt, wenn das Datum des Freistellungsbescheides länger als 5 Jahre bzw. das Datum der Feststellung der Einhaltung der satzungsmäßigen Voraussetzungen nach § 60a Abs. 1 AO länger als 3 Jahre seit Ausstellung des Bescheides zurückliegt (§ 63 Abs. 5 AO).',CW);
+    doc.text(h2,LM,y);y+=h2.length*2.5+4;
 
-    // ── Gemeinnützigkeit ──
-    setNormal(7.5);
-    const gnText = doc.splitTextToSize(
-        'Es wird bestätigt, dass die Zuwendung nur zur Förderung gemeinnütziger Zwecke laut Satzung des Vereins verwendet wird. ' +
-        'Wir sind wegen Förderung des genannten Zwecks nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes ' +
-        (p('finanzamt') || '–') + ', StNr. ' + (p('steuernr') || '–') + ', vom ' + (p('freistellung') || '–') +
-        ' für den letzten Veranlagungszeitraum ' + (p('veranlagung') || '–') +
-        ' nach § 5 Abs. 1 Nr. 9 KStG von der Körperschaftsteuer und nach § 3 Nr. 6 GewStG von der Gewerbesteuer befreit. ' +
-        'Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt festgestellt.',
-        cw
-    );
-    doc.text(gnText, lm, y); y += gnText.length * 3 + 4;
-
-    // ── Unterschrift ──
-    drawLine(); y += 2;
-    gray(); doc.setFontSize(7);
-    doc.text('Ort, Datum und Unterschrift des Zuwendungsempfängers', lm, y); y += 4;
-
-    const sigData = canvas.toDataURL('image/png');
-    doc.addImage(sigData, 'PNG', lm, y, 60, 22);
-
-    setNormal(9);
-    doc.text(p('ort','') + ', ' + new Date().toLocaleDateString('de-DE'), lm + 70, y + 12);
-    y += 26;
-
-    // ── Hinweistext ──
-    drawLine(); y += 2;
-    gray(); doc.setFontSize(6.5);
-    const hinweis = doc.splitTextToSize(
-        'Hinweis: Wer vorsätzlich oder grob fahrlässig eine unrichtige Zuwendungsbestätigung erstellt oder veranlasst, dass Zuwendungen nicht zu den in der Zuwendungsbestätigung angegebenen steuerbegünstigten Zwecken verwendet werden, haftet für die entgangene Steuer (§ 10b Abs. 4 EStG, § 9 Abs. 3 KStG, § 9 Nr. 5 GewStG). Diese Bestätigung wird nicht als Nachweis für die steuerliche Berücksichtigung der Zuwendung anerkannt, wenn das Datum des Freistellungsbescheides länger als 5 Jahre bzw. das Datum der Feststellung der Einhaltung der satzungsmäßigen Voraussetzungen nach § 60a Abs. 1 AO länger als 3 Jahre seit Ausstellung des Bescheides zurückliegt (§ 63 Abs. 5 AO). Bei elektronischer Bestätigung ist eine qualifizierte elektronische Signatur zulässig (§ 50 Abs. 1 EStDV).',
-        cw
-    );
-    doc.text(hinweis, lm, y); y += hinweis.length * 2.5;
+    // 12. Formularnummer
+    setFont('bold',7);doc.text('034123',LM,y);
+    setFont('normal',7);doc.text(' Bestätigung über Sachzuwendung / steuerbegünstigte Einrichtung / Verein (2013)',LM+10,y);
 
     return doc;
 }
 
-// ─── Send PDF via Web3Forms Pro ───
 async function sendPDFviaWeb3Forms(pdfBlob, filename) {
     const statusEl = document.getElementById('emailStatus');
-    statusEl.className = 'status-line sending';
-    statusEl.textContent = '⏳ PDF wird an Kristallkraft gesendet…';
-
+    statusEl.className='status-line sending';statusEl.textContent='⏳ PDF wird an Kristallkraft gesendet…';
     try {
-        const formData = new FormData();
-        formData.append('access_key', WEB3FORMS_KEY);
-        formData.append('subject', 'Spendenbescheinigung eingegangen – ' + (p('verein') || 'Verein'));
-        formData.append('from_name', [p('vorname'), p('nachname')].filter(Boolean).join(' ') || 'Veranstalter');
-        formData.append('replyto', p('email') || '');
-        formData.append('message',
-            'NEUE SPENDENBESCHEINIGUNG UNTERSCHRIEBEN\n' +
-            '=========================================\n\n' +
-            'Verein: ' + (p('verein') || '–') + '\n' +
-            'Ansprechpartner: ' + [p('vorname'), p('nachname')].filter(Boolean).join(' ') + '\n' +
-            'E-Mail: ' + (p('email') || '–') + '\n' +
-            'Veranstaltung: ' + (p('art') || '–') + '\n' +
-            'Datum Veranstaltung: ' + (p('veranstaltungsdatum') || '–') + '\n' +
-            'Wert Sachzuwendung: 132,80 EUR\n' +
-            'Steuernummer: ' + (p('steuernr') || '–') + '\n' +
-            'Finanzamt: ' + (p('finanzamt') || '–') + '\n\n' +
-            '📎 Die unterschriebene PDF ist als Anhang beigefügt.'
-        );
-        formData.append('botcheck', '');
-
-        const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
-        formData.append('attachment', pdfFile);
-
-        const response = await fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            statusEl.className = 'status-line sent';
-            statusEl.textContent = '✅ PDF erfolgreich an Kristallkraft gesendet!';
-        } else {
-            throw new Error(result.message || 'Unbekannter Fehler');
-        }
-    } catch (err) {
-        console.error('Web3Forms-Fehler:', err);
-        statusEl.className = 'status-line failed';
-        statusEl.innerHTML = '⚠️ Automatischer Versand fehlgeschlagen. Bitte schick die PDF manuell an <strong>technik@kristallkraft.com</strong>';
+        const fd=new FormData();
+        fd.append('access_key',WEB3FORMS_KEY);
+        fd.append('subject','Spendenbescheinigung eingegangen – '+(verein||'Verein'));
+        fd.append('from_name',[p('vorname'),p('nachname')].filter(Boolean).join(' ')||'Veranstalter');
+        fd.append('replyto',p('email')||'');
+        fd.append('message','NEUE SPENDENBESCHEINIGUNG UNTERSCHRIEBEN\n=========================================\n\nVerein: '+(verein||'–')+'\nAnsprechpartner: '+[p('vorname'),p('nachname')].filter(Boolean).join(' ')+'\nE-Mail: '+(p('email')||'–')+'\nVeranstaltung: '+(p('art')||'–')+'\nDatum Veranstaltung: '+(p('veranstaltungsdatum')||'–')+'\nWert Sachzuwendung: '+wertFormatiert+'\nBegünstigter Zweck: '+(zweck||'–')+'\nSteuernummer: '+(p('steuernr')||'–')+'\nFinanzamt: '+(p('finanzamt')||'–')+'\n\nDie unterschriebene PDF ist als Anhang beigefügt.');
+        fd.append('botcheck','');
+        fd.append('attachment',new File([pdfBlob],filename,{type:'application/pdf'}));
+        const res=await fetch('https://api.web3forms.com/submit',{method:'POST',body:fd});
+        const result=await res.json();
+        if(result.success){statusEl.className='status-line sent';statusEl.textContent='✅ PDF erfolgreich an Kristallkraft gesendet!';}
+        else throw new Error(result.message||'Unbekannter Fehler');
+    } catch(err){
+        console.error('Web3Forms-Fehler:',err);
+        statusEl.className='status-line failed';
+        statusEl.innerHTML='⚠️ Automatischer Versand fehlgeschlagen. Bitte schick die PDF manuell an <strong>technik@kristallkraft.com</strong>';
     }
 }
 
-// ─── Main ───
 function generateAndSendPDF() {
-    if (!hasSigned) {
-        document.getElementById('errorMsg').classList.add('show');
-        return;
-    }
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Wird verarbeitet…';
-
-    setTimeout(async () => {
+    if(!hasSigned){document.getElementById('errorMsg').classList.add('show');return;}
+    const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Wird verarbeitet…';
+    setTimeout(async()=>{
         try {
-            const doc = buildPDF();
-            const filename = 'Spendenbescheinigung_' +
-                (p('verein') || 'Verein').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_') +
-                '_' + new Date().toISOString().slice(0, 10) + '.pdf';
-
-            const pdfBlob = doc.output('blob');
-            doc.save(filename);
+            const doc=buildPDF();
+            const fn='Spendenbescheinigung_'+(verein||'Verein').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+            const blob=doc.output('blob');doc.save(fn);
             document.getElementById('successOverlay').classList.add('show');
-            await sendPDFviaWeb3Forms(pdfBlob, filename);
-        } catch (err) {
-            console.error(err);
-            alert('Fehler: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Unterschreiben & absenden';
-        }
-    }, 100);
+            await sendPDFviaWeb3Forms(blob,fn);
+        } catch(err){console.error(err);alert('Fehler: '+err.message);}
+        finally{btn.disabled=false;btn.textContent='Unterschreiben & absenden';}
+    },100);
 }
-
-document.getElementById('successOverlay').addEventListener('click', function(e) {
-    if (e.target === this) this.classList.remove('show');
-});
+document.getElementById('successOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
 </script>
 </body>
 </html>
