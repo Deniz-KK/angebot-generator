@@ -377,10 +377,11 @@ function buildPDF() {
     // Zeile 2: Veranlagungszeitraum _________ nach § 5 ...
     doc.text('Veranlagungszeitraum', LM, y);
     bold(9);
-    const vzX = LM + doc.getTextWidth('Veranlagungszeitraum ') + 2;
+    const vzX = LM + doc.getTextWidth('Veranlagungszeitraum') + 3;
     doc.text(vz, vzX, y);
     norm(7.5);
-    doc.text('nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', vzX + Math.max(doc.getTextWidth(vz), 12) + 3, y);
+    const afterVz = vzX + doc.getTextWidth(vz) + 4;
+    doc.text('nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', afterVz, y);
     y += 4;
     doc.text('Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.',LM,y);
     y += 6;
