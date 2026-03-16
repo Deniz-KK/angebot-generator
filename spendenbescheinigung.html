@@ -242,6 +242,11 @@ document.getElementById('val-stnr-inline').textContent = p('steuernr') || '_____
 document.getElementById('val-frei-inline').textContent = p('freistellung') || '___________';
 document.getElementById('val-vz-inline').textContent = p('veranlagung') || '______';
 
+// Förderung von (begünstigter Zweck) – in beide Felder einsetzen
+const foerderung = p('foerderung', 'des Sports');
+document.getElementById('val-zweck').textContent = foerderung;
+document.getElementById('val-zweck2').textContent = foerderung;
+
 // Signature
 const canvas = document.getElementById('signatureCanvas');
 const ctx = canvas.getContext('2d');
@@ -343,7 +348,7 @@ function buildPDF() {
     // ── Wir sind wegen Förderung ──
     y = checkbox(true, 'Wir sind wegen Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)', y);
     bold(9);
-    doc.text('des Sports', LM+7, y); y += 6;
+    doc.text(foerderung, LM+7, y); y += 6;
 
     // ── Freistellungsbescheid ──
     norm(7.5);
@@ -399,7 +404,7 @@ function buildPDF() {
     norm(7.5);
     doc.text('Es wird bestätigt, dass die Zuwendung nur zur Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)',LM+2,y+4);
     bold(9);
-    doc.text('des Reitsportes',LM+2,y+10);
+    doc.text(foerderung,LM+2,y+10);
     norm(7.5);
     doc.text('verwendet wird.',LM+2,y+17);
     y += 23;
