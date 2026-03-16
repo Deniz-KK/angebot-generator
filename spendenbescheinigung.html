@@ -158,10 +158,10 @@
     </div>
 
     <!-- Freistellungsbescheid -->
-    <div class="legal-section">
+    <div class="legal-section" style="line-height:2.2;">
         nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes<br>
-        <span class="fill-line" id="val-fa-inline"></span>, StNr. <span class="fill-line" id="val-stnr-inline"></span>, vom <span class="fill-line" id="val-frei-inline"></span> für den letzten<br>
-        Veranlagungszeitraum <span class="fill-line" id="val-vz-inline"></span>
+        <span class="fill-line" id="val-fa-inline" style="min-width:120px; display:inline-block;"></span>, StNr. <span class="fill-line" id="val-stnr-inline" style="min-width:100px; display:inline-block;"></span>, vom <span class="fill-line" id="val-frei-inline" style="min-width:80px; display:inline-block;"></span> für den letzten<br>
+        Veranlagungszeitraum <span class="fill-line" id="val-vz-inline" style="min-width:60px; display:inline-block;"></span>
         nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der<br>
         Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.
     </div>
@@ -347,36 +347,43 @@ function buildPDF() {
 
     // ── Freistellungsbescheid ──
     norm(7.5);
-    doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes',LM,y); y+=4;
+    doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes',LM,y); y+=6;
 
-    // Finanzamt, StNr, vom, VZ
+    // Finanzamt, StNr, vom, VZ – auf separaten Zeilen mit Platz
     const fa = p('finanzamt','___________');
     const stnr = p('steuernr','___________');
     const frei = p('freistellung','___________');
     const vz = p('veranlagung','______');
 
-    bold(8);
+    // Zeile 1: Finanzamt _________, StNr. _________, vom _________ für den letzten
+    bold(9);
     doc.text(fa, LM, y);
     norm(7.5);
-    doc.text(', StNr.', LM + doc.getTextWidth(fa)+1, y);
-    bold(8);
-    doc.text(stnr, LM + doc.getTextWidth(fa)+1+doc.getTextWidth(', StNr. '), y);
+    const x1 = LM + Math.max(doc.getTextWidth(fa), 30) + 3;
+    doc.text(', StNr.', x1, y);
+    bold(9);
+    const x2 = x1 + doc.getTextWidth(', StNr. ') + 1;
+    doc.text(stnr, x2, y);
     norm(7.5);
-    const afterStnr = LM + doc.getTextWidth(fa)+1+doc.getTextWidth(', StNr. ')+doc.getTextWidth(stnr)+1;
-    doc.text(', vom', afterStnr, y);
-    bold(8);
-    doc.text(frei, afterStnr+doc.getTextWidth(', vom ')+1, y);
+    const x3 = x2 + Math.max(doc.getTextWidth(stnr), 25) + 3;
+    doc.text(', vom', x3, y);
+    bold(9);
+    const x4 = x3 + doc.getTextWidth(', vom ') + 1;
+    doc.text(frei, x4, y);
     norm(7.5);
-    doc.text('für den letzten', afterStnr+doc.getTextWidth(', vom ')+1+doc.getTextWidth(frei)+2, y);
-    y += 4;
+    doc.text('für den letzten', x4 + Math.max(doc.getTextWidth(frei), 20) + 3, y);
+    y += 5;
+
+    // Zeile 2: Veranlagungszeitraum _________ nach § 5 ...
     doc.text('Veranlagungszeitraum', LM, y);
-    bold(8);
-    doc.text(vz, LM+doc.getTextWidth('Veranlagungszeitraum ')+1, y);
+    bold(9);
+    const vzX = LM + doc.getTextWidth('Veranlagungszeitraum ') + 2;
+    doc.text(vz, vzX, y);
     norm(7.5);
-    doc.text('nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', LM+doc.getTextWidth('Veranlagungszeitraum ')+1+doc.getTextWidth(vz)+2, y);
+    doc.text('nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', vzX + Math.max(doc.getTextWidth(vz), 12) + 3, y);
     y += 4;
     doc.text('Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.',LM,y);
-    y += 5;
+    y += 6;
 
     // ── §60a AO (leer) ──
     y = checkbox(false, 'Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt', y);
