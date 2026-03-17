@@ -226,7 +226,7 @@
                 '<tr><td>1 x Art. CL-7</td><td>Kristallkraft Coolly im Wert von 72,90 €</td></tr>' +
                 '<tr><td>1 x Art. KK-8</td><td>Kristallkraft No1 im Wert von 59,90 €</td></tr>' +
               '</table>' +
-              '<p>Bitte sendet uns die per Email an die Emailadresse (<strong>' + entry.email + '</strong>) versendete Spendenbescheinigung spätestens 14 Tage nach der Veranstaltung ausgefüllt zurück.</p>' +
+              '<p>Bitte sende uns die beiliegende Spendenbescheinigung bis spätestens 14 Tage nach der Veranstaltung ausgefüllt zurück.</p>' +
               '<p>Ich wünsche euch eine schöne Veranstaltung und viel Erfolg.</p>' +
               '<p>Herzliche Grüße</p>' +
               '<div class="signature"><p><strong>Katrin Bachmann</strong></p><p>Kristallkraft Naturprodukte GmbH &amp; Co. KG</p></div>' +
@@ -287,8 +287,16 @@
           return;
         }
 
-        const { jsPDF } = window.jspdf;
+        // jsPDF Check
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          alert('Fehler: jsPDF Bibliothek nicht geladen. Bitte Seite neu laden.');
+          console.error('jsPDF nicht gefunden:', window.jspdf);
+          return;
+        }
 
+        const jsPDF = window.jspdf.jsPDF;
+
+        try {
         selectedEntries.forEach((entry, idx) => {
           const doc = new jsPDF('p', 'mm', 'a4');
           const W = 210, LM = 16, RM = W - 16, CW = RM - LM;
@@ -300,23 +308,24 @@
           const bold = (s) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(s || 8); black(); };
           const rect = (x, y2, w, h) => { doc.setDrawColor(120); doc.setLineWidth(0.3); doc.rect(x, y2, w, h); };
 
-          // Vereinsname mit e.V. suffix handling
-          let verein = entry.vereinsname || '';
-          const ev = entry.ev || '';
+          // Vereinsname mit e.V. suffix handling - als String
+          let verein = String(entry.vereinsname || '');
+          const ev = String(entry.ev || '');
           if (ev && ev.toLowerCase().includes('ja') && !verein.toLowerCase().includes('e.v.')) {
             verein = verein + ' e.V.';
           }
           
-          // Adresse aufbauen
-          const strasseVerein = entry.strasseVerein || entry.strasse || '';
-          const hausnrVerein = entry.hausnrVerein || entry.nummer || '';
-          const plzVerein = entry.plzVerein || entry.plz || '';
-          const ortVerein = entry.ortVerein || entry.ort || '';
+          // Adresse aufbauen - alle Werte als String
+          const strasseVerein = String(entry.strasseVerein || entry.strasse || '');
+          const hausnrVerein = String(entry.hausnrVerein || entry.nummer || '');
+          const plzVereinRaw = entry.plzVerein || entry.plz || '';
+          const plzVerein = String(plzVereinRaw).replace('.0', '').split('.')[0];
+          const ortVerein = String(entry.ortVerein || entry.ort || '');
           
           const adresseLines = [
             verein,
             [strasseVerein, hausnrVerein].filter(Boolean).join(' '),
-            [plzVerein.toString().replace('.0', '').split('.')[0], ortVerein].filter(Boolean).join(' ')
+            [plzVerein, ortVerein].filter(Boolean).join(' ')
           ].filter(Boolean);
 
           // BOX: Aussteller
@@ -353,7 +362,8 @@
           norm(9);
           doc.text('132,80', LM + 2, y + 9);
           doc.text('hundertzweiunddreißig euro und achtzig cent', LM + c1 + 2, y + 9);
-          doc.text(entry.veranstaltungsdatum || new Date().toLocaleDateString('de-DE'), LM + c1 + c2 + 2, y + 9);
+          const tagDerZuwendung = String(entry.veranstaltungsdatum || new Date().toLocaleDateString('de-DE'));
+          doc.text(tagDerZuwendung, LM + c1 + c2 + 2, y + 9);
           y += 14;
 
           // BOX: Bezeichnung
@@ -386,13 +396,13 @@
           bold(9);
           doc.text('des Sportes', LM + 7, y); y += 6;
 
-          // Freistellungsbescheid
+          // Freistellungsbescheid - alle Werte als String
           norm(7.5);
           doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes', LM, y); y += 6;
-          const fa = entry.finanzamt || '___________';
-          const stnr = entry.steuernr || '___________';
-          const frei = entry.freistellung || '___________';
-          const vz = entry.veranlagung || '______';
+          const fa = String(entry.finanzamt || '___________');
+          const stnr = String(entry.steuernr || '___________');
+          const frei = String(entry.freistellung || '___________');
+          const vz = String(entry.veranlagung || '______');
 
           bold(9); doc.text(fa, LM, y);
           norm(7.5); const x1 = LM + Math.max(doc.getTextWidth(fa), 30) + 3;
@@ -453,6 +463,10 @@
         });
 
         alert(selectedEntries.length + ' Spendenbescheinigung(en) wurden heruntergeladen.');
+        } catch (err) {
+          console.error('Fehler bei PDF-Generierung:', err);
+          alert('Fehler bei der PDF-Generierung: ' + err.message);
+        }
       };
 
       const selectedCount = [...selectedIds].filter(id => !entries.find(e => e.id === id)?.isAlreadySent).length;
