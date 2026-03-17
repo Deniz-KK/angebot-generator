@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
@@ -19,7 +20,6 @@
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
   </style>
 </head>
 <body>
@@ -53,29 +53,47 @@
                 versendet.toString().trim() !== '--------' &&
                 versendet.toString().trim().toLowerCase() !== 'nan';
               
+              // Datum handling für Excel Serial Dates
+              let veranstaltungsdatum = row['Datum der Veranstaltung'] || '';
+              if (veranstaltungsdatum instanceof Date) {
+                veranstaltungsdatum = veranstaltungsdatum.toLocaleDateString('de-DE');
+              } else if (typeof veranstaltungsdatum === 'number') {
+                // Excel serial date
+                const excelEpoch = new Date(1899, 11, 30);
+                const date = new Date(excelEpoch.getTime() + veranstaltungsdatum * 86400000);
+                veranstaltungsdatum = date.toLocaleDateString('de-DE');
+              }
+              
               return {
                 id: index,
                 oderId: row['Id'] || index,
                 vorname: row['Vorname'] || '',
                 nachname: row['Nachname'] || '',
                 vereinsname: row['Name des Vereins'] || '',
+                ev: row['Eingetragener Verein (e.V.)'] || '',
                 strasse: row['Strasse/ Lief.'] || '',
+                strasseVerein: row['Strasse Verein'] || '',
                 nummer: row['Nummer'] || '',
+                hausnrVerein: row['Hausnummer'] || '',
                 plz: row['Postleitzahl/ Lief.'] || '',
+                plzVerein: row['PLZ/Verein'] || '',
                 ort: row['Lieferort'] || '',
+                ortVerein: row['Ort/Verein'] || '',
                 email: row['Email'] || '',
                 veranstaltung: row['Art der Veranstaltung:'] || '',
-                datum: row['Datum der Veranstaltung'] || '',
+                veranstaltungsdatum: veranstaltungsdatum,
+                finanzamt: row['Zuständiges Finanzamt:'] || '',
+                steuernr: row['Steuernummer:'] || '',
+                veranlagung: row['Veranlagungszeitraum:'] || '',
+                freistellung: row['Datum des Freistellungsbescheides:'] || '',
                 versendet: versendet || '',
                 isAlreadySent: hasVersendetDate,
               };
             }).filter(entry => entry.vorname || entry.nachname || entry.vereinsname);
 
             setEntries(processedEntries);
-            const selectableIds = processedEntries
-              .filter(e => !e.isAlreadySent)
-              .map(e => e.id);
-            setSelectedIds(new Set(selectableIds));
+            // Standardmäßig KEINE Einträge vorausgewählt
+            setSelectedIds(new Set());
             setFileName(file.name);
           } catch (error) {
             alert('Fehler beim Lesen der Datei: ' + error.message);
@@ -144,10 +162,7 @@
         }
 
         const today = new Date();
-        const dd = today.getDate().toString().padStart(2, '0');
-        const mm = (today.getMonth() + 1).toString().padStart(2, '0');
-        const yy = today.getFullYear().toString().slice(-2);
-        const deliveryDate = dd + '.' + mm + '.' + yy;
+        const deliveryDate = today.getDate().toString().padStart(2, '0') + '.' + (today.getMonth() + 1).toString().padStart(2, '0') + '.' + today.getFullYear().toString().slice(-2);
         
         const header = '"OrderNo"|"s_name1"|"s_name2"|"s_street"|"s_zipcodeno"|"s_town"|"s_country"|"s_phone"|"s_mail"|"quantity"|"products"|"delivery_date"|"CustomerNo"|"Total_weight"|"Abrechnungsnummer"|"AbsName"|"AbsStrasse"|"AbsPLZOrt"|"AbsLand"|"Zuordnung"|"AbsTel"';
         
@@ -169,10 +184,9 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        const hh = today.getHours().toString().padStart(2, '0');
-        const min = today.getMinutes().toString().padStart(2, '0');
-        const ss = today.getSeconds().toString().padStart(2, '0');
-        link.download = 'DHL_ZL_DE_-_' + dd + '_' + mm + '_' + yy + '_-_' + hh + '_' + min + '_' + ss + '.csv';
+        const dateStr = today.getDate().toString().padStart(2, '0') + '_' + (today.getMonth() + 1).toString().padStart(2, '0') + '_' + today.getFullYear().toString().slice(-2);
+        const timeStr = today.getHours().toString().padStart(2, '0') + '_' + today.getMinutes().toString().padStart(2, '0') + '_' + today.getSeconds().toString().padStart(2, '0');
+        link.download = 'DHL_ZL_DE_-_' + dateStr + '_-_' + timeStr + '.csv';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -191,91 +205,254 @@
         const dateStr = formatDateLong(today);
 
         let anschreibenHTML = '';
-        
         selectedEntries.forEach((entry, idx) => {
           const plz = entry.plz.toString().replace('.0', '').split('.')[0];
-          const pageBreak = idx > 0 ? ' style="page-break-before: always;"' : '';
+          const pageBreak = idx > 0 ? 'style="page-break-before: always;"' : '';
           
-          anschreibenHTML += '<div class="page"' + pageBreak + '>';
-          anschreibenHTML += '<div class="logo"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJhIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNzguODRtbSIgaGVpZ2h0PSI2OC4xNm1tIiB2aWV3Qm94PSIwIDAgNTA2Ljk1IDE5My4yMSI+PHBhdGggZD0ibTcuNzgsMTI1LjY1SDB2LTQyaDcuNzh2NDJabTI3Ljc5LTQybC0xOC41LDE5LjU5LDIwLjk3LDIyLjQxaC0xMC43OGwtMTcuMTItMTkuNjJ2LTUuMDVsMTUuOTItMTcuMzNoOS41Mi0uMDFaIiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTQzLjM3LDEyNS41OXYtNDEuOTRoMTkuMDljOC41OCwwLDEyLjg3LDMuNzUsMTIuODcsMTEuMjUsMCw1LjA3LTMuMzQsOS4yNy0xMC4wMiwxMi42bDEzLjMxLDE4LjE1aC0xMC4xbC0xMi43OC0xOC4zdi0zLjU1YzcuNjQtMS4yNywxMS40Ni00LjE2LDExLjQ2LTguNjcsMC0zLjEtMS43NC00LjY0LTUuMjMtNC42NGgtMTAuNjZ2MzUuMWgtNy45NFoiIGZpbGw9IiNjOTllNjciLz48cmVjdCB4PSI4NC41NCIgeT0iODMuNjUiIHdpZHRoPSI3Ljc4IiBoZWlnaHQ9IjQyIiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTk5LjUsMTI0Ljg5di03LjA1YzQuMjEsMS41NywxMC45NywxLjM1LDE2LjI4LDEuMzUsNi40NCwwLDkuNjYtMi4xNSw5LjY2LTYuNDYsMC0zLjEzLTEuOTgtNC43LTUuOTMtNC43aC03LjE3Yy04LjYsMC0xMi44OS0zLjkyLTEyLjg5LTExLjc1LDAtOC42Miw2LjEyLTEyLjkyLDE4LjM2LTEyLjkyLDQuNywwLDExLjM2LjA1LDExLjM2LjA1bC0uMDQsNi43aC0xMS4zMmMtNy4wNSwwLTEwLjU3LDIuMDYtMTAuNTcsNi4xNywwLDMuMTMsMS43LDQuNyw1LjExLDQuN2g3LjE3YzkuMTQsMCwxMy43MiwzLjkxLDEzLjcyLDExLjc1LDAsOC44MS01LjgyLDEzLjIyLTE3LjQ1LDEzLjIyLTUuMzEsMC0xMi4wNy4zMi0xNi4yOC0xLjA1IiBmaWxsPSIjYzk5ZTY3Ii8+PHBvbHlnb24gcG9pbnRzPSIxNjguNjQgODMuNjUgMTY4LjY0IDkwLjQgMTU2LjYgOTAuNCAxNTYuNiAxMjUuNjUgMTQ4LjgxIDEyNS42NSAxNDguODEgOTAuNCAxMzYuNzcgOTAuNCAxMzYuNzcgODMuNjUgMTY4LjY0IDgzLjY1IiBmaWxsPSIjYzk5ZTY3Ii8+PHBvbHlnb24gcG9pbnRzPSIxNjUuNDggMTI1LjY1IDE4My4zMSA4My42NSAxOTEuNjkgODMuNjUgMjA5LjkgMTI1LjY1IDIwMS41MiAxMjUuNjUgMTk2LjI0IDExNC4yIDE4Mi43OSAxMTQuMiAxODUuNDYgMTA3LjQ0IDE5NC4xOCAxMDcuNDQgMTg3LjMxIDkxLjY3IDE3My40NyAxMjUuNjUgMTY1LjQ4IDEyNS42NSIgZmlsbD0iI2M5OWU2NyIvPjxwb2x5Z29uIHBvaW50cz0iMjI0LjYgODMuNjUgMjI0LjYgMTE4LjkgMjQ0LjIyIDExOC45IDI0NC4yMiAxMjUuNjUgMjE2LjgyIDEyNS42NSAyMTYuODIgODMuNjUgMjI0LjYgODMuNjUiIGZpbGw9IiNjOTllNjciLz48cG9seWdvbiBwb2ludHM9IjI1OC4xMyA4My42NSAyNTguMTMgMTE4LjkgMjc3Ljc1IDExOC45IDI3Ny43NSAxMjUuNjUgMjUwLjM1IDEyNS42NSAyNTAuMzUgODMuNjUgMjU4LjEzIDgzLjY1IiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTI5MS42OCwxMjUuNjVoLTcuNzh2LTQyaDcuNzh2NDJabTI3Ljc5LTQybC0xOC41MSwxOS41OSwyMC45NywyMi40MWgtMTAuNzhsLTE3LjEyLTE5LjYydi01LjA1bDE1LjkyLTE3LjMzaDkuNTJaIiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTMyOC4yOCwxMjUuNTl2LTQxLjk0aDE5LjA5YzguNTgsMCwxMi44NywzLjc1LDEyLjg3LDExLjI1LDAsNS4wNy0zLjM0LDkuMjctMTAuMDIsMTIuNmwxMy4zMSwxOC4xNWgtMTAuMWwtMTIuNzgtMTguM3YtMy41NWM3LjY0LTEuMjcsMTEuNDUtNC4xNiwxMS40NS04LjY3LDAtMy4xLTEuNzQtNC42NC01LjIzLTQuNjRoLTEwLjY2djM1LjFzLTcuOTMsMC03LjkzLDBaIiBmaWxsPSIjYzk5ZTY3Ii8+PHBvbHlnb24gcG9pbnRzPSIzNjcuNzggMTI1LjY1IDM4NS42MSA4My42NSAzOTMuOTggODMuNjUgNDEyLjE5IDEyNS42NSA0MDMuODIgMTI1LjY1IDM5OC41MyAxMTQuMiAzODUuMDggMTE0LjIgMzg3Ljc1IDEwNy40NCAzOTYuNDggMTA3LjQ0IDM4OS42IDkxLjY3IDM3NS43NyAxMjUuNjUgMzY3Ljc4IDEyNS42NSIgZmlsbD0iI2M5OWU2NyIvPjxwb2x5Z29uIHBvaW50cz0iNDQ1LjcgODMuNjUgNDQ1LjcgOTAuMzUgNDI1Ljg0IDkwLjM1IDQyNS44NCAxMDAuOTIgNDQ0LjcgMTAwLjkyIDQ0NC43IDEwNy44OCA0MjUuNzUgMTA3Ljg4IDQyNS43NSAxMjUuNjUgNDE4LjEyIDEyNS42NSA0MTguMTIgODMuNjUgNDQ1LjcgODMuNjUiIGZpbGw9IiNjOTllNjciLz48cG9seWdvbiBwb2ludHM9IjQ4NC4zMiA4My42NSA0ODQuMzIgOTAuNCA0NzIuMjcgOTAuNCA0NzIuMjcgMTI1LjY1IDQ2NC40OSAxMjUuNjUgNDY0LjQ5IDkwLjQgNDUyLjQ1IDkwLjQgNDUyLjQ1IDgzLjY1IDQ4NC4zMiA4My42NSIgZmlsbD0iI2M5OWU2NyIvPjxwb2x5Z29uIHBvaW50cz0iMzEwLjY2IDcwLjEgMzU2LjkxIDMzLjQ3IDI5My43NCA2Ni44NSAzMzIuNTkgMTkuMjggMjgwLjU5IDYwLjYzIDMwNC41NyA4LjcxIDI2NS44NiA1Ni4zNCAyNzMuOTkgMi4xOSAyNTAuMTcgNTQuMTUgMjQyLjEyIDAgMjM0LjE1IDU0LjE2IDIxMC4yNSAyLjIyIDIxOC40NiA1Ni4zNSAxNzkuNjggOC43NiAyMDMuNzUgNjAuNjYgMTUxLjY3IDE5LjM1IDE5MC42IDY2Ljg5IDEyNy4zNyAzMy41NiAxNzMuNzEgNzAuMTcgMTE1Ljc4IDUwLjggMTU2LjExIDcxLjk4IDE3NiA3MS45OCAxNzkuMTMgNzEuOTggMzA1LjA2IDcxLjk4IDMwOC4yOSA3MS45OCAzMjguMTEgNzEuOTggMzY4LjU0IDUwLjcgMzEwLjY2IDcwLjEiIGZpbGw9IiNjOTllNjciLz48cGF0aCBkPSJtMjQyLjE2LDE2OC41MmMtNTMuMTMsMC05OS43MS0xNy4zMy0xMjUuNzktMzUuODMsMTkuNzksMjQuMSw2OC42NSw0MS4xNCwxMjUuNzksNDEuMTRzMTA2LTE3LjA1LDEyNS43OS00MS4xNGMtMjYuMDgsMTguNS03Mi42NiwzNS44My0xMjUuNzksMzUuODMiIGZpbGw9IiNjOTllNjciLz48cGF0aCBkPSJtMjQyLjE2LDE4OS41M2MtMzYuOCwwLTY5LjA2LTEyLjAxLTg3LjEyLTI0LjgxLDEzLjcxLDE2LjY5LDQ3LjU1LDI4LjQ5LDg3LjEyLDI4LjQ5czczLjQyLTExLjgxLDg3LjEyLTI4LjQ5Yy0xOC4wNiwxMi44MS01MC4zMiwyNC44MS04Ny4xMiwyNC44MSIgZmlsbD0iI2M5OWU2NyIvPjxwYXRoIGQ9Im00OTEuNzgsODYuNjljMC01LDIuNTItNy41MSw3LjU2LTcuNTFzNy42MSwyLjUsNy42MSw3LjUxLTIuNTQsNy4yOS03LjYxLDcuMjktNy40Mi0yLjQzLTcuNTYtNy4yOVptNy41Niw2LjMxYzQuMjIsMCw2LjMzLTIuMTIsNi4zMy02LjM1cy0yLjExLTYuNDktNi4zMy02LjQ5LTYuMjgsMi4xNi02LjI4LDYuNDksMi4wOSw2LjM1LDYuMjgsNi4zNVptLTMuMDktMS42MnYtOS40Mmg0LjAzYzEuNzksMCwyLjY5Ljc1LDIuNjksMi4yNSwwLDEuMjMtLjg4LDIuMTQtMi42NCwyLjcybDMuMjMsNC40NWgtMS42bC0zLjAxLTQuMjR2LS43OWMxLjgtLjI5LDIuNzEtLjk5LDIuNzEtMi4wOSwwLS44Ny0uNS0xLjMtMS41MS0xLjNoLTIuNjl2OC40MmgtMS4yMSwwWiIgZmlsbD0iI2M5OWU2NyIvPjwvc3ZnPg==" alt="Kristallkraft Logo" /></div>';
-          anschreibenHTML += '<div class="date">' + dateStr + '</div>';
-          anschreibenHTML += '<div class="sender">Kristallkraft Naturprodukte GmbH &amp; Co. KG · Hauptstr. 3 · 29499 Gülden</div>';
-          anschreibenHTML += '<div class="recipient">';
-          anschreibenHTML += entry.vereinsname + '<br>';
-          anschreibenHTML += entry.vorname + ' ' + entry.nachname + '<br>';
-          anschreibenHTML += entry.strasse + ' ' + entry.nummer + '<br>';
-          anschreibenHTML += plz + ' ' + entry.ort;
-          anschreibenHTML += '</div>';
-          anschreibenHTML += '<div class="subject">Unsere Sachspende</div>';
-          anschreibenHTML += '<div class="content">';
-          anschreibenHTML += '<p>Gern unterstützen wir euch bei eurer Veranstaltung mit unserem Sponsoring-Paket, bestehend aus zwei in unserer Hofmanufaktur liebevoll hergestellten Kristallkraft-Produkten:</p>';
-          anschreibenHTML += '<table class="products">';
-          anschreibenHTML += '<tr><td>1 x Art. CL-7</td><td>Kristallkraft Coolly im Wert von 72,90 €</td></tr>';
-          anschreibenHTML += '<tr><td>1 x Art. KK-8</td><td>Kristallkraft No1 im Wert von 59,90 €</td></tr>';
-          anschreibenHTML += '</table>';
-          anschreibenHTML += '<p>Bitte sendet uns die per Email an die Emailadresse (<strong>' + entry.email + '</strong>) versendete Spendenbescheinigung spätestens 14 Tage nach der Veranstaltung ausgefüllt zurück.</p>';
-          anschreibenHTML += '<p>Ich wünsche euch eine schöne Veranstaltung und viel Erfolg.</p>';
-          anschreibenHTML += '<p>Herzliche Grüße</p>';
-          anschreibenHTML += '<div class="signature">';
-          anschreibenHTML += '<p><strong>Katrin Bachmann</strong></p>';
-          anschreibenHTML += '<p>Kristallkraft Naturprodukte GmbH &amp; Co. KG</p>';
-          anschreibenHTML += '</div></div>';
-          anschreibenHTML += '<div class="footer">';
-          anschreibenHTML += '<div class="footer-col">';
-          anschreibenHTML += '<p>Kristallkraft Naturprodukte</p>';
-          anschreibenHTML += '<p>GmbH &amp; Co. KG</p>';
-          anschreibenHTML += '<p>Hauptstraße 3</p>';
-          anschreibenHTML += '<p>29499 Gülden</p>';
-          anschreibenHTML += '<p>USt-IdNr.: DE296319042</p>';
-          anschreibenHTML += '<p>RG Lüneburg HRA 202102</p>';
-          anschreibenHTML += '</div>';
-          anschreibenHTML += '<div class="footer-col">';
-          anschreibenHTML += '<p>VR Plus Altmark-Wendland eG</p>';
-          anschreibenHTML += '<p>IBAN: DE61258634891702660100</p>';
-          anschreibenHTML += '<p>BIC: GENODEF1WOT</p>';
-          anschreibenHTML += '<p>Tel. +49 (0) 5863 9836090</p>';
-          anschreibenHTML += '<p>Email: info@kristallkraft.com</p>';
-          anschreibenHTML += '<p>www.kristallkraft.com</p>';
-          anschreibenHTML += '</div>';
-          anschreibenHTML += '<div class="footer-col">';
-          anschreibenHTML += '<p>Persönlich haftende Gesellschafterin:</p>';
-          anschreibenHTML += '<p>Kristallkraft Verwaltungs GmbH</p>';
-          anschreibenHTML += '<p>Hauptstraße 3</p>';
-          anschreibenHTML += '<p>29499 Gülden</p>';
-          anschreibenHTML += '<p>RG Lüneburg HRB 205063</p>';
-          anschreibenHTML += '<p>GF: Daniel D\'Amico</p>';
-          anschreibenHTML += '</div></div></div>';
+          anschreibenHTML += '<div class="page" ' + pageBreak + '>' +
+            '<div class="logo"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJhIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNzguODRtbSIgaGVpZ2h0PSI2OC4xNm1tIiB2aWV3Qm94PSIwIDAgNTA2Ljk1IDE5My4yMSI+PHBhdGggZD0ibTcuNzgsMTI1LjY1SDB2LTQyaDcuNzh2NDJabTI3Ljc5LTQybC0xOC41LDE5LjU5LDIwLjk3LDIyLjQxaC0xMC43OGwtMTcuMTItMTkuNjJ2LTUuMDVsMTUuOTItMTcuMzNoOS41Mi0uMDFaIiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTQzLjM3LDEyNS41OXYtNDEuOTRoMTkuMDljOC41OCwwLDEyLjg3LDMuNzUsMTIuODcsMTEuMjUsMCw1LjA3LTMuMzQsOS4yNy0xMC4wMiwxMi42bDEzLjMxLDE4LjE1aC0xMC4xbC0xMi43OC0xOC4zdi0zLjU1YzcuNjQtMS4yNywxMS40Ni00LjE2LDExLjQ2LTguNjcsMC0zLjEtMS43NC00LjY0LTUuMjMtNC42NGgtMTAuNjZ2MzUuMWgtNy45NFoiIGZpbGw9IiNjOTllNjciLz48cmVjdCB4PSI4NC41NCIgeT0iODMuNjUiIHdpZHRoPSI3Ljc4IiBoZWlnaHQ9IjQyIiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTk5LjUsMTI0Ljg5di03LjA1YzQuMjEsMS41NywxMC45NywxLjM1LDE2LjI4LDEuMzUsNi40NCwwLDkuNjYtMi4xNSw5LjY2LTYuNDYsMC0zLjEzLTEuOTgtNC43LTUuOTMtNC43aC03LjE3Yy04LjYsMC0xMi44OS0zLjkyLTEyLjg5LTExLjc1LDAtOC42Miw2LjEyLTEyLjkyLDE4LjM2LTEyLjkyLDQuNywwLDExLjM2LjA1LDExLjM2LjA1bC0uMDQsNi43aC0xMS4zMmMtNy4wNSwwLTEwLjU3LDIuMDYtMTAuNTcsNi4xNywwLDMuMTMsMS43LDQuNyw1LjExLDQuN2g3LjE3YzkuMTQsMCwxMy43MiwzLjkxLDEzLjcyLDExLjc1LDAsOC44MS01LjgyLDEzLjIyLTE3LjQ1LDEzLjIyLTUuMzEsMC0xMi4wNy4zMi0xNi4yOC0xLjA1IiBmaWxsPSIjYzk5ZTY3Ii8+PHBvbHlnb24gcG9pbnRzPSIxNjguNjQgODMuNjUgMTY4LjY0IDkwLjQgMTU2LjYgOTAuNCAxNTYuNiAxMjUuNjUgMTQ4LjgxIDEyNS42NSAxNDguODEgOTAuNCAxMzYuNzcgOTAuNCAxMzYuNzcgODMuNjUgMTY4LjY0IDgzLjY1IiBmaWxsPSIjYzk5ZTY3Ii8+PHBvbHlnb24gcG9pbnRzPSIxNjUuNDggMTI1LjY1IDE4My4zMSA4My42NSAxOTEuNjkgODMuNjUgMjA5LjkgMTI1LjY1IDIwMS41MiAxMjUuNjUgMTk2LjI0IDExNC4yIDE4Mi43OSAxMTQuMiAxODUuNDYgMTA3LjQ0IDE5NC4xOCAxMDcuNDQgMTg3LjMxIDkxLjY3IDE3My40NyAxMjUuNjUgMTY1LjQ4IDEyNS42NSIgZmlsbD0iI2M5OWU2NyIvPjxwb2x5Z29uIHBvaW50cz0iMjI0LjYgODMuNjUgMjI0LjYgMTE4LjkgMjQ0LjIyIDExOC45IDI0NC4yMiAxMjUuNjUgMjE2LjgyIDEyNS42NSAyMTYuODIgODMuNjUgMjI0LjYgODMuNjUiIGZpbGw9IiNjOTllNjciLz48cG9seWdvbiBwb2ludHM9IjI1OC4xMyA4My42NSAyNTguMTMgMTE4LjkgMjc3Ljc1IDExOC45IDI3Ny43NSAxMjUuNjUgMjUwLjM1IDEyNS42NSAyNTAuMzUgODMuNjUgMjU4LjEzIDgzLjY1IiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTI5MS42OCwxMjUuNjVoLTcuNzh2LTQyaDcuNzh2NDJabTI3Ljc5LTQybC0xOC41MSwxOS41OSwyMC45NywyMi40MWgtMTAuNzhsLTE3LjEyLTE5LjYydi01LjA1bDE1LjkyLTE3LjMzaDkuNTJaIiBmaWxsPSIjYzk5ZTY3Ii8+PHBhdGggZD0ibTMyOC4yOCwxMjUuNTl2LTQxLjk0aDE5LjA5YzguNTgsMCwxMi44NywzLjc1LDEyLjg3LDExLjI1LDAsNS4wNy0zLjM0LDkuMjctMTAuMDIsMTIuNmwxMy4zMSwxOC4xNWgtMTAuMWwtMTIuNzgtMTguM3YtMy41NWM3LjY0LTEuMjcsMTEuNDUtNC4xNiwxMS40NS04LjY3LDAtMy4xLTEuNzQtNC42NC01LjIzLTQuNjRoLTEwLjY2djM1LjFzLTcuOTMsMC03LjkzLDBaIiBmaWxsPSIjYzk5ZTY3Ii8+PHBvbHlnb24gcG9pbnRzPSIzNjcuNzggMTI1LjY1IDM4NS42MSA4My42NSAzOTMuOTggODMuNjUgNDEyLjE5IDEyNS42NSA0MDMuODIgMTI1LjY1IDM5OC41MyAxMTQuMiAzODUuMDggMTE0LjIgMzg3Ljc1IDEwNy40NCAzOTYuNDggMTA3LjQ0IDM4OS42IDkxLjY3IDM3NS43NyAxMjUuNjUgMzY3Ljc4IDEyNS42NSIgZmlsbD0iI2M5OWU2NyIvPjxwb2x5Z29uIHBvaW50cz0iNDQ1LjcgODMuNjUgNDQ1LjcgOTAuMzUgNDI1Ljg0IDkwLjM1IDQyNS44NCAxMDAuOTIgNDQ0LjcgMTAwLjkyIDQ0NC43IDEwNy44OCA0MjUuNzUgMTA3Ljg4IDQyNS43NSAxMjUuNjUgNDE4LjEyIDEyNS42NSA0MTguMTIgODMuNjUgNDQ1LjcgODMuNjUiIGZpbGw9IiNjOTllNjciLz48cG9seWdvbiBwb2ludHM9IjQ4NC4zMiA4My42NSA0ODQuMzIgOTAuNCA0NzIuMjcgOTAuNCA0NzIuMjcgMTI1LjY1IDQ2NC40OSAxMjUuNjUgNDY0LjQ5IDkwLjQgNDUyLjQ1IDkwLjQgNDUyLjQ1IDgzLjY1IDQ4NC4zMiA4My42NSIgZmlsbD0iI2M5OWU2NyIvPjxwb2x5Z29uIHBvaW50cz0iMzEwLjY2IDcwLjEgMzU2LjkxIDMzLjQ3IDI5My43NCA2Ni44NSAzMzIuNTkgMTkuMjggMjgwLjU5IDYwLjYzIDMwNC41NyA4LjcxIDI2NS44NiA1Ni4zNCAyNzMuOTkgMi4xOSAyNTAuMTcgNTQuMTUgMjQyLjEyIDAgMjM0LjE1IDU0LjE2IDIxMC4yNSAyLjIyIDIxOC40NiA1Ni4zNSAxNzkuNjggOC43NiAyMDMuNzUgNjAuNjYgMTUxLjY3IDE5LjM1IDE5MC42IDY2Ljg5IDEyNy4zNyAzMy41NiAxNzMuNzEgNzAuMTcgMTE1Ljc4IDUwLjggMTU2LjExIDcxLjk4IDE3NiA3MS45OCAxNzkuMTMgNzEuOTggMzA1LjA2IDcxLjk4IDMwOC4yOSA3MS45OCAzMjguMTEgNzEuOTggMzY4LjU0IDUwLjcgMzEwLjY2IDcwLjEiIGZpbGw9IiNjOTllNjciLz48cGF0aCBkPSJtMjQyLjE2LDE2OC41MmMtNTMuMTMsMC05OS43MS0xNy4zMy0xMjUuNzktMzUuODMsMTkuNzksMjQuMSw2OC42NSw0MS4xNCwxMjUuNzksNDEuMTRzMTA2LTE3LjA1LDEyNS43OS00MS4xNGMtMjYuMDgsMTguNS03Mi42NiwzNS44My0xMjUuNzksMzUuODMiIGZpbGw9IiNjOTllNjciLz48cGF0aCBkPSJtMjQyLjE2LDE4OS41M2MtMzYuOCwwLTY5LjA2LTEyLjAxLTg3LjEyLTI0LjgxLDEzLjcxLDE2LjY5LDQ3LjU1LDI4LjQ5LDg3LjEyLDI4LjQ5czczLjQyLTExLjgxLDg3LjEyLTI4LjQ5Yy0xOC4wNiwxMi44MS01MC4zMiwyNC44MS04Ny4xMiwyNC44MSIgZmlsbD0iI2M5OWU2NyIvPjxwYXRoIGQ9Im00OTEuNzgsODYuNjljMC01LDIuNTItNy41MSw3LjU2LTcuNTFzNy42MSwyLjUsNy42MSw3LjUxLTIuNTQsNy4yOS03LjYxLDcuMjktNy40Mi0yLjQzLTcuNTYtNy4yOVptNy41Niw2LjMxYzQuMjIsMCw2LjMzLTIuMTIsNi4zMy02LjM1cy0yLjExLTYuNDktNi4zMy02LjQ5LTYuMjgsMi4xNi02LjI4LDYuNDksMi4wOSw2LjM1LDYuMjgsNi4zNVptLTMuMDktMS42MnYtOS40Mmg0LjAzYzEuNzksMCwyLjY5Ljc1LDIuNjksMi4yNSwwLDEuMjMtLjg4LDIuMTQtMi42NCwyLjcybDMuMjMsNC40NWgtMS42bC0zLjAxLTQuMjR2LS43OWMxLjgtLjI5LDIuNzEtLjk5LDIuNzEtMi4wOSwwLS44Ny0uNS0xLjMtMS41MS0xLjNoLTIuNjl2OC40MmgtMS4yMSwwWiIgZmlsbD0iI2M5OWU2NyIvPjwvc3ZnPg==" alt="Kristallkraft" /></div>' +
+            '<div class="date">' + dateStr + '</div>' +
+            '<div class="sender">Kristallkraft Naturprodukte GmbH &amp; Co. KG · Hauptstr. 3 · 29499 Gülden</div>' +
+            '<div class="recipient">' +
+              entry.vereinsname + '<br>' +
+              entry.vorname + ' ' + entry.nachname + '<br>' +
+              entry.strasse + ' ' + entry.nummer + '<br>' +
+              plz + ' ' + entry.ort +
+            '</div>' +
+            '<div class="subject">Unsere Sachspende</div>' +
+            '<div class="content">' +
+              '<p>Gern unterstützen wir euch bei eurer Veranstaltung mit unserem Sponsoring-Paket, bestehend aus zwei in unserer Hofmanufaktur liebevoll hergestellten Kristallkraft-Produkten:</p>' +
+              '<table class="products">' +
+                '<tr><td>1 x Art. CL-7</td><td>Kristallkraft Coolly im Wert von 72,90 €</td></tr>' +
+                '<tr><td>1 x Art. KK-8</td><td>Kristallkraft No1 im Wert von 59,90 €</td></tr>' +
+              '</table>' +
+              '<p>Bitte sendet uns die per Email an die Emailadresse (<strong>' + entry.email + '</strong>) versendete Spendenbescheinigung spätestens 14 Tage nach der Veranstaltung ausgefüllt zurück.</p>' +
+              '<p>Ich wünsche euch eine schöne Veranstaltung und viel Erfolg.</p>' +
+              '<p>Herzliche Grüße</p>' +
+              '<div class="signature"><p><strong>Katrin Bachmann</strong></p><p>Kristallkraft Naturprodukte GmbH &amp; Co. KG</p></div>' +
+            '</div>' +
+            '<div class="footer">' +
+              '<div class="footer-col">' +
+                '<p>Kristallkraft Naturprodukte<br>GmbH &amp; Co. KG<br>Hauptstraße 3<br>29499 Gülden</p>' +
+                '<p style="margin-top:8px;">USt-IdNr.: DE296319042<br>RG Lüneburg HRA 202102</p>' +
+              '</div>' +
+              '<div class="footer-col">' +
+                '<p>VR Plus Altmark-Wendland eG<br>IBAN: DE61258634891702660100<br>BIC: GENODEF1WOT</p>' +
+                '<p style="margin-top:8px;">Tel. +49 (0) 5863 9836090<br>Email: info@kristallkraft.com<br>www.kristallkraft.com</p>' +
+              '</div>' +
+              '<div class="footer-col">' +
+                '<p>Persönlich haftende<br>Gesellschafterin:<br>Kristallkraft Verwaltungs GmbH<br>Hauptstraße 3, 29499 Gülden</p>' +
+                '<p style="margin-top:8px;">RG Lüneburg HRB 205063<br>GF: Daniel D\'Amico</p>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
         });
 
+        const printStyles = '@page { size: A4; margin: 0; }' +
+          '@media print { html, body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
+          '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+          'body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }' +
+          '.page { padding: 15mm 25mm; min-height: 297mm; position: relative; }' +
+          '.logo { text-align: center; margin-bottom: 20px; }' +
+          '.logo img { width: 180px; height: auto; }' +
+          '.date { text-align: right; margin-bottom: 20px; }' +
+          '.sender { font-size: 9pt; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 30px; }' +
+          '.recipient { margin-bottom: 40px; line-height: 1.6; }' +
+          '.subject { font-weight: bold; font-size: 14pt; margin-bottom: 25px; }' +
+          '.content p { margin-bottom: 15px; }' +
+          '.products { width: 100%; border-collapse: collapse; margin: 20px 0; }' +
+          '.products td { padding: 10px; border: 1px solid #ddd; }' +
+          '.products td:first-child { width: 120px; font-weight: bold; }' +
+          '.signature { margin-top: 40px; }' +
+          '.signature p { margin-bottom: 5px; }' +
+          '.footer { display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 8pt; color: #666; }' +
+          '.footer-col { flex: 1; padding: 0 10px; }' +
+          '.footer-col:first-child { padding-left: 0; }' +
+          '.footer-col:last-child { padding-right: 0; }' +
+          '.footer p { margin: 0; line-height: 1.4; }';
+
+        const fullHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Anschreiben</title><style>' + printStyles + '</style></head><body>' + anschreibenHTML + '<script>window.onload = function() { window.print(); }<\/script></body></html>';
+
         const printWindow = window.open('', '_blank');
-        let htmlContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Anschreiben</title>';
-        htmlContent += '<style>';
-        htmlContent += '@page { size: A4; margin: 0; }';
-        htmlContent += '* { box-sizing: border-box; margin: 0; padding: 0; }';
-        htmlContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }';
-        htmlContent += '.page { padding: 15mm 25mm; min-height: 297mm; }';
-        htmlContent += '.logo { text-align: center; margin-bottom: 20px; }';
-        htmlContent += '.logo img { width: 180px; height: auto; }';
-        htmlContent += '.date { text-align: right; margin-bottom: 20px; }';
-        htmlContent += '.sender { font-size: 9pt; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 30px; }';
-        htmlContent += '.recipient { margin-bottom: 40px; line-height: 1.6; }';
-        htmlContent += '.subject { font-weight: bold; font-size: 14pt; margin-bottom: 25px; }';
-        htmlContent += '.content p { margin-bottom: 15px; }';
-        htmlContent += '.products { width: 100%; border-collapse: collapse; margin: 20px 0; }';
-        htmlContent += '.products td { padding: 10px; border: 1px solid #ddd; }';
-        htmlContent += '.products td:first-child { width: 120px; font-weight: bold; }';
-        htmlContent += '.signature { margin-top: 40px; }';
-        htmlContent += '.signature p { margin-bottom: 5px; }';
-        htmlContent += '.footer { display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 8pt; color: #666; }';
-        htmlContent += '.footer-col { flex: 1; }';
-        htmlContent += '.footer-col p { margin-bottom: 2px; line-height: 1.4; }';
-        htmlContent += '</style></head><body>';
-        htmlContent += anschreibenHTML;
-        htmlContent += '<script>window.onload = function() { window.print(); }<\/script>';
-        htmlContent += '</body></html>';
-        
-        printWindow.document.write(htmlContent);
+        printWindow.document.write(fullHTML);
         printWindow.document.close();
+      };
+
+      // Spendenbescheinigung PDF Generator
+      const generateSpendenbescheinigung = () => {
+        const selectedEntries = entries.filter(e => selectedIds.has(e.id) && !e.isAlreadySent);
+        
+        if (selectedEntries.length === 0) {
+          alert('Keine Einträge ausgewählt.');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+
+        selectedEntries.forEach((entry, idx) => {
+          const doc = new jsPDF('p', 'mm', 'a4');
+          const W = 210, LM = 16, RM = W - 16, CW = RM - LM;
+          let y = 14;
+          
+          const gray = () => { doc.setTextColor(80, 80, 80); };
+          const black = () => { doc.setTextColor(0, 0, 0); };
+          const norm = (s) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(s || 8); black(); };
+          const bold = (s) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(s || 8); black(); };
+          const rect = (x, y2, w, h) => { doc.setDrawColor(120); doc.setLineWidth(0.3); doc.rect(x, y2, w, h); };
+
+          // Vereinsname mit e.V. suffix handling
+          let verein = entry.vereinsname || '';
+          const ev = entry.ev || '';
+          if (ev && ev.toLowerCase().includes('ja') && !verein.toLowerCase().includes('e.v.')) {
+            verein = verein + ' e.V.';
+          }
+          
+          // Adresse aufbauen
+          const strasseVerein = entry.strasseVerein || entry.strasse || '';
+          const hausnrVerein = entry.hausnrVerein || entry.nummer || '';
+          const plzVerein = entry.plzVerein || entry.plz || '';
+          const ortVerein = entry.ortVerein || entry.ort || '';
+          
+          const adresseLines = [
+            verein,
+            [strasseVerein, hausnrVerein].filter(Boolean).join(' '),
+            [plzVerein.toString().replace('.0', '').split('.')[0], ortVerein].filter(Boolean).join(' ')
+          ].filter(Boolean);
+
+          // BOX: Aussteller
+          rect(LM, y, CW, 20);
+          gray(); doc.setFontSize(6.5);
+          doc.text('Aussteller (Bezeichnung und Anschrift der steuerbegünstigten Einrichtung)', LM + 2, y + 3.5);
+          norm(9);
+          adresseLines.forEach((line, i) => doc.text(line, LM + 2, y + 8 + i * 4));
+          y += 22;
+
+          // Titel
+          bold(12); doc.text('Bestätigung über Sachzuwendungen', LM, y + 5); y += 7;
+          norm(7);
+          const sub = doc.splitTextToSize('im Sinne des § 10b des Einkommensteuergesetzes an eine der in § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes bezeichneten Körperschaften, Personenvereinigungen oder Vermögensmassen', CW);
+          doc.text(sub, LM, y + 2); y += sub.length * 3 + 5;
+
+          // BOX: Zuwendender
+          rect(LM, y, CW, 18);
+          gray(); doc.setFontSize(6.5);
+          doc.text('Name und Anschrift des Zuwendenden:', LM + 2, y + 3.5);
+          norm(9);
+          doc.text('Kristallkraft Naturprodukte GmbH & Co. KG', LM + 2, y + 8);
+          doc.text('Hauptstraße 3', LM + 2, y + 12);
+          doc.text('29499 Gülden', LM + 2, y + 16);
+          y += 20;
+
+          // ROW: Wert / Buchstaben / Tag
+          const c1 = 55, c2 = 80, c3 = CW - c1 - c2;
+          rect(LM, y, c1, 12); rect(LM + c1, y, c2, 12); rect(LM + c1 + c2, y, c3, 12);
+          gray(); doc.setFontSize(6.5);
+          doc.text('Wert der Zuwendung - in Ziffern -', LM + 2, y + 3.5);
+          doc.text('- in Buchstaben -', LM + c1 + 2, y + 3.5);
+          doc.text('Tag der Zuwendung:', LM + c1 + c2 + 2, y + 3.5);
+          norm(9);
+          doc.text('132,80', LM + 2, y + 9);
+          doc.text('hundertzweiunddreißig euro und achtzig cent', LM + c1 + 2, y + 9);
+          doc.text(entry.veranstaltungsdatum || new Date().toLocaleDateString('de-DE'), LM + c1 + c2 + 2, y + 9);
+          y += 14;
+
+          // BOX: Bezeichnung
+          rect(LM, y, CW, 16);
+          gray(); doc.setFontSize(6.5);
+          doc.text('Genaue Bezeichnung der Sachzuwendung mit Alter, Zustand, Kaufpreis usw.', LM + 2, y + 3.5);
+          norm(9);
+          doc.text('1x Kristallkraft No1        59,90€', LM + 2, y + 8.5);
+          doc.text('1x Kristallkraft Coolly     72,90€', LM + 2, y + 12.5);
+          y += 18;
+
+          // Checkboxen
+          norm(7.5);
+          const checkbox = (checked, text, yPos) => {
+            doc.setDrawColor(120); doc.setLineWidth(0.3); doc.rect(LM, yPos, 4, 4);
+            if (checked) { bold(9); doc.text('X', LM + 0.7, yPos + 3.3); norm(7.5); }
+            const lines = doc.splitTextToSize(text, CW - 8);
+            doc.text(lines, LM + 7, yPos + 3);
+            return yPos + Math.max(lines.length * 3.2, 5) + 1.5;
+          };
+
+          y = checkbox(true, 'Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Betriebsvermögen. Die Zuwendung wurde nach dem Wert der Entnahme (ggf. mit dem niedrigeren gemeinen Wert) und nach der Umsatzsteuer, die auf die Entnahme entfällt, bewertet.', y);
+          y = checkbox(false, 'Die Sachzuwendung stammt nach den Angaben des Zuwendenden aus dem Privatvermögen.', y);
+          y = checkbox(false, 'Der Zuwendende hat trotz Aufforderung keine Angaben zur Herkunft der Sachzuwendung gemacht.', y);
+          y = checkbox(true, 'Geeignete Unterlagen, die zur Wertermittlung gedient haben, z. B. Rechnung, Gutachten, liegen vor.', y);
+          y += 2;
+
+          // Wir sind wegen Förderung - mit "des Sportes"
+          y = checkbox(true, 'Wir sind wegen Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)', y);
+          bold(9);
+          doc.text('des Sportes', LM + 7, y); y += 6;
+
+          // Freistellungsbescheid
+          norm(7.5);
+          doc.text('nach dem Freistellungsbescheid bzw. nach der Anlage zum Körperschaftsteuerbescheid des Finanzamtes', LM, y); y += 6;
+          const fa = entry.finanzamt || '___________';
+          const stnr = entry.steuernr || '___________';
+          const frei = entry.freistellung || '___________';
+          const vz = entry.veranlagung || '______';
+
+          bold(9); doc.text(fa, LM, y);
+          norm(7.5); const x1 = LM + Math.max(doc.getTextWidth(fa), 30) + 3;
+          doc.text(', StNr.', x1, y); bold(9);
+          const x2 = x1 + doc.getTextWidth(', StNr. ') + 1; doc.text(stnr, x2, y);
+          norm(7.5); const x3 = x2 + Math.max(doc.getTextWidth(stnr), 25) + 3;
+          doc.text(', vom', x3, y); bold(9);
+          const x4 = x3 + doc.getTextWidth(', vom ') + 1; doc.text(frei, x4, y);
+          norm(7.5); doc.text('für den letzten', x4 + Math.max(doc.getTextWidth(frei), 20) + 3, y);
+          y += 5;
+
+          norm(7.5); doc.text('Veranlagungszeitraum', LM, y);
+          const vzLabelW = doc.getTextWidth('Veranlagungszeitraum');
+          bold(9); doc.text(vz, LM + vzLabelW + 1, y);
+          y += 5;
+          norm(7.5);
+          doc.text('nach § 5 Abs. 1 Nr. 9 des Körperschaftsteuergesetzes von der', LM, y);
+          y += 4;
+          doc.text('Körperschaftsteuer und nach § 3 Nr. 6 des Gewerbesteuergesetzes von der Gewerbesteuer befreit.', LM, y);
+          y += 6;
+
+          // §60a AO (leer)
+          y = checkbox(false, 'Die Einhaltung der satzungsmäßigen Voraussetzungen nach den §§ 51, 59, 60 und 61 AO wurde vom Finanzamt', y);
+          norm(7.5);
+          doc.text('_____________, StNr. _____________, mit Bescheid vom _____________ nach § 60a AO', LM + 7, y); y += 4;
+          doc.text('gesondert festgestellt. Wir fördern nach unserer Satzung (Angabe des begünstigten Zwecks / der begünstigsten Zwecke)', LM + 7, y);
+          y += 7;
+
+          // BOX: Bestätigung - mit "des Reitsports"
+          rect(LM, y, CW, 20);
+          norm(7.5);
+          doc.text('Es wird bestätigt, dass die Zuwendung nur zur Förderung (Angabe des begünstigten Zwecks / der begünstigten Zwecke)', LM + 2, y + 4);
+          bold(9); doc.text('des Reitsports', LM + 2, y + 10);
+          norm(7.5); doc.text('verwendet wird.', LM + 2, y + 17);
+          y += 23;
+
+          // Unterschrift-Zeile (leer – wird handschriftlich ausgefüllt)
+          y += 8;
+          doc.setDrawColor(50); doc.setLineWidth(0.5); doc.line(LM, y, RM, y); y += 2;
+          gray(); doc.setFontSize(6.5);
+          doc.text('(Ort, Datum und Unterschrift des Zuwendungsempfängers)', LM, y + 2); y += 6;
+
+          // Hinweis
+          bold(7); doc.text('Hinweis:', LM, y); y += 3;
+          norm(6.5);
+          const h1 = doc.splitTextToSize('Wer vorsätzlich oder grob fahrlässig eine unrichtige Zuwendungsbestätigung erstellt oder veranlasst, dass Zuwendungen nicht zu den in der Zuwendungsbestätigung angegebenen steuerbegünstigten Zwecken verwendet werden, haftet für die entgangene Steuer (§ 10b Abs. 4 EStG, § 9 Abs. 3 KStG, § 9 Nr. 5 GewStG).', CW);
+          doc.text(h1, LM, y); y += h1.length * 2.5 + 2;
+          const h2 = doc.splitTextToSize('Diese Bestätigung wird nicht als Nachweis für die steuerliche Berücksichtigung der Zuwendung anerkannt, wenn das Datum des Freistellungsbescheides länger als 5 Jahre bzw. das Datum der Feststellung der Einhaltung der satzungsmäßigen Voraussetzungen nach § 60a Abs. 1 AO länger als 3 Jahre seit Ausstellung des Bescheides zurückliegt (§ 63 Abs. 5 AO).', CW);
+          doc.text(h2, LM, y); y += h2.length * 2.5 + 5;
+
+          // Footer
+          bold(6.5);
+          doc.text('034123 Bestätigung über Sachzuwendung / steuerbegünstigte Einrichtung / Verein (2013)', LM, y);
+
+          // Save PDF
+          const fn = 'Spendenbescheinigung_' + (verein || 'Verein').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+          doc.save(fn);
+        });
+
+        alert(selectedEntries.length + ' Spendenbescheinigung(en) wurden heruntergeladen.');
       };
 
       const selectedCount = [...selectedIds].filter(id => !entries.find(e => e.id === id)?.isAlreadySent).length;
@@ -311,30 +488,29 @@
             </div>
             
             {entries.length > 0 && (
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  borderRadius: '8px',
-                  padding: '8px 16px',
-                  fontSize: '13px'
-                }}>
-                  <span style={{ opacity: 0.7 }}>Verfügbar:</span>{' '}
-                  <strong style={{ color: '#4ade80' }}>{availableCount}</strong>
-                  <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
-                  <span style={{ opacity: 0.7 }}>Bereits versendet:</span>{' '}
-                  <strong style={{ color: '#f87171' }}>{sentCount}</strong>
-                  <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
-                  <span style={{ opacity: 0.7 }}>Ausgewählt:</span>{' '}
-                  <strong style={{ color: '#fbbf24' }}>{selectedCount}</strong>
-                </div>
+              <div style={{
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontSize: '13px'
+              }}>
+                <span style={{ opacity: 0.7 }}>Verfügbar:</span>{' '}
+                <strong style={{ color: '#4ade80' }}>{availableCount}</strong>
+                <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
+                <span style={{ opacity: 0.7 }}>Versendet:</span>{' '}
+                <strong style={{ color: '#f87171' }}>{sentCount}</strong>
+                <span style={{ margin: '0 8px', opacity: 0.3 }}>|</span>
+                <span style={{ opacity: 0.7 }}>Ausgewählt:</span>{' '}
+                <strong style={{ color: '#fbbf24' }}>{selectedCount}</strong>
               </div>
             )}
           </div>
 
-          {entries.length === 0 && (
+          {entries.length === 0 && !isLoading && (
             <div 
               onDrop={handleFileDrop}
               onDragOver={(e) => e.preventDefault()}
+              onClick={() => document.getElementById('fileInput').click()}
               style={{
                 maxWidth: '600px',
                 margin: '80px auto',
@@ -343,10 +519,8 @@
                 padding: '60px 40px',
                 textAlign: 'center',
                 background: 'rgba(255,255,255,0.03)',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                cursor: 'pointer'
               }}
-              onClick={() => document.getElementById('fileInput').click()}
             >
               <div style={{ fontSize: '64px', marginBottom: '16px' }}>📁</div>
               <h2 style={{ margin: '0 0 8px', fontWeight: 600 }}>Excel-Datei hochladen</h2>
@@ -381,11 +555,7 @@
                 alignItems: 'center'
               }}>
                 <button
-                  onClick={() => {
-                    setEntries([]);
-                    setSelectedIds(new Set());
-                    setFileName('');
-                  }}
+                  onClick={() => { setEntries([]); setSelectedIds(new Set()); setFileName(''); }}
                   style={{
                     padding: '10px 20px',
                     background: 'rgba(255,255,255,0.1)',
@@ -393,13 +563,10 @@
                     borderRadius: '8px',
                     color: '#fff',
                     cursor: 'pointer',
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
+                    fontSize: '14px'
                   }}
                 >
-                  📂 Neue Datei laden
+                  📂 Neue Datei
                 </button>
                 
                 <button
@@ -414,7 +581,7 @@
                     fontSize: '14px'
                   }}
                 >
-                  ✓ Alle auswählen
+                  ✓ Alle
                 </button>
                 
                 <button
@@ -429,7 +596,7 @@
                     fontSize: '14px'
                   }}
                 >
-                  ✗ Alle abwählen
+                  ✗ Keine
                 </button>
                 
                 <div style={{ flex: 1 }} />
@@ -438,43 +605,48 @@
                   onClick={generateAnschreiben}
                   disabled={selectedCount === 0}
                   style={{
-                    padding: '12px 28px',
-                    background: selectedCount > 0 
-                      ? 'linear-gradient(135deg, #60a5fa, #3b82f6)' 
-                      : 'rgba(255,255,255,0.1)',
+                    padding: '12px 24px',
+                    background: selectedCount > 0 ? 'linear-gradient(135deg, #60a5fa, #3b82f6)' : 'rgba(255,255,255,0.1)',
                     border: 'none',
                     borderRadius: '8px',
                     color: selectedCount > 0 ? '#fff' : '#666',
                     cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: selectedCount > 0 ? '0 4px 20px rgba(59,130,246,0.3)' : 'none'
+                    fontSize: '14px',
+                    fontWeight: 600
                   }}
                 >
                   📄 Anschreiben ({selectedCount})
                 </button>
                 
                 <button
+                  onClick={generateSpendenbescheinigung}
+                  disabled={selectedCount === 0}
+                  style={{
+                    padding: '12px 24px',
+                    background: selectedCount > 0 ? 'linear-gradient(135deg, #a855f7, #7c3aed)' : 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: selectedCount > 0 ? '#fff' : '#666',
+                    cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
+                    fontSize: '14px',
+                    fontWeight: 600
+                  }}
+                >
+                  📋 Spendenbescheinigung ({selectedCount})
+                </button>
+                
+                <button
                   onClick={generateDHLCSV}
                   disabled={selectedCount === 0}
                   style={{
-                    padding: '12px 28px',
-                    background: selectedCount > 0 
-                      ? 'linear-gradient(135deg, #ffd700, #ffaa00)' 
-                      : 'rgba(255,255,255,0.1)',
+                    padding: '12px 24px',
+                    background: selectedCount > 0 ? 'linear-gradient(135deg, #ffd700, #ffaa00)' : 'rgba(255,255,255,0.1)',
                     border: 'none',
                     borderRadius: '8px',
                     color: selectedCount > 0 ? '#1a1a2e' : '#666',
                     cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: selectedCount > 0 ? '0 4px 20px rgba(255,215,0,0.3)' : 'none'
+                    fontSize: '14px',
+                    fontWeight: 600
                   }}
                 >
                   📦 DHL CSV ({selectedCount})
@@ -486,16 +658,10 @@
                 borderRadius: '8px',
                 padding: '12px 16px',
                 marginBottom: '16px',
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                fontSize: '13px'
               }}>
-                <span style={{ opacity: 0.6 }}>📄 Geladene Datei:</span>
-                <strong>{fileName}</strong>
-                <span style={{ opacity: 0.4, marginLeft: 'auto' }}>
-                  Produkte: CL-7, KK-8
-                </span>
+                📄 <strong>{fileName}</strong>
+                <span style={{ opacity: 0.4, marginLeft: '16px' }}>Produkte: CL-7, KK-8</span>
               </div>
 
               <div style={{
@@ -505,20 +671,16 @@
                 border: '1px solid rgba(255,255,255,0.1)'
               }}>
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{
-                    width: '100%',
-                    borderCollapse: 'collapse',
-                    fontSize: '13px'
-                  }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                     <thead>
                       <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                         <th style={{ padding: '14px 12px', textAlign: 'center', width: '50px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>✓</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Name</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Verein</th>
-                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Lieferadresse</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Adresse</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>PLZ / Ort</th>
                         <th style={{ padding: '14px 12px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Veranstaltung</th>
-                        <th style={{ padding: '14px 12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Versendet</th>
+                        <th style={{ padding: '14px 12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -527,14 +689,9 @@
                           key={entry.id}
                           onClick={() => !entry.isAlreadySent && toggleSelection(entry.id)}
                           style={{
-                            background: entry.isAlreadySent 
-                              ? 'rgba(100,100,100,0.15)' 
-                              : selectedIds.has(entry.id) 
-                                ? 'rgba(255,215,0,0.1)' 
-                                : 'transparent',
+                            background: entry.isAlreadySent ? 'rgba(100,100,100,0.15)' : selectedIds.has(entry.id) ? 'rgba(255,215,0,0.1)' : 'transparent',
                             opacity: entry.isAlreadySent ? 0.4 : 1,
-                            cursor: entry.isAlreadySent ? 'not-allowed' : 'pointer',
-                            transition: 'background 0.2s ease'
+                            cursor: entry.isAlreadySent ? 'not-allowed' : 'pointer'
                           }}
                         >
                           <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -546,25 +703,15 @@
                                 checked={selectedIds.has(entry.id)}
                                 onChange={() => toggleSelection(entry.id)}
                                 onClick={(e) => e.stopPropagation()}
-                                style={{ 
-                                  width: '18px', 
-                                  height: '18px', 
-                                  cursor: 'pointer',
-                                  accentColor: '#ffd700'
-                                }}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#ffd700' }}
                               />
                             )}
                           </td>
                           <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>
                             {entry.vorname} {entry.nachname}
                           </td>
-                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', maxWidth: '250px' }}>
-                            <div style={{ 
-                              overflow: 'hidden', 
-                              textOverflow: 'ellipsis', 
-                              whiteSpace: 'nowrap',
-                              fontSize: '12px'
-                            }}>
+                          <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', maxWidth: '200px' }}>
+                            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
                               {entry.vereinsname}
                             </div>
                           </td>
@@ -572,46 +719,22 @@
                             {entry.strasse} {entry.nummer}
                           </td>
                           <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <span style={{ 
-                              background: 'rgba(255,255,255,0.1)', 
-                              padding: '2px 8px', 
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontFamily: 'monospace'
-                            }}>
+                            <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontFamily: 'monospace' }}>
                               {entry.plz.toString().replace('.0', '').split('.')[0]}
                             </span>
                             {' '}{entry.ort}
                           </td>
                           <td style={{ padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '12px' }}>
                             {entry.veranstaltung}
-                            {entry.datum && (
-                              <span style={{ opacity: 0.6, marginLeft: '8px' }}>
-                                ({formatDate(entry.datum)})
-                              </span>
-                            )}
+                            {entry.veranstaltungsdatum && <span style={{ opacity: 0.6, marginLeft: '8px' }}>({entry.veranstaltungsdatum})</span>}
                           </td>
                           <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             {entry.isAlreadySent ? (
-                              <span style={{
-                                background: 'rgba(248, 113, 113, 0.2)',
-                                color: '#f87171',
-                                padding: '4px 10px',
-                                borderRadius: '12px',
-                                fontSize: '11px',
-                                fontWeight: 500
-                              }}>
+                              <span style={{ background: 'rgba(248, 113, 113, 0.2)', color: '#f87171', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 500 }}>
                                 {entry.versendet}
                               </span>
                             ) : (
-                              <span style={{
-                                background: 'rgba(74, 222, 128, 0.2)',
-                                color: '#4ade80',
-                                padding: '4px 10px',
-                                borderRadius: '12px',
-                                fontSize: '11px',
-                                fontWeight: 500
-                              }}>
+                              <span style={{ background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 500 }}>
                                 Offen
                               </span>
                             )}
@@ -632,8 +755,7 @@
                 fontSize: '13px'
               }}>
                 <strong style={{ color: '#ffd700' }}>💡 Hinweis:</strong>{' '}
-                Grau markierte Einträge wurden bereits versendet und werden beim Export ignoriert.
-                Alle ausgewählten Einträge erhalten standardmäßig die Produkte <strong>CL-7</strong> und <strong>KK-8</strong>.
+                Grau markierte Einträge wurden bereits versendet. Produkte: <strong>CL-7</strong> und <strong>KK-8</strong>.
               </div>
             </div>
           )}
