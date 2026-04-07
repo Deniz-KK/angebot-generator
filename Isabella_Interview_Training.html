@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vorstellungsgespräch-Training — LBS Süd</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #CC0A1A;
+  --red-dark: #A00815;
+  --red-light: #FDEAEC;
+  --dark: #1A1A2E;
+  --charcoal: #2D2D3F;
+  --white: #FFFFFF;
+  --off-white: #F7F7FA;
+  --gray: #E0E0E8;
+  --text-dark: #1A1A2E;
+  --text-mid: #5A5A6A;
+  --green: #1B8A4E;
+  --green-light: #E8F5EE;
+  --orange: #E8890C;
+  --orange-light: #FFF3E0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  background: var(--off-white);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* ===== INTRO SCREEN ===== */
+.intro-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark);
+  position: relative;
+  overflow: hidden;
+}
+.intro-screen::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: var(--red);
+}
+.intro-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 2rem;
+  animation: fadeUp 0.8s ease-out;
+}
+.intro-badge {
+  display: inline-block;
+  background: var(--red);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 18px;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+}
+.intro-content h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: white;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+.intro-content .subtitle {
+  color: #9999BB;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.intro-content .name-highlight {
+  color: var(--red);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+}
+.intro-content p.desc {
+  color: #AAAACC;
+  font-size: 0.95rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+.btn-start {
+  display: inline-block;
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: 16px 48px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-start:hover {
+  background: var(--red-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(204, 10, 26, 0.3);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar-container {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: var(--gray);
+  z-index: 100;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--red);
+  transition: width 0.5s ease;
+  width: 0%;
+}
+
+/* ===== MODULE SCREEN ===== */
+.module-screen {
+  display: none;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+.module-screen.active { display: block; }
+.module-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  animation: fadeUp 0.5s ease-out;
+}
+
+/* Module header */
+.module-header {
+  margin-bottom: 2rem;
+  padding-top: 1.5rem;
+}
+.module-number {
+  display: inline-block;
+  background: var(--red);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 16px;
+  margin-bottom: 0.75rem;
+}
+.module-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--text-dark);
+  line-height: 1.3;
+}
+
+/* Info card */
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border-left: 5px solid var(--red);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.info-card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 0.75rem;
+}
+.info-card p, .info-card li {
+  font-size: 0.95rem;
+  color: var(--text-mid);
+  line-height: 1.75;
+}
+.info-card ul {
+  list-style: none;
+  padding: 0;
+}
+.info-card ul li {
+  padding: 4px 0 4px 20px;
+  position: relative;
+}
+.info-card ul li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--red);
+  font-weight: bold;
+}
+.info-card .highlight-box {
+  background: var(--red-light);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--red-dark);
+  font-weight: 600;
+}
+.info-card .key-fact {
+  display: inline-block;
+  background: var(--dark);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 2px 3px;
+}
+
+/* ===== QUIZ SECTION ===== */
+.quiz-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border-top: 4px solid var(--dark);
+}
+.quiz-section h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 1.25rem;
+}
+.quiz-section h3::before {
+  content: '❓ ';
+}
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid var(--gray);
+  border-radius: 10px;
+  background: var(--off-white);
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+.quiz-option:hover:not(.disabled) {
+  border-color: var(--red);
+  background: var(--red-light);
+}
+.quiz-option.selected {
+  border-color: var(--red);
+  background: var(--red-light);
+  font-weight: 600;
+}
+.quiz-option.correct {
+  border-color: var(--green);
+  background: var(--green-light);
+  font-weight: 600;
+}
+.quiz-option.wrong {
+  border-color: #D32F2F;
+  background: #FFEBEE;
+  opacity: 0.7;
+}
+.quiz-option.disabled {
+  cursor: default;
+}
+.quiz-feedback {
+  display: none;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct {
+  background: var(--green-light);
+  color: #155D36;
+  border: 1px solid #A8DFC0;
+}
+.quiz-feedback.wrong {
+  background: var(--orange-light);
+  color: #7A4D00;
+  border: 1px solid #F5D9A0;
+}
+
+/* Next button */
+.btn-next {
+  display: none;
+  margin-top: 1.5rem;
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  width: 100%;
+}
+.btn-next.show { display: block; }
+.btn-next:hover {
+  background: var(--red-dark);
+}
+
+/* ===== RESULTS SCREEN ===== */
+.results-screen {
+  display: none;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: var(--dark);
+}
+.results-screen.active { display: flex; align-items: center; justify-content: center; }
+.results-inner {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+  animation: fadeUp 0.8s ease-out;
+}
+.results-inner .result-badge {
+  display: inline-block;
+  background: var(--red);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+}
+.results-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: white;
+  margin-bottom: 2rem;
+}
+.score-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--charcoal);
+  margin: 0 auto 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid var(--red);
+}
+.score-circle .score-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: white;
+}
+.score-circle .score-label {
+  color: #9999BB;
+  font-size: 0.85rem;
+}
+.results-text {
+  color: #BBBBDD;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+.results-text strong { color: white; }
+.result-details {
+  background: var(--charcoal);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-size: 0.9rem;
+}
+.result-row:last-child { border: none; }
+.result-row .label { color: #9999BB; }
+.result-row .value { color: white; font-weight: 600; }
+.result-row .value.correct-val { color: #4CAF50; }
+.result-row .value.wrong-val { color: #FF7043; }
+.btn-restart {
+  display: inline-block;
+  background: transparent;
+  border: 2px solid var(--red);
+  color: white;
+  padding: 14px 36px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-restart:hover {
+  background: var(--red);
+}
+
+/* ===== TIP BOX ===== */
+.tip-box {
+  background: linear-gradient(135deg, #1A1A2E 0%, #2D2D4F 100%);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+.tip-box .tip-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.5rem;
+}
+.tip-box p {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: #CCCCEE;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .intro-content h1 { font-size: 2rem; }
+  .module-header h2 { font-size: 1.5rem; }
+  .info-card, .quiz-section { padding: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div class="intro-screen" id="intro">
+  <div class="intro-content">
+    <div class="intro-badge">Vorbereitungstraining</div>
+    <h1>Fit fürs Vorstellungsgespräch</h1>
+    <p class="subtitle">Kauffrau für Büromanagement bei der LBS Süd</p>
+    <p class="name-highlight">Für Isabella Bernhardt</p>
+    <p class="desc">
+      In diesem Training lernst du alles Wichtige über die LBS Süd, die Sparkassen-Finanzgruppe, 
+      das Thema Bausparen und den Beruf Kauffrau für Büromanagement. 
+      Nach jedem Abschnitt testest du dein Wissen mit einer Quizfrage.<br><br>
+      <strong style="color:white;">⏱ Dauer: ca. 20–30 Minuten · 📝 12 Module mit Quizfragen</strong>
+    </p>
+    <button class="btn-start" onclick="startTraining()">Training starten →</button>
+  </div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-container" id="progressBar" style="display:none;">
+  <div class="progress-bar-fill" id="progressFill"></div>
+</div>
+
+<!-- MODULES CONTAINER -->
+<div id="modulesContainer"></div>
+
+<!-- RESULTS -->
+<div class="results-screen" id="results">
+  <div class="results-inner">
+    <div class="result-badge">Auswertung</div>
+    <h2>Training abgeschlossen!</h2>
+    <div class="score-circle">
+      <div class="score-number" id="scoreNumber">0%</div>
+      <div class="score-label">richtig</div>
+    </div>
+    <p class="results-text" id="resultsText"></p>
+    <div class="result-details" id="resultDetails"></div>
+    <button class="btn-restart" onclick="location.reload()">🔄 Training wiederholen</button>
+  </div>
+</div>
+
+<script>
+// ===== MODULE DATA =====
+const modules = [
+  // MODULE 1
+  {
+    title: "Die LBS Süd — Dein zukünftiger Arbeitgeber",
+    info: [
+      {
+        heading: "Was ist die LBS Süd?",
+        content: `Die <strong>LBS Landesbausparkasse Süd</strong> ist die <strong>größte Landesbausparkasse Deutschlands</strong>. Sie entstand 2023 durch die Fusion der LBS Südwest (Baden-Württemberg & Rheinland-Pfalz) mit der LBS Bayern.`,
+        extra: `<p style="margin-top:10px">Das Unternehmen hat seinen Sitz in <strong>Stuttgart und München</strong>, mit weiteren Standorten in Karlsruhe und Mainz. Rund <strong>1.500 Mitarbeitende</strong> im Innendienst und etwa <strong>950 Vertriebsprofis</strong> arbeiten für die LBS Süd.</p>
+        <div class="highlight-box">💡 Merke: Die LBS Süd ist seit 2023 die größte LBS in Deutschland — das zeigt, dass du dich bei einem starken, zukunftsorientierten Unternehmen bewirbst!</div>`
+      },
+      {
+        heading: "Geschäftsgebiet & Rechtsform",
+        content: `Die LBS Süd ist in drei Bundesländern aktiv: <span class="key-fact">Baden-Württemberg</span> <span class="key-fact">Bayern</span> <span class="key-fact">Rheinland-Pfalz</span>`,
+        extra: `<p style="margin-top:10px">Die Rechtsform ist eine <strong>rechtsfähige Anstalt des öffentlichen Rechts</strong>. Die Anteilseigner sind die Sparkassenverbände: Baden-Württemberg (51,2 %), Bayern (41,5 %) und Rheinland-Pfalz (7,3 %).</p>`
+      }
+    ],
+    quiz: {
+      question: "Wann ist die LBS Süd in ihrer heutigen Form entstanden?",
+      options: ["2016 — durch die Fusion von LBS Baden-Württemberg und LBS Rheinland-Pfalz", "2023 — durch die Fusion von LBS Südwest und LBS Bayern", "2020 — als Ausgliederung der Landesbank Baden-Württemberg", "2018 — durch Zusammenschluss aller süddeutschen Bausparkassen"],
+      correct: 1,
+      feedback_correct: "Genau! 2023 fusionierten die LBS Südwest und die LBS Bayern zur LBS Süd — der größten Landesbausparkasse Deutschlands.",
+      feedback_wrong: "Nicht ganz. Die LBS Süd entstand 2023 durch die Fusion von LBS Südwest und LBS Bayern. 2016 war die Vorgängerfusion zur LBS Südwest."
+    }
+  },
+  // MODULE 2
+  {
+    title: "Die Sparkassen-Finanzgruppe",
+    info: [
+      {
+        heading: "Was ist die Sparkassen-Finanzgruppe?",
+        content: `Die LBS Süd ist Teil der <strong>Sparkassen-Finanzgruppe</strong> — dem <strong>größten Finanzdienstleister Europas</strong> mit einem Geschäftsvolumen von über 3.000 Milliarden Euro.`,
+        extra: `<p style="margin-top:10px">Die Gruppe umfasst rund <strong>600 Unternehmen</strong>, darunter Sparkassen, Landesbanken, Landesbausparkassen, öffentliche Versicherer und weitere Verbundpartner. Sie beschäftigt insgesamt rund <strong>287.000 Mitarbeitende</strong> und ist der <strong>größte Ausbilder in der Finanzbranche</strong>.</p>`
+      },
+      {
+        heading: "Verbundpartner der LBS Süd",
+        content: `Innerhalb der Sparkassen-Finanzgruppe arbeitet die LBS Süd eng mit verschiedenen Partnern zusammen:`,
+        extra: `<ul>
+          <li><strong>Sparkassen</strong> — Hausbank für Privat- und Geschäftskunden</li>
+          <li><strong>Landesbank Baden-Württemberg (LBBW)</strong> — Zentralbank</li>
+          <li><strong>LBS Immobiliengesellschaften</strong> — Vermittlung von Wohnimmobilien</li>
+          <li><strong>SV-Versicherung / Versicherungskammer Bayern</strong> — Versicherungsschutz</li>
+        </ul>
+        <div class="highlight-box">💡 Die LBS kooperiert über rund 10.600 Sparkassenfilialen — das bedeutet enorme Kundennähe!</div>`
+      }
+    ],
+    quiz: {
+      question: "Welche Rolle hat die Sparkassen-Finanzgruppe?",
+      options: ["Sie ist ein privater Bankkonzern mit Hauptsitz in Frankfurt", "Sie ist ein Verbund öffentlich-rechtlicher Finanzdienstleister mit dem Ziel der Allfinanzberatung", "Sie ist eine staatliche Behörde zur Regulierung des Bankensektors", "Sie ist eine reine Versicherungsgruppe für den öffentlichen Dienst"],
+      correct: 1,
+      feedback_correct: "Richtig! Die Sparkassen-Finanzgruppe ist ein Verbund, der Kunden alle Finanzdienstleistungen ‚aus einer Hand' bietet — das Allfinanzkonzept.",
+      feedback_wrong: "Die Sparkassen-Finanzgruppe ist kein Konzern und keine Behörde, sondern ein Verbund selbstständiger öffentlich-rechtlicher Finanzdienstleister mit dem Allfinanzkonzept."
+    }
+  },
+  // MODULE 3
+  {
+    title: "Bausparen — das Kernprodukt",
+    info: [
+      {
+        heading: "Wie funktioniert Bausparen?",
+        content: `Bausparen ist das <strong>Kernprodukt</strong> der LBS. Es funktioniert in drei Phasen:`,
+        extra: `<ul>
+          <li><strong>1. Sparphase:</strong> Der Kunde schließt einen Bausparvertrag über eine bestimmte Bausparsumme ab und spart regelmäßig ein (meist 40–50 % der Summe).</li>
+          <li><strong>2. Zuteilung:</strong> Wenn genug angespart wurde und bestimmte Voraussetzungen erfüllt sind, wird der Vertrag zugeteilt.</li>
+          <li><strong>3. Darlehensphase:</strong> Der Kunde erhält ein zinsgünstiges Bauspardarlehen für den Rest der Bausparsumme — für wohnungswirtschaftliche Maßnahmen.</li>
+        </ul>
+        <div class="highlight-box">💡 Das Besondere: Der Darlehenszins wird schon bei Vertragsabschluss festgelegt — das gibt Planungssicherheit, egal wie sich die Zinsen am Markt entwickeln!</div>`
+      },
+      {
+        heading: "Wofür kann man Bausparen nutzen?",
+        content: `Bausparmittel dürfen nur für <strong>wohnungswirtschaftliche Zwecke</strong> verwendet werden:`,
+        extra: `<ul>
+          <li>Kauf oder Bau einer Immobilie</li>
+          <li>Modernisierung und energetische Sanierung</li>
+          <li>Umbau und barrierefreies Wohnen</li>
+          <li>Grundstückskauf</li>
+        </ul>
+        <p style="margin-top:8px">Daneben gibt es auch <strong>staatliche Förderungen</strong> wie die Wohnungsbauprämie und die Arbeitnehmersparzulage, die das Bausparen besonders attraktiv machen.</p>`
+      }
+    ],
+    quiz: {
+      question: "Was ist der besondere Vorteil eines Bausparvertrags gegenüber einem normalen Bankkredit?",
+      options: ["Man bekommt immer 0 % Zinsen auf das Darlehen", "Der Darlehenszins steht schon bei Vertragsabschluss fest — unabhängig von der Zinsentwicklung", "Man muss das Darlehen nie zurückzahlen", "Es gibt keine Sparphase — man bekommt sofort das gesamte Geld"],
+      correct: 1,
+      feedback_correct: "Genau! Der festgelegte Darlehenszins von Anfang an gibt dem Bausparer Planungssicherheit — das ist ein echtes Alleinstellungsmerkmal.",
+      feedback_wrong: "Der entscheidende Vorteil ist die Zinssicherheit: Der Darlehenszins wird bei Vertragsabschluss festgelegt und ändert sich nicht mehr."
+    }
+  },
+  // MODULE 4
+  {
+    title: "Die LBS Süd als Arbeitgeber",
+    info: [
+      {
+        heading: "Standorte und Erreichbarkeit",
+        content: `Dein Ausbildungsstandort wäre <strong>München</strong> — in unmittelbarer Nähe zum Hauptbahnhof (Arnulfstraße 50). Der Standort ist also optimal mit öffentlichen Verkehrsmitteln erreichbar.`,
+        extra: `<p style="margin-top:10px">Die LBS Süd bietet ihren Auszubildenden:</p>
+        <ul>
+          <li>Vergütung nach <strong>Tarifvertrag für das öffentliche Bankgewerbe</strong></li>
+          <li>1. Lehrjahr: ca. 1.620 € · 2. Lehrjahr: ca. 1.688 € · 3. Lehrjahr: ca. 1.755 €</li>
+          <li>Cafeteria, Betriebssport, Mobilitätszuschuss</li>
+          <li>Vielfältige Weiterbildungsmöglichkeiten nach der Ausbildung</li>
+        </ul>`
+      },
+      {
+        heading: "Ausbildungsdauer & Struktur",
+        content: `Die Ausbildung zur Kauffrau für Büromanagement bei der LBS Süd dauert <strong>2,5 Jahre</strong>. Sie ist dual aufgebaut: Praxis im Unternehmen und Theorie an der Berufsschule plus innerbetriebliche Schulungen.`,
+        extra: `<div class="highlight-box">💡 Tipp fürs Gespräch: Die attraktive Vergütung und die Nähe zum Hauptbahnhof sind nice-to-haves — fokussiere dich im Gespräch besser auf die inhaltlichen Gründe (Vielseitigkeit, Lernmöglichkeiten, Unternehmenskultur).</div>`
+      }
+    ],
+    quiz: {
+      question: "Wie lange dauert die Ausbildung zur Kauffrau für Büromanagement bei der LBS Süd?",
+      options: ["2 Jahre", "2,5 Jahre", "3 Jahre", "3,5 Jahre"],
+      correct: 1,
+      feedback_correct: "Richtig! Die Ausbildung dauert 2,5 Jahre — kürzer als die regulären 3 Jahre.",
+      feedback_wrong: "Bei der LBS Süd dauert die Ausbildung 2,5 Jahre. Die reguläre Dauer wäre 3 Jahre, aber die LBS Süd setzt auf die verkürzte Variante."
+    }
+  },
+  // MODULE 5
+  {
+    title: "Kauffrau für Büromanagement — das Berufsbild",
+    info: [
+      {
+        heading: "Was macht eine Kauffrau für Büromanagement?",
+        content: `Kaufleute für Büromanagement sind echte <strong>Organisationstalente</strong>. Sie sorgen dafür, dass im Büro alles reibungslos läuft. Ihre Aufgaben sind extrem vielseitig:`,
+        extra: `<ul>
+          <li><strong>Büroorganisation:</strong> Termine koordinieren, Meetings vorbereiten, Unterlagen verwalten</li>
+          <li><strong>Kommunikation:</strong> Telefonkontakt mit Kunden, Schriftverkehr, E-Mails</li>
+          <li><strong>Sachbearbeitung:</strong> Aufträge bearbeiten, Rechnungen prüfen, Daten pflegen</li>
+          <li><strong>Assistenz:</strong> Vorgesetzte und Teams unterstützen</li>
+          <li><strong>Datenmanagement:</strong> Excel-Tabellen, Statistiken, Auswertungen</li>
+        </ul>`
+      },
+      {
+        heading: "Wahlqualifikationen bei der LBS Süd",
+        content: `Die LBS Süd bildet in zwei Wahlqualifikationen aus:`,
+        extra: `<ul>
+          <li><strong>Auftragssteuerung und -koordination:</strong> Aufträge bearbeiten, Termine überwachen, Qualität sichern</li>
+          <li><strong>Assistenz und Sekretariat:</strong> Chefentlastung, Reiseplanung, Veranstaltungsorganisation, Protokolle</li>
+        </ul>
+        <div class="highlight-box">💡 Diese Information steht auch im Merkblatt! Wenn du im Gespräch danach gefragt wirst, zeigt es, dass du dich vorbereitet hast.</div>`
+      }
+    ],
+    quiz: {
+      question: "In welchen zwei Wahlqualifikationen bildet die LBS Süd aus?",
+      options: ["Marketing und Vertrieb + Personalwirtschaft", "Auftragssteuerung und -koordination + Assistenz und Sekretariat", "Finanzbuchhaltung + Einkauf und Logistik", "Öffentlichkeitsarbeit + Verwaltung und Recht"],
+      correct: 1,
+      feedback_correct: "Perfekt! Die LBS Süd bildet in ‚Auftragssteuerung und -koordination' sowie ‚Assistenz und Sekretariat' aus. Das steht auch im Merkblatt!",
+      feedback_wrong: "Die LBS Süd hat sich für ‚Auftragssteuerung und -koordination' und ‚Assistenz und Sekretariat' entschieden. Das steht im Merkblatt — unbedingt merken!"
+    }
+  },
+  // MODULE 6
+  {
+    title: "Die Abschlussprüfung — gut zu wissen",
+    info: [
+      {
+        heading: "So ist die Prüfung aufgebaut",
+        content: `Die Abschlussprüfung besteht aus zwei Teilen — eine sogenannte <strong>gestreckte Abschlussprüfung</strong>:`,
+        extra: `<ul>
+          <li><strong>Teil 1 — Mitte des 2. Ausbildungsjahres (25 %):</strong> Informationstechnisches Büromanagement (am PC: Word, Excel etc.)</li>
+          <li><strong>Teil 2 — Ende der Ausbildung (75 %):</strong>
+            <ul style="margin-top:5px; list-style:none; padding-left:10px;">
+              <li style="padding-left:20px">▸ Kundenbeziehungsprozesse — schriftlich (30 %)</li>
+              <li style="padding-left:20px">▸ Wirtschafts- und Sozialkunde — schriftlich (10 %)</li>
+              <li style="padding-left:20px">▸ Fachaufgabe in der Wahlqualifikation — mündlich (35 %)</li>
+            </ul>
+          </li>
+        </ul>
+        <div class="highlight-box">💡 Das zeigt: Deine MS-Office-Kenntnisse werden direkt geprüft! Gut, dass du das in deiner Präsentation erwähnst.</div>`
+      }
+    ],
+    quiz: {
+      question: "Welches Fach wird in Teil 1 der Abschlussprüfung geprüft?",
+      options: ["Wirtschafts- und Sozialkunde", "Kundenbeziehungsprozesse", "Informationstechnisches Büromanagement (Word, Excel etc.)", "Die Wahlqualifikation"],
+      correct: 2,
+      feedback_correct: "Richtig! Teil 1 prüft die IT-Kenntnisse am PC — also genau die Office-Skills, die du schon mitbringst.",
+      feedback_wrong: "In Teil 1 wird ‚Informationstechnisches Büromanagement' geprüft — also der praktische Umgang mit Office-Programmen am PC."
+    }
+  },
+  // MODULE 7
+  {
+    title: "Das Regionalprinzip der Sparkassen",
+    info: [
+      {
+        heading: "Was bedeutet das Regionalprinzip?",
+        content: `Ein wichtiges Prinzip der Sparkassen-Welt: Sparkassen und Landesbausparkassen arbeiten <strong>nur in ihrer eigenen Region</strong> — sie stehen untereinander <strong>nicht im Wettbewerb</strong>.`,
+        extra: `<p style="margin-top:10px">Die LBS Süd ist also nur in Baden-Württemberg, Bayern und Rheinland-Pfalz tätig — nicht bundesweit. Private Bausparkassen wie Schwäbisch Hall oder Wüstenrot sind dagegen bundesweit aktiv.</p>
+        <p style="margin-top:8px">Das Regionalprinzip sorgt dafür, dass die LBS <strong>eng mit den lokalen Sparkassen</strong> zusammenarbeitet und Kunden vor Ort optimal beraten werden.</p>
+        <div class="highlight-box">💡 Im Gespräch könnte gefragt werden, was die LBS von privaten Bausparkassen unterscheidet — das Regionalprinzip und die öffentlich-rechtliche Trägerschaft sind gute Antworten!</div>`
+      }
+    ],
+    quiz: {
+      question: "Was bedeutet das Regionalprinzip für die LBS Süd?",
+      options: ["Sie darf nur in München Kunden beraten", "Sie ist nur in Baden-Württemberg, Bayern und Rheinland-Pfalz tätig und steht nicht im Wettbewerb mit anderen LBS", "Sie muss in allen 16 Bundesländern vertreten sein", "Sie darf nur Sparkassen-Kunden beraten"],
+      correct: 1,
+      feedback_correct: "Genau! Das Regionalprinzip begrenzt das Geschäftsgebiet auf die eigene Region — die LBS-en stehen untereinander nicht im Wettbewerb.",
+      feedback_wrong: "Das Regionalprinzip bedeutet, dass die LBS Süd nur in ihrem Geschäftsgebiet (BW, Bayern, RLP) tätig ist und nicht mit anderen Landesbausparkassen konkurriert."
+    }
+  },
+  // MODULE 8
+  {
+    title: "Typische Aufgaben bei der LBS Süd",
+    info: [
+      {
+        heading: "Was erwartet dich im Arbeitsalltag?",
+        content: `Bei der LBS Süd lernst du verschiedene Abteilungen und Bereiche kennen. Typische Einsatzgebiete sind:`,
+        extra: `<ul>
+          <li><strong>Backoffice / Sachbearbeitung:</strong> Bausparverträge bearbeiten, Kundenanfragen beantworten, Daten pflegen</li>
+          <li><strong>Assistenz:</strong> Teams und Führungskräfte unterstützen, Meetings organisieren</li>
+          <li><strong>Vertriebsunterstützung:</strong> Materialien vorbereiten, Auswertungen erstellen</li>
+          <li><strong>Kundenkontakt:</strong> Telefonate mit Bausparern, Korrespondenz</li>
+        </ul>
+        <p style="margin-top:10px">Nach der Ausbildung kannst du in <strong>allen Bereichen des Hauses</strong> spannende Aufgaben übernehmen — das hat dir auch das Merkblatt verraten.</p>`
+      }
+    ],
+    quiz: {
+      question: "Welche Aussage über die Ausbildung bei der LBS Süd stimmt?",
+      options: ["Man arbeitet nur in einer einzigen Abteilung", "Man wird ausschließlich im Kundenkontakt eingesetzt", "Man lernt verschiedene Abteilungen kennen und kann nach der Ausbildung in vielen Bereichen arbeiten", "Die Ausbildung findet nur an der Berufsschule statt, ohne Praxis im Unternehmen"],
+      correct: 2,
+      feedback_correct: "Richtig! Die Vielseitigkeit ist ein großer Pluspunkt: Du rotierst durch verschiedene Abteilungen und findest so deinen Lieblingsbereich.",
+      feedback_wrong: "Die richtige Antwort: Man lernt verschiedene Abteilungen kennen. Genau diese Vielseitigkeit macht die Ausbildung bei der LBS Süd besonders attraktiv."
+    }
+  },
+  // MODULE 9
+  {
+    title: "Soft Skills — was die LBS Süd sucht",
+    info: [
+      {
+        heading: "Welche Eigenschaften sind gefragt?",
+        content: `Im Merkblatt stecken versteckte Hinweise darauf, was die LBS Süd sich von dir wünscht. Lies es nochmal genau:`,
+        extra: `<ul>
+          <li><strong>Ruhe und Übersicht</strong> — auch wenn es hektisch wird</li>
+          <li><strong>Kommunikationsstärke</strong> — du bist Ansprechperson für alle</li>
+          <li><strong>Teamfähigkeit</strong> — „bei Ihnen laufen alle Informationen zusammen"</li>
+          <li><strong>Digitale Kompetenz</strong> — „modernste Kommunikationstechniken"</li>
+          <li><strong>Strukturiertes Arbeiten</strong> — Daten managen, Texte gestalten</li>
+        </ul>
+        <div class="highlight-box">💡 In deiner Präsentation deckst du mit „Teamfähig & kommunikativ", „Zuverlässig & strukturiert" und „Kreativ & lösungsorientiert" genau diese Anforderungen ab — super!</div>`
+      }
+    ],
+    quiz: {
+      question: "Im Merkblatt steht: ‚Sie sind der Mittelpunkt Ihres Teams, denn bei Ihnen laufen alle Informationen zusammen.' Was wird hier gesucht?",
+      options: ["Jemand, der gerne alleine arbeitet und Entscheidungen allein trifft", "Jemand mit starken Organisationsfähigkeiten, der Informationen bündelt und als Schnittstelle im Team funktioniert", "Jemand, der vor allem kreativ ist und neue Produkte entwickelt", "Jemand mit Führungserfahrung und Personalverantwortung"],
+      correct: 1,
+      feedback_correct: "Genau! Die LBS sucht jemanden, der als organisatorische Schnittstelle fungiert — Informationen sammeln, sortieren und weitergeben.",
+      feedback_wrong: "Hier geht es um die Schnittstellenfunktion: Informationen bündeln, organisieren und als zentrale Ansprechperson für das Team da sein."
+    }
+  },
+  // MODULE 10
+  {
+    title: "Dein Auswahlverfahren — was dich erwartet",
+    info: [
+      {
+        heading: "Der Ablauf am Auswahltag",
+        content: `Du hast den Onlinetest und das Telefoninterview bereits bestanden — Glückwunsch! Am Auswahltag erwarten dich zwei Stationen:`,
+        extra: `<ul>
+          <li><strong>1. Präsentation (5 Minuten):</strong> Du stellst dich persönlich vor — mit PowerPoint. Die vier Fragen kennst du: Wer bist du? Deine Persönlichkeit? Warum dieser Beruf? Warum die LBS Süd?</li>
+          <li><strong>2. Einzelgespräch:</strong> Ein persönliches Gespräch mit den Ausbildungsverantwortlichen.</li>
+        </ul>
+        <p style="margin-top:10px">Innerhalb von <strong>zwei Wochen</strong> bekommst du eine Rückmeldung. Wichtig: Nach dem Verfahren gibt es <strong>keine weiteren Auskünfte über deine Leistung</strong>.</p>`
+      }
+    ],
+    tip: "Halte dich strikt an die 5 Minuten! Übe mit Stoppuhr. Zu lang wirkt unvorbereitet, zu kurz wirkt desinteressiert. 5 Minuten bei 6 Folien = ca. 50 Sekunden pro Folie.",
+    quiz: {
+      question: "Wie viel Zeit hast du für deine Präsentation am Auswahltag?",
+      options: ["3 Minuten", "5 Minuten", "10 Minuten", "15 Minuten"],
+      correct: 1,
+      feedback_correct: "Richtig — 5 Minuten. Übe unbedingt mit Stoppuhr, damit du das Timing im Griff hast!",
+      feedback_wrong: "Die Präsentation soll genau 5 Minuten dauern — das steht in der Aufgabenstellung. Zeitmanagement ist Teil der Bewertung!"
+    }
+  },
+  // MODULE 11
+  {
+    title: "Typische Fragen im Einzelgespräch",
+    info: [
+      {
+        heading: "Darauf solltest du vorbereitet sein",
+        content: `Nach der Präsentation kommt das Einzelgespräch. Typische Fragen für eine Ausbildungsstelle bei einer Bausparkasse:`,
+        extra: `<ul>
+          <li><strong>„Was wissen Sie über die LBS Süd?"</strong> → Größte Landesbausparkasse, Teil der Sparkassen-Finanzgruppe, Sitz in Stuttgart/München, Geschäftsgebiet in 3 Bundesländern</li>
+          <li><strong>„Was ist Bausparen?"</strong> → 3 Phasen erklären können: Sparen, Zuteilung, Darlehen</li>
+          <li><strong>„Warum nicht weiter Schule?"</strong> → Positiv formulieren: Du willst praktisch lernen und direkt ins Berufsleben einsteigen</li>
+          <li><strong>„Wo sehen Sie sich in 5 Jahren?"</strong> → Weiterbildung bei der LBS, z.B. Sparkassenfachwirt, Verantwortung übernehmen</li>
+          <li><strong>„Was sind Ihre Stärken/Schwächen?"</strong> → Ehrlich, aber reflektiert. Schwäche + was du dagegen tust</li>
+        </ul>`
+      }
+    ],
+    tip: "Bei der Frage ‚Warum nicht weiter Schule?' niemals negativ über die FOS sprechen. Besser: ‚Ich habe gemerkt, dass ich meine Stärken in der Praxis besser einbringen kann und mir eine Ausbildung mehr liegt als der rein schulische Weg.'",
+    quiz: {
+      question: "Wie solltest du die Frage ‚Warum haben Sie die FOS abgebrochen?' am besten beantworten?",
+      options: ["‚Die FOS war zu schwer für mich und die Noten waren schlecht.'", "‚Ich hatte keine Lust mehr auf Schule.'", "‚Ich habe erkannt, dass ich meine Stärken besser in der Praxis einbringen kann und eine Ausbildung der richtige Weg für mich ist.'", "‚Meine Eltern haben mir geraten, lieber eine Ausbildung zu machen.'"],
+      correct: 2,
+      feedback_correct: "Perfekt! Diese Antwort ist positiv formuliert, zeigt Selbstreflexion und Eigeninitiative — genau das, was Ausbilder hören wollen.",
+      feedback_wrong: "Am besten positiv und eigenverantwortlich formulieren: ‚Ich habe erkannt, dass die Praxis besser zu meinen Stärken passt.' Das zeigt Reife und Entscheidungsfähigkeit."
+    }
+  },
+  // MODULE 12
+  {
+    title: "Letzte Tipps für den großen Tag",
+    info: [
+      {
+        heading: "Praktische Vorbereitung",
+        content: `Hier noch eine Checkliste für den Auswahltag:`,
+        extra: `<ul>
+          <li><strong>Kleidung:</strong> Business Casual — ordentlich, aber nicht overdressed. Blazer/Bluse ist perfekt.</li>
+          <li><strong>Pünktlichkeit:</strong> 10–15 Minuten vorher da sein.</li>
+          <li><strong>Präsentation:</strong> Auf USB-Stick UND per E-Mail an dich selbst schicken (doppelte Sicherheit).</li>
+          <li><strong>Unterlagen:</strong> Kopie deiner Bewerbung mitnehmen — falls du darauf angesprochen wirst.</li>
+          <li><strong>Fragen vorbereiten:</strong> Am Ende werden sie fragen ‚Haben Sie noch Fragen?' — Immer ja!</li>
+        </ul>`
+      },
+      {
+        heading: "Gute Rückfragen für das Gespräch",
+        content: `Eigene Fragen zeigen echtes Interesse. Hier sind gute Beispiele:`,
+        extra: `<ul>
+          <li>„Wie sieht ein typischer Ausbildungstag bei Ihnen aus?"</li>
+          <li>„In welchen Abteilungen werde ich während der Ausbildung eingesetzt?"</li>
+          <li>„Welche Weiterbildungsmöglichkeiten gibt es nach der Ausbildung?"</li>
+          <li>„Wie groß ist das Azubi-Team am Standort München?"</li>
+        </ul>
+        <div class="highlight-box">⚠️ Frage NICHT als erstes nach Gehalt, Urlaub oder Homeoffice — das kommt später von selbst.</div>`
+      }
+    ],
+    tip: "Lächeln nicht vergessen! Blickkontakt halten. Und: Es ist völlig okay, kurz nachzudenken, bevor du antwortest. Das wirkt sogar reflektiert.",
+    quiz: {
+      question: "Welche Frage solltest du am Ende des Gesprächs NICHT als erstes stellen?",
+      options: ["‚In welchen Abteilungen werde ich eingesetzt?'", "‚Wie viele Urlaubstage bekomme ich?'", "‚Welche Weiterbildungsmöglichkeiten gibt es?'", "‚Wie sieht ein typischer Ausbildungstag aus?'"],
+      correct: 1,
+      feedback_correct: "Richtig — Fragen nach Urlaub, Gehalt oder Homeoffice sind zwar berechtigt, aber kommen besser erst, wenn dir ein Angebot gemacht wird. Am Auswahltag lieber inhaltliches Interesse zeigen!",
+      feedback_wrong: "Fragen zu Urlaubstagen sind am Auswahltag nicht ideal als erste Rückfrage — das kann desinteressiert wirken. Besser: Fragen zum Ausbildungsalltag oder Weiterbildung stellen."
+    }
+  }
+];
+
+// ===== STATE =====
+let currentModule = 0;
+let score = 0;
+let answers = [];
+
+// ===== FUNCTIONS =====
+function startTraining() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'block';
+  buildModules();
+  showModule(0);
+}
+
+function buildModules() {
+  const container = document.getElementById('modulesContainer');
+  modules.forEach((mod, idx) => {
+    const div = document.createElement('div');
+    div.className = 'module-screen';
+    div.id = `module-${idx}`;
+
+    let infoHTML = '';
+    mod.info.forEach(info => {
+      infoHTML += `
+        <div class="info-card">
+          <h3>${info.heading}</h3>
+          <p>${info.content}</p>
+          ${info.extra || ''}
+        </div>`;
+    });
+
+    let tipHTML = '';
+    if (mod.tip) {
+      tipHTML = `
+        <div class="tip-box">
+          <div class="tip-label">💡 Interview-Tipp</div>
+          <p>${mod.tip}</p>
+        </div>`;
+    }
+
+    let optionsHTML = '';
+    mod.quiz.options.forEach((opt, oi) => {
+      optionsHTML += `<button class="quiz-option" data-module="${idx}" data-option="${oi}" onclick="selectAnswer(${idx}, ${oi})">${opt}</button>`;
+    });
+
+    div.innerHTML = `
+      <div class="module-inner">
+        <div class="module-header">
+          <div class="module-number">Modul ${idx + 1} von ${modules.length}</div>
+          <h2>${mod.title}</h2>
+        </div>
+        ${infoHTML}
+        ${tipHTML}
+        <div class="quiz-section" id="quiz-${idx}">
+          <h3>${mod.quiz.question}</h3>
+          <div class="quiz-options">${optionsHTML}</div>
+          <div class="quiz-feedback" id="feedback-${idx}"></div>
+        </div>
+        <button class="btn-next" id="next-${idx}" onclick="nextModule(${idx})">
+          ${idx < modules.length - 1 ? 'Weiter zum nächsten Modul →' : 'Zur Auswertung →'}
+        </button>
+      </div>`;
+
+    container.appendChild(div);
+  });
+}
+
+function showModule(idx) {
+  document.querySelectorAll('.module-screen').forEach(el => el.classList.remove('active'));
+  const mod = document.getElementById(`module-${idx}`);
+  if (mod) {
+    mod.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateProgress(idx);
+  }
+}
+
+function updateProgress(idx) {
+  const pct = ((idx + 1) / modules.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function selectAnswer(moduleIdx, optionIdx) {
+  const quiz = modules[moduleIdx].quiz;
+  const buttons = document.querySelectorAll(`[data-module="${moduleIdx}"]`);
+  const feedback = document.getElementById(`feedback-${moduleIdx}`);
+
+  // Disable all buttons
+  buttons.forEach(btn => {
+    btn.classList.add('disabled');
+    btn.onclick = null;
+  });
+
+  // Mark correct/wrong
+  const isCorrect = optionIdx === quiz.correct;
+  buttons[optionIdx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    buttons[quiz.correct].classList.add('correct');
+  }
+
+  // Show feedback
+  feedback.className = `quiz-feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+  feedback.innerHTML = isCorrect
+    ? `✅ <strong>Richtig!</strong> ${quiz.feedback_correct}`
+    : `⚠️ <strong>Nicht ganz.</strong> ${quiz.feedback_wrong}`;
+
+  // Track score
+  if (isCorrect) score++;
+  answers.push({ module: moduleIdx, correct: isCorrect });
+
+  // Show next button
+  document.getElementById(`next-${moduleIdx}`).classList.add('show');
+}
+
+function nextModule(currentIdx) {
+  if (currentIdx < modules.length - 1) {
+    currentModule = currentIdx + 1;
+    showModule(currentModule);
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.querySelectorAll('.module-screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('progressBar').style.display = 'none';
+
+  const pct = Math.round((score / modules.length) * 100);
+  document.getElementById('scoreNumber').textContent = pct + '%';
+
+  // Verdict text
+  let verdict = '';
+  if (pct >= 90) {
+    verdict = `<strong>Hervorragend, Isabella!</strong> Du bist bestens vorbereitet. Du kennst die LBS Süd, das Berufsbild und die Branche im Detail. So kannst du selbstbewusst ins Gespräch gehen! 🎉`;
+  } else if (pct >= 70) {
+    verdict = `<strong>Gut gemacht, Isabella!</strong> Du hast ein solides Grundwissen. Schau dir die Themen, bei denen du unsicher warst, nochmal an — dann bist du perfekt vorbereitet! 💪`;
+  } else if (pct >= 50) {
+    verdict = `<strong>Guter Anfang, Isabella!</strong> Einige Themen sitzen schon, aber bei manchen Fragen war noch Luft nach oben. Lies dir die Infos nochmal in Ruhe durch und mach das Training nochmal. Du schaffst das! 📚`;
+  } else {
+    verdict = `<strong>Nicht verzagen, Isabella!</strong> Das Training zeigt dir genau, wo du noch aufholen musst. Geh die Module nochmal durch und wiederhole das Quiz — beim zweiten Mal wird es viel besser! 💡`;
+  }
+  document.getElementById('resultsText').innerHTML = verdict;
+
+  // Detail rows
+  let detailHTML = `
+    <div class="result-row">
+      <span class="label">Fragen gesamt</span>
+      <span class="value">${modules.length}</span>
+    </div>
+    <div class="result-row">
+      <span class="label">Richtig beantwortet</span>
+      <span class="value correct-val">${score}</span>
+    </div>
+    <div class="result-row">
+      <span class="label">Falsch beantwortet</span>
+      <span class="value wrong-val">${modules.length - score}</span>
+    </div>
+    <div class="result-row">
+      <span class="label">Ergebnis</span>
+      <span class="value">${pct}%</span>
+    </div>`;
+
+  // Per-module results
+  answers.forEach((a, i) => {
+    detailHTML += `
+      <div class="result-row">
+        <span class="label">Modul ${i + 1}: ${modules[i].title.substring(0, 40)}…</span>
+        <span class="value ${a.correct ? 'correct-val' : 'wrong-val'}">${a.correct ? '✓' : '✗'}</span>
+      </div>`;
+  });
+
+  document.getElementById('resultDetails').innerHTML = detailHTML;
+
+  const results = document.getElementById('results');
+  results.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
