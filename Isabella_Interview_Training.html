@@ -260,6 +260,10 @@ body {
   border-color: var(--red);
   background: var(--red-light);
 }
+.quiz-option, .btn-next, .btn-start, .btn-restart {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 .quiz-option.selected {
   border-color: var(--red);
   background: var(--red-light);
@@ -300,23 +304,31 @@ body {
 
 /* Next button */
 .btn-next {
-  display: none;
   margin-top: 1.5rem;
-  background: var(--red);
-  color: white;
+  background: var(--gray);
+  color: #999;
   border: none;
   padding: 14px 36px;
   font-size: 1rem;
   font-weight: 700;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: default;
   font-family: inherit;
-  transition: all 0.2s;
+  transition: all 0.3s;
   width: 100%;
+  pointer-events: none;
 }
-.btn-next.show { display: block; }
-.btn-next:hover {
+.btn-next.show {
+  background: var(--red);
+  color: white;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.btn-next.show:hover {
   background: var(--red-dark);
+}
+.btn-next.show:active {
+  transform: scale(0.98);
 }
 
 /* ===== RESULTS SCREEN ===== */
@@ -937,7 +949,13 @@ function selectAnswer(moduleIdx, optionIdx) {
   answers.push({ module: moduleIdx, correct: isCorrect });
 
   // Show next button
-  document.getElementById(`next-${moduleIdx}`).classList.add('show');
+  const nextBtn = document.getElementById(`next-${moduleIdx}`);
+  nextBtn.classList.add('show');
+
+  // Auto-scroll to the button so it's clearly tappable
+  setTimeout(() => {
+    nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 400);
 }
 
 function nextModule(currentIdx) {
